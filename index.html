@@ -293,19 +293,24 @@
         }
 
         async function init() {
+            console.log('Init started');
             await loadState();
+            console.log('State loaded:', state);
             await resetDailyHabits();
+            console.log('Habits reset');
             
             // Render content immediately
             render();
+            console.log('Rendered');
             
             // Hide loading screen after animation
             setTimeout(() => {
                 const loadingScreen = document.getElementById('loadingScreen');
                 if (loadingScreen) {
-                    loadingScreen.remove();
+                    loadingScreen.classList.add('fade-out');
+                    setTimeout(() => loadingScreen.remove(), 500);
                 }
-            }, 3000);
+            }, 2000);
         }
 
         init();
@@ -350,11 +355,14 @@
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            animation: fadeOut 0.5s ease-out 2.5s forwards;
+        }
+        
+        .loading-screen.fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
         }
 
         @keyframes fadeOut {
-            to { opacity: 0; pointer-events: none; }
+            to { opacity: 0; pointer-events: none; visibility: hidden; }
         }
 
         .loading-logo {
