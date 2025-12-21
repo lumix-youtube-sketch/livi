@@ -1,13 +1,551 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>livi</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Livi</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: white;
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+    
+    .container {
+      max-width: 428px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-bottom: 80px;
+    }
+    
+    .header {
+      text-align: center;
+      padding: 30px 0;
+    }
+    
+    .logo {
+      font-size: 48px;
+      font-weight: bold;
+      color: #8B9A9C;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      font-size: 16px;
+      color: #999;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: #0f0f0f;
+      border: 1px solid #2a2a2a;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .stat-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+    
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      font-weight: 600;
+    }
+    
+    .section {
+      background: #0f0f0f;
+      border: 1px solid #2a2a2a;
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+    
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      background: #0a0a0a;
+      border-radius: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .task:active {
+      transform: scale(0.98);
+    }
+    
+    .checkbox {
+      width: 28px;
+      height: 28px;
+      border: 2px solid #3a3a3a;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .checkbox.checked {
+      background: #8B9A9C;
+      border-color: #8B9A9C;
+    }
+    
+    .task-title {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .task-title.completed {
+      text-decoration: line-through;
+      color: #666;
+    }
+    
+    .task-points {
+      background: rgba(139, 154, 156, 0.2);
+      color: #8B9A9C;
+      padding: 5px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .habits-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .habit-card {
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .habit-card:active {
+      transform: scale(0.95);
+    }
+    
+    .habit-card.completed {
+      background: rgba(139, 154, 156, 0.15);
+      border-color: rgba(139, 154, 156, 0.4);
+    }
+    
+    .habit-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(139, 154, 156, 0.3);
+      border-radius: 15px;
+      margin: 0 auto 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .habit-name {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .habit-streak {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    
+    .add-task {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .input {
+      flex: 1;
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+      border-radius: 15px;
+      padding: 15px;
+      color: white;
+      font-size: 14px;
+    }
+    
+    .btn {
+      background: #8B9A9C;
+      border: none;
+      border-radius: 15px;
+      padding: 15px 20px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .btn:active {
+      transform: scale(0.95);
+    }
+    
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 15, 15, 0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid #2a2a2a;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      max-width: 428px;
+      margin: 0 auto;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 15px;
+      cursor: pointer;
+      color: #666;
+      font-size: 24px;
+      transition: all 0.3s;
+    }
+    
+    .nav-item.active {
+      color: #8B9A9C;
+    }
+    
+    .nav-label {
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .livi-character {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 0;
+    }
+    
+    .livi-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: rgba(139, 154, 156, 0.2);
+      border: 2px solid #8B9A9C;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 40px rgba(139, 154, 156, 0.4);
+      margin-bottom: 20px;
+    }
+    
+    .livi-inner {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: rgba(139, 154, 156, 0.4);
+      border: 1px solid #8B9A9C;
+    }
+    
+    .livi-state {
+      font-size: 20px;
+      font-weight: bold;
+      color: #8B9A9C;
+      margin-bottom: 10px;
+    }
+    
+    .livi-desc {
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Страница: Главная -->
+    <div id="page-home">
+      <div class="header">
+        <div class="logo">livi</div>
+        <div class="subtitle">Ваш путь к лучшей версии себя</div>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-value"><span id="completed-count">0</span>/<span id="total-count">4</span></div>
+          <div class="stat-label">Задачи</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-value" id="streak-count">14</div>
+          <div class="stat-label">Серия</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-value" id="points-count">0</div>
+          <div class="stat-label">Очки</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-value">88%</div>
+          <div class="stat-label">Энергия</div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">Привычки</div>
+        <div class="habits-grid" id="habits-list"></div>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">Сегодня</div>
+        <div id="tasks-list"></div>
+      </div>
+    </div>
+    
+    <!-- Страница: Задачи -->
+    <div id="page-tasks" class="hidden">
+      <div class="section">
+        <div class="section-title">Новая задача</div>
+        <div class="add-task">
+          <input type="text" class="input" id="new-task-input" placeholder="Что нужно сделать?">
+          <button class="btn" onclick="addTask()">+</button>
+        </div>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">Все задачи</div>
+        <div id="all-tasks-list"></div>
+      </div>
+    </div>
+    
+    <!-- Страница: Livi -->
+    <div id="page-livi" class="hidden">
+      <div class="section">
+        <div class="livi-character">
+          <div class="livi-circle">
+            <div class="livi-inner"></div>
+          </div>
+          <div class="livi-state">Процветающий</div>
+          <div class="livi-desc">Отражение текущего состояния</div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">Текущее состояние</div>
+        <div style="padding: 15px; background: #0a0a0a; border-radius: 15px; margin-bottom: 10px;">
+          📊 <span id="completion-rate">75</span>% задач выполнено
+        </div>
+        <div style="padding: 15px; background: #0a0a0a; border-radius: 15px; margin-bottom: 10px;">
+          ⚡ Средний уровень энергии: 88%
+        </div>
+        <div style="padding: 15px; background: #0a0a0a; border-radius: 15px; margin-bottom: 10px;">
+          🔥 Текущая серия: <span id="livi-streak">14</span> дней
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="showPage('home')">
+      <div>🏠</div>
+      <div class="nav-label">Главная</div>
+    </div>
+    <div class="nav-item" onclick="showPage('tasks')">
+      <div>✅</div>
+      <div class="nav-label">Задачи</div>
+    </div>
+    <div class="nav-item" onclick="showPage('livi')">
+      <div>🤖</div>
+      <div class="nav-label">Livi</div>
+    </div>
+  </div>
+
+  <script>
+    // Инициализация Telegram WebApp
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+
+    // Данные
+    let tasks = [
+      { id: 1, title: 'Прочитать 30 страниц', completed: false, points: 10 },
+      { id: 2, title: 'Утренняя зарядка', completed: false, points: 15 },
+      { id: 3, title: 'Медитация 15 мин', completed: false, points: 10 },
+      { id: 4, title: 'Выучить 20 слов', completed: false, points: 20 }
+    ];
+
+    let habits = [
+      { id: 1, name: 'Зарядка', streak: 14, completed: false },
+      { id: 2, name: 'Чтение', streak: 21, completed: false },
+      { id: 3, name: 'Медитация', streak: 7, completed: false },
+      { id: 4, name: 'Вода 2л', streak: 12, completed: false }
+    ];
+
+    // Навигация
+    function showPage(page) {
+      document.querySelectorAll('[id^="page-"]').forEach(p => p.classList.add('hidden'));
+      document.getElementById('page-' + page).classList.remove('hidden');
+      
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
+
+    // Отрисовка задач
+    function renderTasks() {
+      const tasksList = document.getElementById('tasks-list');
+      const allTasksList = document.getElementById('all-tasks-list');
+      
+      tasksList.innerHTML = '';
+      allTasksList.innerHTML = '';
+      
+      tasks.forEach(task => {
+        const taskEl = createTaskElement(task);
+        tasksList.appendChild(taskEl.cloneNode(true));
+        allTasksList.appendChild(taskEl);
+      });
+      
+      updateStats();
+    }
+
+    function createTaskElement(task) {
+      const div = document.createElement('div');
+      div.className = 'task';
+      div.onclick = () => toggleTask(task.id);
+      
+      div.innerHTML = `
+        <div class="checkbox ${task.completed ? 'checked' : ''}">
+          ${task.completed ? '✓' : ''}
+        </div>
+        <div class="task-title ${task.completed ? 'completed' : ''}">${task.title}</div>
+        <div class="task-points">+${task.points}</div>
+      `;
+      
+      return div;
+    }
+
+    // Переключение задачи
+    function toggleTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        task.completed = !task.completed;
+        tg.HapticFeedback.impactOccurred('light');
+        renderTasks();
+      }
+    }
+
+    // Добавление задачи
+    function addTask() {
+      const input = document.getElementById('new-task-input');
+      const title = input.value.trim();
+      
+      if (title) {
+        tasks.push({
+          id: Date.now(),
+          title: title,
+          completed: false,
+          points: 10
+        });
+        
+        input.value = '';
+        tg.HapticFeedback.notificationOccurred('success');
+        renderTasks();
+      }
+    }
+
+    // Отрисовка привычек
+    function renderHabits() {
+      const habitsList = document.getElementById('habits-list');
+      habitsList.innerHTML = '';
+      
+      habits.forEach(habit => {
+        const div = document.createElement('div');
+        div.className = 'habit-card' + (habit.completed ? ' completed' : '');
+        div.onclick = () => toggleHabit(habit.id);
+        
+        div.innerHTML = `
+          <div class="habit-icon">${habit.completed ? '✓' : '○'}</div>
+          <div class="habit-name">${habit.name}</div>
+          <div class="habit-streak">🔥 ${habit.streak}</div>
+        `;
+        
+        habitsList.appendChild(div);
+      });
+    }
+
+    // Переключение привычки
+    function toggleHabit(id) {
+      const habit = habits.find(h => h.id === id);
+      if (habit) {
+        habit.completed = !habit.completed;
+        if (habit.completed) habit.streak++;
+        tg.HapticFeedback.impactOccurred('medium');
+        renderHabits();
+      }
+    }
+
+    // Обновление статистики
+    function updateStats() {
+      const completed = tasks.filter(t => t.completed).length;
+      const total = tasks.length;
+      const points = tasks.filter(t => t.completed).reduce((sum, t) => sum + t.points, 0);
+      
+      document.getElementById('completed-count').textContent = completed;
+      document.getElementById('total-count').textContent = total;
+      document.getElementById('points-count').textContent = points;
+      document.getElementById('completion-rate').textContent = Math.round((completed / total) * 100);
+    }
+
+    // Инициализация
+    renderTasks();
+    renderHabits();
+  </script>
+</body>
 </html>
-npm run dev
