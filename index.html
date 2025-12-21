@@ -1084,11 +1084,14 @@
                         });
                     });
                 } else {
+                    console.log('📦 CloudStorage недоступен - используем начальное состояние');
                     isLoading = false;
+                    return Promise.resolve();
                 }
             } catch (e) {
                 console.log('❌ Ошибка загрузки:', e.message);
                 isLoading = false;
+                return Promise.resolve();
             }
         }
 
