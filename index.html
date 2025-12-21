@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>livi</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.5.0/Recharts.js"></script>
     <style>
         * {
             margin: 0;
@@ -20,6 +19,7 @@
             max-width: 428px;
             margin: 0 auto;
             overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
         @keyframes fadeIn {
@@ -41,10 +41,9 @@
         .slide-in { animation: slideIn 0.5s ease-out; }
         .gentle-pulse { animation: gentlePulse 3s ease-in-out infinite; }
         .card-hover:active { transform: scale(0.97); }
-
         .hidden { display: none !important; }
 
-        .auth-container {
+        .onboarding-container {
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -52,7 +51,7 @@
             padding: 24px;
         }
 
-        .auth-box {
+        .onboarding-box {
             width: 100%;
             max-width: 400px;
         }
@@ -93,22 +92,9 @@
             margin-bottom: 8px;
         }
 
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 16px;
-            top: 16px;
-            width: 20px;
-            height: 20px;
-            color: #666;
-        }
-
         input, textarea {
             width: 100%;
-            padding: 16px 16px 16px 48px;
+            padding: 16px;
             background-color: #0a0a0a;
             border: 1px solid #2a2a2a;
             border-radius: 16px;
@@ -146,12 +132,10 @@
             color: #8B9A9C;
         }
 
-        .text-link {
-            text-align: center;
-            margin-top: 24px;
-            font-size: 14px;
-            color: #8B9A9C;
-            cursor: pointer;
+        .btn:disabled {
+            background-color: #2a2a2a;
+            color: #666;
+            cursor: not-allowed;
         }
 
         .progress-bar-container {
@@ -219,7 +203,7 @@
             position: sticky;
             top: 0;
             z-index: 50;
-            background-color: rgba(26, 26, 26, 0.8);
+            background-color: rgba(26, 26, 26, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid #2a2a2a;
             padding: 16px 20px;
@@ -250,12 +234,18 @@
             border-radius: 12px;
             font-weight: bold;
             font-size: 18px;
+            cursor: pointer;
         }
 
         .tabs {
             display: flex;
             gap: 16px;
             overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .tab {
@@ -275,6 +265,7 @@
 
         .content {
             padding: 24px 20px;
+            padding-bottom: 100px;
         }
 
         .grid-2 {
@@ -291,7 +282,7 @@
             cursor: pointer;
         }
 
-        .stat-card svg {
+        .stat-icon {
             width: 28px;
             height: 28px;
             margin-bottom: 12px;
@@ -357,7 +348,6 @@
             background-color: #0a0a0a;
             border-radius: 12px;
             margin-bottom: 12px;
-            cursor: pointer;
         }
 
         .checkbox {
@@ -369,6 +359,7 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            cursor: pointer;
         }
 
         .checkbox.checked {
@@ -380,6 +371,7 @@
             flex: 1;
             font-size: 14px;
             font-weight: 500;
+            cursor: pointer;
         }
 
         .task-points {
@@ -402,6 +394,7 @@
 
         .modal-content {
             width: 100%;
+            max-width: 428px;
             background-color: #0f0f0f;
             border-top: 1px solid #2a2a2a;
             border-radius: 24px 24px 0 0;
@@ -461,10 +454,29 @@
             background-color: rgba(255, 68, 68, 0.2);
             border-radius: 8px;
             cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
         }
 
         svg {
-            fill: currentColor;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
     </style>
 </head>
@@ -481,12 +493,22 @@
             warning: '#D4AF7A',
         };
 
-        const state = {
-            isAuthenticated: false,
+        // Функция для работы с данными в памяти
+        let appState = null;
+
+        const storage = {
+            get: (key) => {
+                return appState;
+            },
+            set: (key, value) => {
+                appState = value;
+            }
+        };
+
+        // Инициализация состояния
+        const getInitialState = () => ({
             hasCompletedOnboarding: false,
-            showRegister: false,
             onboardingStep: 0,
-            showPassword: false,
             activeTab: 'home',
             showRankModal: false,
             selectedHabit: null,
@@ -501,34 +523,43 @@
             },
             userInfo: {
                 name: '',
-                email: '',
-                password: '',
-                wakeUpTime: '7:00',
+                wakeUpTime: '07:00',
                 sleepTime: '23:00',
                 mainGoal: ''
             },
-            tasks: [
-                { id: 1, title: 'Прочитать 30 страниц', completed: true, category: 'Обучение', points: 10 },
-                { id: 2, title: 'Утренняя зарядка', completed: true, category: 'Здоровье', points: 15 },
-                { id: 3, title: 'Медитация 15 мин', completed: false, category: 'Здоровье', points: 10 },
-                { id: 4, title: 'Выучить 20 слов', completed: false, category: 'Обучение', points: 20 },
-            ],
-            habits: [
-                { id: 1, name: 'Зарядка', streak: 14, completed: true, color: colors.accent3 },
-                { id: 2, name: 'Чтение', streak: 21, completed: true, color: colors.primary },
-                { id: 3, name: 'Медитация', streak: 7, completed: false, color: colors.secondary },
-                { id: 4, name: 'Вода 2л', streak: 12, completed: true, color: colors.accent1 }
-            ],
-            streak: 14
-        };
+            tasks: [],
+            habits: [],
+            streak: 0,
+            totalPoints: 0,
+            lastActiveDate: new Date().toDateString()
+        });
+
+        const savedState = storage.get('liviState');
+        const state = savedState || getInitialState();
+
+        // Сохранение состояния
+        function saveState() {
+            storage.set('liviState', state);
+        }
+
+        // Проверка и обновление стрика
+        function updateStreak() {
+            const today = new Date().toDateString();
+            if (state.lastActiveDate !== today) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                if (state.lastActiveDate === yesterday.toDateString()) {
+                    state.streak++;
+                } else {
+                    state.streak = 1;
+                }
+                state.lastActiveDate = today;
+                saveState();
+            }
+        }
 
         function createSvg(name, color = 'currentColor') {
             const icons = {
-                mail: '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
-                lock: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
-                user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
-                eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
-                eyeOff: '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>',
                 arrowRight: '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
                 heart: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
                 book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
@@ -548,20 +579,19 @@
                 chevronRight: '<polyline points="9 18 15 12 9 6"/>',
                 plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
                 trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
-                circle: '<circle cx="12" cy="12" r="10"/>',
-                x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
+                circle: '<circle cx="12" cy="12" r="10"/>'
             };
-            return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icons[name]}</svg>`;
+            return `<svg width="24" height="24" viewBox="0 0 24 24" style="color: ${color}">${icons[name]}</svg>`;
         }
 
-        function getLiviState(energy, completion, habits, screenTime) {
+        function getLiviState(energy, completion, habits) {
             const avgScore = (energy + completion + (habits / 4 * 100)) / 3;
             
             if (avgScore >= 85) return {
                 size: 140,
                 opacity: 1,
                 glow: '0 0 40px rgba(139, 154, 156, 0.6)',
-                color: '#8B9A9C',
+                color: colors.primary,
                 innerSize: 100,
                 label: 'Процветающий'
             };
@@ -569,7 +599,7 @@
                 size: 120,
                 opacity: 0.9,
                 glow: '0 0 30px rgba(139, 154, 156, 0.4)',
-                color: '#8B9A9C',
+                color: colors.primary,
                 innerSize: 85,
                 label: 'Стабильный'
             };
@@ -577,7 +607,7 @@
                 size: 100,
                 opacity: 0.75,
                 glow: '0 0 20px rgba(139, 154, 156, 0.3)',
-                color: '#8B9A9C',
+                color: colors.primary,
                 innerSize: 70,
                 label: 'Формирующийся'
             };
@@ -602,11 +632,11 @@
 
         function generateAIAnalysis() {
             const completedTasks = state.tasks.filter(t => t.completed).length;
-            const totalTasks = state.tasks.length;
+            const totalTasks = state.tasks.length || 1;
             const completionRate = (completedTasks / totalTasks) * 100;
-            const avgEnergy = 88;
-            const avgScreenTime = 3.8;
             const activeHabits = state.habits.filter(h => h.completed).length;
+            
+            const avgEnergy = completionRate >= 75 ? 90 : completionRate >= 50 ? 75 : 60;
 
             let insights = [];
             let recommendations = [];
@@ -614,7 +644,6 @@
 
             reflections.push(`${Math.round(completionRate)}% задач выполнено`);
             reflections.push(`Средний уровень энергии: ${Math.round(avgEnergy)}%`);
-            reflections.push(`Экранное время: ${avgScreenTime.toFixed(1)}ч/день`);
             reflections.push(`${activeHabits} из ${state.habits.length} привычек активны`);
             reflections.push(`Текущая серия: ${state.streak} дней`);
 
@@ -624,38 +653,18 @@
                 insights.push('Хорошая продуктивность, но есть куда расти.');
                 recommendations.push('Попробуйте разбить крупные задачи на более мелкие');
             } else {
-                insights.push('Продуктивность ниже среднего. Возможно, задачи слишком амбициозные?');
-                recommendations.push('Начните с 3-4 простых задач в день');
-            }
-
-            if (avgEnergy >= 85) {
-                insights.push('Ваш уровень энергии стабильно высокий!');
-            } else if (avgEnergy >= 70) {
-                insights.push('Энергия в норме, но бывают спады.');
-                recommendations.push('Обратите внимание на качество сна');
-            } else {
-                insights.push('Низкий уровень энергии требует внимания.');
-                recommendations.push('Добавьте физическую активность и проверьте режим сна');
-            }
-
-            if (avgScreenTime > 5) {
-                insights.push(`Экранное время высокое: ${avgScreenTime.toFixed(1)}ч в день.`);
-                recommendations.push('Установите лимиты для соцсетей (макс. 1 час)');
-                recommendations.push('Делайте перерывы каждые 45 минут');
-            } else if (avgScreenTime > 4) {
-                insights.push('Экранное время в пределах нормы.');
-                recommendations.push('Продолжайте следить за балансом');
+                insights.push('Начните с малого - добавьте простые задачи на сегодня.');
+                recommendations.push('Начните с 2-3 простых задач в день');
             }
 
             if (activeHabits >= 3) {
                 insights.push('Вы отлично справляетесь с привычками!');
+            } else if (activeHabits > 0) {
+                insights.push('Хорошее начало с привычками!');
+                recommendations.push('Добавьте ещё одну привычку для баланса');
             } else {
-                insights.push('Некоторые привычки требуют внимания.');
-                recommendations.push('Фокусируйтесь на одной привычке за раз');
-            }
-
-            if (state.userGoals.sleep && avgScreenTime > 4) {
-                recommendations.push('Для улучшения сна: прекращайте использование экранов за 1 час до сна');
+                insights.push('Добавьте первую привычку для отслеживания прогресса.');
+                recommendations.push('Начните с одной простой привычки');
             }
 
             return {
@@ -664,120 +673,29 @@
                 reflections,
                 completionRate: Math.round(completionRate),
                 avgEnergy: Math.round(avgEnergy),
-                activeHabits,
-                avgScreenTime
+                activeHabits
             };
         }
 
         function render() {
             const app = document.getElementById('app');
             
-            if (!state.isAuthenticated) {
-                app.innerHTML = renderAuth();
-                attachAuthListeners();
-                return;
-            }
-
             if (!state.hasCompletedOnboarding) {
                 app.innerHTML = renderOnboarding();
                 attachOnboardingListeners();
                 return;
             }
 
+            updateStreak();
             app.innerHTML = renderMain();
             attachMainListeners();
-        }
-
-        function renderAuth() {
-            if (!state.showRegister) {
-                return `
-                    <div class="auth-container fade-in">
-                        <div class="auth-box">
-                            <div class="logo-section">
-                                <h1 class="logo-title">livi</h1>
-                                <p class="logo-subtitle">Ваш путь к лучшей версии себя</p>
-                            </div>
-                            <div class="card">
-                                <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px; color: white;">Вход</h2>
-                                <form id="loginForm">
-                                    <div class="form-group">
-                                        <label class="form-label">Email</label>
-                                        <div class="input-wrapper">
-                                            <div class="input-icon">${createSvg('mail', '#666')}</div>
-                                            <input type="email" id="email" placeholder="your@email.com" required>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Пароль</label>
-                                        <div class="input-wrapper">
-                                            <div class="input-icon">${createSvg('lock', '#666')}</div>
-                                            <input type="${state.showPassword ? 'text' : 'password'}" id="password" placeholder="••••••••" required style="padding-right: 48px;">
-                                            <button type="button" id="togglePassword" style="position: absolute; right: 16px; top: 16px; background: none; border: none; cursor: pointer; padding: 0;">
-                                                ${state.showPassword ? createSvg('eyeOff', '#666') : createSvg('eye', '#666')}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary" style="margin-top: 24px;">Войти</button>
-                                </form>
-                                <div class="text-link" id="showRegister">
-                                    Нет аккаунта? Зарегистрироваться
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                return `
-                    <div class="auth-container fade-in">
-                        <div class="auth-box">
-                            <div class="logo-section">
-                                <h1 class="logo-title">livi</h1>
-                                <p class="logo-subtitle">Ваш путь к лучшей версии себя</p>
-                            </div>
-                            <div class="card">
-                                <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px; color: white;">Регистрация</h2>
-                                <form id="registerForm">
-                                    <div class="form-group">
-                                        <label class="form-label">Имя</label>
-                                        <div class="input-wrapper">
-                                            <div class="input-icon">${createSvg('user', '#666')}</div>
-                                            <input type="text" id="name" placeholder="Ваше имя" required>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Email</label>
-                                        <div class="input-wrapper">
-                                            <div class="input-icon">${createSvg('mail', '#666')}</div>
-                                            <input type="email" id="email" placeholder="your@email.com" required>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Пароль</label>
-                                        <div class="input-wrapper">
-                                            <div class="input-icon">${createSvg('lock', '#666')}</div>
-                                            <input type="${state.showPassword ? 'text' : 'password'}" id="password" placeholder="••••••••" required style="padding-right: 48px;">
-                                            <button type="button" id="togglePassword" style="position: absolute; right: 16px; top: 16px; background: none; border: none; cursor: pointer; padding: 0;">
-                                                ${state.showPassword ? createSvg('eyeOff', '#666') : createSvg('eye', '#666')}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary" style="margin-top: 24px;">Создать аккаунт</button>
-                                </form>
-                                <div class="text-link" id="showLogin">
-                                    Уже есть аккаунт? Войти
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
         }
 
         function renderOnboarding() {
             const steps = [
                 {
-                    title: `Привет${state.userInfo.name ? ', ' + state.userInfo.name : ''}! 👋`,
-                    subtitle: 'Давайте настроим livi под ваши цели',
+                    title: 'Добро пожаловать в livi! 👋',
+                    subtitle: 'Давайте настроим приложение под ваши цели',
                     content: `
                         <div style="text-align: center;">
                             <p style="font-size: 18px; color: #999; margin-bottom: 24px;">
@@ -786,6 +704,16 @@
                             <button class="btn btn-primary" id="startOnboarding">
                                 Начать ${createSvg('arrowRight', 'white')}
                             </button>
+                        </div>
+                    `
+                },
+                {
+                    title: 'Как вас зовут?',
+                    subtitle: 'Давайте познакомимся',
+                    content: `
+                        <div>
+                            <input type="text" id="userName" placeholder="Ваше имя" value="${state.userInfo.name}" style="margin-bottom: 24px;">
+                            <button class="btn btn-primary" id="nextStep">Далее</button>
                         </div>
                     `
                 },
@@ -826,13 +754,13 @@
                                 <label class="form-label">
                                     ${createSvg('sunrise', colors.warning)} Время пробуждения
                                 </label>
-                                <input type="time" id="wakeUpTime" value="${state.userInfo.wakeUpTime}" style="padding: 16px; width: 100%;">
+                                <input type="time" id="wakeUpTime" value="${state.userInfo.wakeUpTime}">
                             </div>
                             <div style="margin-bottom: 24px;">
                                 <label class="form-label">
                                     ${createSvg('moon', colors.secondary)} Время сна
                                 </label>
-                                <input type="time" id="sleepTime" value="${state.userInfo.sleepTime}" style="padding: 16px; width: 100%;">
+                                <input type="time" id="sleepTime" value="${state.userInfo.sleepTime}">
                             </div>
                             <button class="btn btn-primary" id="nextStep">Далее</button>
                         </div>
@@ -855,13 +783,20 @@
             const currentStep = steps[state.onboardingStep];
 
             return `
-                <div class="auth-container slide-in">
-                    <div class="auth-box">
-                        <div class="progress-bar-container">
-                            ${steps.map((_, i) => `
-                                <div class="progress-bar ${i <= state.onboardingStep ? 'active' : ''}"></div>
-                            `).join('')}
-                        </div>
+                <div class="onboarding-container slide-in">
+                    <div class="onboarding-box">
+                        ${state.onboardingStep === 0 ? `
+                            <div class="logo-section">
+                                <h1 class="logo-title">livi</h1>
+                                <p class="logo-subtitle">Ваш путь к лучшей версии себя</p>
+                            </div>
+                        ` : `
+                            <div class="progress-bar-container">
+                                ${steps.slice(1).map((_, i) => `
+                                    <div class="progress-bar ${i < state.onboardingStep ? 'active' : ''}"></div>
+                                `).join('')}
+                            </div>
+                        `}
                         <div class="card">
                             <h2 style="font-size: 28px; font-weight: bold; margin-bottom: 8px; color: white;">${currentStep.title}</h2>
                             <p style="font-size: 16px; color: #999; margin-bottom: 32px;">${currentStep.subtitle}</p>
@@ -879,7 +814,6 @@
 
         function renderMain() {
             const completedTasks = state.tasks.filter(t => t.completed).length;
-            const totalPoints = state.tasks.filter(t => t.completed).reduce((sum, t) => sum + t.points, 0);
             const currentRank = getRank(state.streak);
             const aiAnalysis = generateAIAnalysis();
 
@@ -888,13 +822,13 @@
                     <div class="header-top">
                         <div class="header-title">livi</div>
                         <div class="header-stats">
-                            <button class="stat-badge gentle-pulse" style="background-color: ${colors.warning}20;" id="showRank">
+                            <button class="stat-badge gentle-pulse" style="background-color: rgba(212, 175, 122, 0.2);" id="showRank">
                                 ${createSvg('flame', colors.warning)}
                                 <span>${state.streak}</span>
                             </button>
-                            <button class="stat-badge" style="background-color: ${colors.primary}20;">
+                            <button class="stat-badge" style="background-color: rgba(139, 154, 156, 0.2);">
                                 ${createSvg('star', colors.primary)}
-                                <span>${totalPoints}</span>
+                                <span>${state.totalPoints}</span>
                             </button>
                         </div>
                     </div>
@@ -918,52 +852,78 @@
             if (state.activeTab === 'home') {
                 return `
                     <div class="grid-2">
-                        ${[
-                            { icon: 'target', value: `${completedTasks}/${state.tasks.length}`, label: 'Задачи', color: colors.primary },
-                            { icon: 'clock', value: '3.8ч', label: 'Экран', color: colors.accent3 },
-                            { icon: 'zap', value: '88%', label: 'Энергия', color: colors.warning },
-                            { icon: 'award', value: currentRank.icon, label: currentRank.title, color: currentRank.color }
-                        ].map(stat => `
-                            <div class="stat-card card-hover">
-                                ${createSvg(stat.icon, stat.color)}
-                                <div class="stat-value">${stat.value}</div>
-                                <div class="stat-label">${stat.label}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-
-                    <div class="section">
-                        <h2 class="section-title">Привычки</h2>
-                        <div class="habit-grid">
-                            ${state.habits.map(habit => `
-                                <div class="habit-card card-hover" data-habit="${habit.id}" style="background-color: ${habit.completed ? habit.color + '15' : '#0a0a0a'}; border-color: ${habit.completed ? habit.color + '40' : '#2a2a2a'};">
-                                    <div class="habit-icon" style="background-color: ${habit.color}30;">
-                                        <div style="font-size: 24px;">${habit.completed ? '✓' : '○'}</div>
-                                    </div>
-                                    <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">${habit.name}</div>
-                                    <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
-                                        ${createSvg('flame', colors.warning)}
-                                        <span style="font-size: 16px; font-weight: bold;">${habit.streak}</span>
-                                    </div>
-                                </div>
-                            `).join('')}
+                        <div class="stat-card card-hover" style="background-color: #0f0f0f;">
+                            ${createSvg('target', colors.primary)}
+                            <div class="stat-value">${completedTasks}/${state.tasks.length}</div>
+                            <div class="stat-label">Задачи</div>
+                        </div>
+                        <div class="stat-card card-hover" style="background-color: #0f0f0f;">
+                            ${createSvg('clock', colors.accent3)}
+                            <div class="stat-value">${state.habits.filter(h => h.completed).length}/${state.habits.length}</div>
+                            <div class="stat-label">Привычки</div>
+                        </div>
+                        <div class="stat-card card-hover" style="background-color: #0f0f0f;">
+                            ${createSvg('zap', colors.warning)}
+                            <div class="stat-value">${aiAnalysis.avgEnergy}%</div>
+                            <div class="stat-label">Энергия</div>
+                        </div>
+                        <div class="stat-card card-hover" style="background-color: #0f0f0f;">
+                            ${createSvg('award', currentRank.color)}
+                            <div class="stat-value">${currentRank.icon}</div>
+                            <div class="stat-label">${currentRank.title}</div>
                         </div>
                     </div>
 
                     <div class="section">
-                        <h2 class="section-title">Сегодня</h2>
-                        ${state.tasks.slice(0, 4).map(task => `
-                            <div class="task-item card-hover" data-task="${task.id}">
-                                <div class="checkbox ${task.completed ? 'checked' : ''}">
-                                    ${task.completed ? createSvg('check', 'white') : ''}
-                                </div>
-                                <div class="task-title ${task.completed ? 'line-through' : ''}" style="color: ${task.completed ? '#666' : 'white'};">
-                                    ${task.title}
-                                </div>
-                                <div class="task-points">+${task.points}</div>
+                        <h2 class="section-title">Привычки</h2>
+                        ${state.habits.length > 0 ? `
+                            <div class="habit-grid">
+                                ${state.habits.map(habit => `
+                                    <div class="habit-card card-hover" data-habit="${habit.id}" style="background-color: ${habit.completed ? habit.color + '15' : '#0a0a0a'}; border-color: ${habit.completed ? habit.color + '40' : '#2a2a2a'};">
+                                        <div class="habit-icon" style="background-color: ${habit.color}30;">
+                                            <div style="font-size: 24px;">${habit.completed ? '✓' : '○'}</div>
+                                        </div>
+                                        <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">${habit.name}</div>
+                                        <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                            ${createSvg('flame', colors.warning)}
+                                            <span style="font-size: 16px; font-weight: bold;">${habit.streak}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
                             </div>
-                        `).join('')}
-                        <button class="btn btn-secondary" id="goToTasks" style="margin-top: 16px;">Все задачи →</button>
+                        ` : `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🌱</div>
+                                <p>Добавьте первую привычку!</p>
+                                <button class="btn btn-primary" id="addFirstHabit" style="margin-top: 16px;">Добавить привычку</button>
+                            </div>
+                        `}
+                    </div>
+
+                    <div class="section">
+                        <h2 class="section-title">Сегодня</h2>
+                        ${state.tasks.length > 0 ? `
+                            ${state.tasks.slice(0, 4).map(task => `
+                                <div class="task-item card-hover">
+                                    <div class="checkbox ${task.completed ? 'checked' : ''}" data-task-check="${task.id}">
+                                        ${task.completed ? createSvg('check', 'white') : ''}
+                                    </div>
+                                    <div class="task-title" style="color: ${task.completed ? '#666' : 'white'}; text-decoration: ${task.completed ? 'line-through' : 'none'};">
+                                        ${task.title}
+                                    </div>
+                                    <div class="task-points">+${task.points}</div>
+                                </div>
+                            `).join('')}
+                            ${state.tasks.length > 4 ? `
+                                <button class="btn btn-secondary" id="goToTasks" style="margin-top: 16px;">Все задачи →</button>
+                            ` : ''}
+                        ` : `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">✨</div>
+                                <p>Начните день с первой задачи!</p>
+                                <button class="btn btn-primary" id="goToTasks" style="margin-top: 16px;">Добавить задачу</button>
+                            </div>
+                        `}
                     </div>
                 `;
             } else if (state.activeTab === 'tasks') {
@@ -980,20 +940,27 @@
 
                     <div class="section">
                         <h2 class="section-title">Все задачи</h2>
-                        ${state.tasks.map(task => `
-                            <div class="task-item" style="margin-bottom: 12px;">
-                                <div class="checkbox ${task.completed ? 'checked' : ''}" data-task="${task.id}">
-                                    ${task.completed ? createSvg('check', 'white') : ''}
+                        ${state.tasks.length > 0 ? `
+                            ${state.tasks.map(task => `
+                                <div class="task-item" style="margin-bottom: 12px;">
+                                    <div class="checkbox ${task.completed ? 'checked' : ''}" data-task-check="${task.id}">
+                                        ${task.completed ? createSvg('check', 'white') : ''}
+                                    </div>
+                                    <div class="task-title" style="color: ${task.completed ? '#666' : 'white'}; text-decoration: ${task.completed ? 'line-through' : 'none'};">
+                                        ${task.title}
+                                    </div>
+                                    <div class="task-points">${task.category || 'Общее'}</div>
+                                    <button class="delete-btn" data-delete="${task.id}">
+                                        ${createSvg('trash', '#ff4444')}
+                                    </button>
                                 </div>
-                                <div class="task-title ${task.completed ? 'line-through' : ''}" style="color: ${task.completed ? '#666' : 'white'}; cursor: pointer;" data-task="${task.id}">
-                                    ${task.title}
-                                </div>
-                                <div class="task-points">${task.category}</div>
-                                <button class="delete-btn" data-delete="${task.id}">
-                                    ${createSvg('trash', '#ff4444')}
-                                </button>
+                            `).join('')}
+                        ` : `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📝</div>
+                                <p>Здесь пока нет задач</p>
                             </div>
-                        `).join('')}
+                        `}
                     </div>
                 `;
             } else if (state.activeTab === 'analysis') {
@@ -1008,11 +975,11 @@
                         </div>
 
                         <div class="grid-2" style="margin-bottom: 24px;">
-                            <div style="padding: 16px; border-radius: 12px; background-color: ${colors.primary}15; text-align: center;">
+                            <div style="padding: 16px; border-radius: 12px; background-color: rgba(139, 154, 156, 0.15); text-align: center;">
                                 <div style="font-size: 32px; font-weight: bold; margin-bottom: 4px;">${aiAnalysis.completionRate}%</div>
                                 <div style="font-size: 12px; font-weight: 500; color: #999;">Выполнение</div>
                             </div>
-                            <div style="padding: 16px; border-radius: 12px; background-color: ${colors.accent3}15; text-align: center;">
+                            <div style="padding: 16px; border-radius: 12px; background-color: rgba(165, 189, 161, 0.15); text-align: center;">
                                 <div style="font-size: 32px; font-weight: bold; margin-bottom: 4px;">${aiAnalysis.avgEnergy}%</div>
                                 <div style="font-size: 12px; font-weight: 500; color: #999;">Энергия</div>
                             </div>
@@ -1036,7 +1003,7 @@
                                 Рекомендации
                             </h3>
                             ${aiAnalysis.recommendations.map(rec => `
-                                <div style="padding: 12px; border-radius: 12px; background-color: ${colors.accent3}15; margin-bottom: 8px; display: flex; align-items: start; gap: 12px;">
+                                <div style="padding: 12px; border-radius: 12px; background-color: rgba(165, 189, 161, 0.15); margin-bottom: 8px; display: flex; align-items: start; gap: 12px;">
                                     ${createSvg('chevronRight', colors.accent3)}
                                     <p style="font-size: 14px;">${rec}</p>
                                 </div>
@@ -1044,7 +1011,7 @@
                         </div>
 
                         ${state.userInfo.mainGoal ? `
-                            <div style="padding: 16px; border-radius: 12px; background-color: ${colors.warning}15;">
+                            <div style="padding: 16px; border-radius: 12px; background-color: rgba(212, 175, 122, 0.15);">
                                 <p style="font-size: 12px; font-weight: bold; color: ${colors.warning}; margin-bottom: 8px;">ВАША ЦЕЛЬ</p>
                                 <p style="font-size: 14px;">${state.userInfo.mainGoal}</p>
                             </div>
@@ -1072,7 +1039,7 @@
                     </div>
                 `;
             } else if (state.activeTab === 'livi') {
-                const liviState = getLiviState(aiAnalysis.avgEnergy, aiAnalysis.completionRate, aiAnalysis.activeHabits, aiAnalysis.avgScreenTime);
+                const liviState = getLiviState(aiAnalysis.avgEnergy, aiAnalysis.completionRate, aiAnalysis.activeHabits);
                 
                 return `
                     <div class="section">
@@ -1089,7 +1056,7 @@
                         <h2 class="section-title">Текущее состояние</h2>
                         ${aiAnalysis.reflections.map(reflection => `
                             <div style="padding: 16px; border-radius: 12px; background-color: #0a0a0a; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">
-                                ${createSvg('circle', colors.primary)}
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${colors.primary}; flex-shrink: 0;"></div>
                                 <p style="font-size: 14px;">${reflection}</p>
                             </div>
                         `).join('')}
@@ -1115,7 +1082,7 @@
                             };
                             return `
                                 <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background-color: #0a0a0a; margin-bottom: 8px;">
-                                    ${createSvg('circle', colors.primary)}
+                                    <div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${colors.primary}; flex-shrink: 0;"></div>
                                     <span style="font-size: 14px; font-weight: 500;">${goalLabels[key]}</span>
                                 </div>
                             `;
@@ -1165,9 +1132,9 @@
                             { title: 'Мастер', icon: '⭐', level: 5, days: '50-99' },
                             { title: 'Легенда', icon: '👑', level: 6, days: '100+' }
                         ].map(rank => `
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-radius: 12px; background-color: ${rank.title === currentRank.title ? colors.primary + '20' : '#0a0a0a'}; border: 1px solid ${rank.title === currentRank.title ? colors.primary : 'transparent'}; margin-bottom: 8px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-radius: 12px; background-color: ${rank.title === currentRank.title ? 'rgba(139, 154, 156, 0.2)' : '#0a0a0a'}; border: 1px solid ${rank.title === currentRank.title ? colors.primary : 'transparent'}; margin-bottom: 8px;">
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    <div style="width: 40px; height: 40px; border-radius: 50%; background-color: ${colors.primary + (rank.title === currentRank.title ? '40' : '20')}; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(139, 154, 156, ${rank.title === currentRank.title ? '0.4' : '0.2'}); display: flex; align-items: center; justify-content: center; font-size: 20px;">
                                         ${rank.icon}
                                     </div>
                                     <div>
@@ -1211,67 +1178,13 @@
             `;
         }
 
-        function attachAuthListeners() {
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            const showRegisterBtn = document.getElementById('showRegister');
-            const showLoginBtn = document.getElementById('showLogin');
-            const togglePasswordBtn = document.getElementById('togglePassword');
-
-            if (loginForm) {
-                loginForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    state.userInfo.email = document.getElementById('email').value;
-                    state.userInfo.password = document.getElementById('password').value;
-                    if (state.userInfo.email && state.userInfo.password) {
-                        state.isAuthenticated = true;
-                        render();
-                    }
-                });
-            }
-
-            if (registerForm) {
-                registerForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    state.userInfo.name = document.getElementById('name').value;
-                    state.userInfo.email = document.getElementById('email').value;
-                    state.userInfo.password = document.getElementById('password').value;
-                    if (state.userInfo.name && state.userInfo.email && state.userInfo.password) {
-                        state.showRegister = false;
-                        state.isAuthenticated = true;
-                        render();
-                    }
-                });
-            }
-
-            if (showRegisterBtn) {
-                showRegisterBtn.addEventListener('click', () => {
-                    state.showRegister = true;
-                    render();
-                });
-            }
-
-            if (showLoginBtn) {
-                showLoginBtn.addEventListener('click', () => {
-                    state.showRegister = false;
-                    render();
-                });
-            }
-
-            if (togglePasswordBtn) {
-                togglePasswordBtn.addEventListener('click', () => {
-                    state.showPassword = !state.showPassword;
-                    render();
-                });
-            }
-        }
-
         function attachOnboardingListeners() {
             const startBtn = document.getElementById('startOnboarding');
             const nextBtn = document.getElementById('nextStep');
             const prevBtn = document.getElementById('prevStep');
             const completeBtn = document.getElementById('completeOnboarding');
             const goalButtons = document.querySelectorAll('[data-goal]');
+            const userName = document.getElementById('userName');
 
             if (startBtn) {
                 startBtn.addEventListener('click', () => {
@@ -1282,7 +1195,10 @@
 
             if (nextBtn) {
                 nextBtn.addEventListener('click', () => {
-                    if (state.onboardingStep === 2) {
+                    if (state.onboardingStep === 1 && userName) {
+                        state.userInfo.name = userName.value.trim();
+                    }
+                    if (state.onboardingStep === 3) {
                         state.userInfo.wakeUpTime = document.getElementById('wakeUpTime').value;
                         state.userInfo.sleepTime = document.getElementById('sleepTime').value;
                     }
@@ -1300,8 +1216,33 @@
 
             if (completeBtn) {
                 completeBtn.addEventListener('click', () => {
-                    state.userInfo.mainGoal = document.getElementById('mainGoal').value;
+                    state.userInfo.mainGoal = document.getElementById('mainGoal').value.trim();
                     state.hasCompletedOnboarding = true;
+                    state.streak = 1;
+                    state.lastActiveDate = new Date().toDateString();
+                    
+                    // Добавляем начальные привычки на основе выбранных целей
+                    const habitsByGoal = {
+                        health: { name: 'Зарядка', color: colors.accent3, icon: '💪' },
+                        learning: { name: 'Чтение', color: colors.accent2, icon: '📚' },
+                        productivity: { name: 'Планирование', color: colors.primary, icon: '📋' },
+                        mindfulness: { name: 'Медитация', color: colors.secondary, icon: '🧘' },
+                        sleep: { name: 'Сон 8 часов', color: colors.accent1, icon: '😴' },
+                        social: { name: 'Общение', color: colors.warning, icon: '☕' }
+                    };
+                    
+                    state.habits = Object.entries(state.userGoals)
+                        .filter(([_, selected]) => selected)
+                        .map(([goal], index) => ({
+                            id: Date.now() + index,
+                            name: habitsByGoal[goal].name,
+                            color: habitsByGoal[goal].color,
+                            streak: 0,
+                            completed: false,
+                            lastCompletedDate: null
+                        }));
+                    
+                    saveState();
                     render();
                 });
             }
@@ -1321,12 +1262,13 @@
             const rankModal = document.getElementById('rankModal');
             const habitCards = document.querySelectorAll('[data-habit]');
             const habitModal = document.getElementById('habitModal');
-            const closeHabitBtn = document.getElementById('closeHabitModal');
-            const taskCheckboxes = document.querySelectorAll('[data-task]');
-            const deleteBtns = document.querySelectorAll('[data-delete]');
+            const closeHabitModalBtn = document.getElementById('closeHabitModal');
+            const taskChecks = document.querySelectorAll('[data-task-check]');
             const addTaskBtn = document.getElementById('addTask');
             const newTaskInput = document.getElementById('newTaskInput');
+            const deleteButtons = document.querySelectorAll('[data-delete]');
             const goToTasksBtn = document.getElementById('goToTasks');
+            const addFirstHabitBtn = document.getElementById('addFirstHabit');
 
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -1343,85 +1285,116 @@
             }
 
             if (rankModal) {
-                rankModal.addEventListener('click', () => {
-                    state.showRankModal = false;
-                    render();
+                rankModal.addEventListener('click', (e) => {
+                    if (e.target === rankModal) {
+                        state.showRankModal = false;
+                        render();
+                    }
                 });
             }
 
             habitCards.forEach(card => {
                 card.addEventListener('click', () => {
                     const habitId = parseInt(card.dataset.habit);
-                    state.selectedHabit = state.habits.find(h => h.id === habitId);
-                    render();
-                });
-            });
-
-            if (habitModal) {
-                habitModal.addEventListener('click', () => {
-                    state.selectedHabit = null;
-                    render();
-                });
-            }
-
-            if (closeHabitBtn) {
-                closeHabitBtn.addEventListener('click', () => {
-                    state.selectedHabit = null;
-                    render();
-                });
-            }
-
-            taskCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('click', () => {
-                    const taskId = parseInt(checkbox.dataset.task);
-                    const task = state.tasks.find(t => t.id === taskId);
-                    if (task) {
-                        task.completed = !task.completed;
+                    const habit = state.habits.find(h => h.id === habitId);
+                    
+                    if (habit) {
+                        const today = new Date().toDateString();
+                        
+                        if (!habit.completed) {
+                            habit.completed = true;
+                            habit.lastCompletedDate = today;
+                            habit.streak++;
+                            state.totalPoints += 10;
+                        } else {
+                            habit.completed = false;
+                            if (habit.streak > 0) habit.streak--;
+                            state.totalPoints = Math.max(0, state.totalPoints - 10);
+                        }
+                        
+                        saveState();
                         render();
                     }
                 });
             });
 
-            deleteBtns.forEach(btn => {
+            if (closeHabitModalBtn) {
+                closeHabitModalBtn.addEventListener('click', () => {
+                    state.selectedHabit = null;
+                    render();
+                });
+            }
+
+            if (habitModal) {
+                habitModal.addEventListener('click', (e) => {
+                    if (e.target === habitModal) {
+                        state.selectedHabit = null;
+                        render();
+                    }
+                });
+            }
+
+            taskChecks.forEach(check => {
+                check.addEventListener('click', () => {
+                    const taskId = parseInt(check.dataset.taskCheck);
+                    const task = state.tasks.find(t => t.id === taskId);
+                    
+                    if (task) {
+                        task.completed = !task.completed;
+                        
+                        if (task.completed) {
+                            state.totalPoints += task.points;
+                        } else {
+                            state.totalPoints = Math.max(0, state.totalPoints - task.points);
+                        }
+                        
+                        saveState();
+                        render();
+                    }
+                });
+            });
+
+            if (addTaskBtn && newTaskInput) {
+                const addTask = () => {
+                    const title = newTaskInput.value.trim();
+                    if (title) {
+                        state.tasks.push({
+                            id: Date.now(),
+                            title,
+                            completed: false,
+                            points: 5,
+                            category: 'Общее',
+                            createdAt: new Date().toISOString()
+                        });
+                        state.newTask = '';
+                        saveState();
+                        render();
+                    }
+                };
+
+                addTaskBtn.addEventListener('click', addTask);
+                newTaskInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        addTask();
+                    }
+                });
+            }
+
+            deleteButtons.forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const taskId = parseInt(btn.dataset.delete);
+                    const task = state.tasks.find(t => t.id === taskId);
+                    
+                    if (task && task.completed) {
+                        state.totalPoints = Math.max(0, state.totalPoints - task.points);
+                    }
+                    
                     state.tasks = state.tasks.filter(t => t.id !== taskId);
+                    saveState();
                     render();
                 });
             });
-
-            if (addTaskBtn) {
-                addTaskBtn.addEventListener('click', () => {
-                    if (newTaskInput && newTaskInput.value.trim()) {
-                        state.tasks.push({
-                            id: Date.now(),
-                            title: newTaskInput.value.trim(),
-                            completed: false,
-                            category: 'Общее',
-                            points: 10
-                        });
-                        state.newTask = '';
-                        render();
-                    }
-                });
-            }
-
-            if (newTaskInput) {
-                newTaskInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter' && newTaskInput.value.trim()) {
-                        state.tasks.push({
-                            id: Date.now(),
-                            title: newTaskInput.value.trim(),
-                            completed: false,
-                            category: 'Общее',
-                            points: 10
-                        });
-                        state.newTask = '';
-                        render();
-                    }
-                });
-            }
 
             if (goToTasksBtn) {
                 goToTasksBtn.addEventListener('click', () => {
@@ -1429,9 +1402,39 @@
                     render();
                 });
             }
+
+            if (addFirstHabitBtn) {
+                addFirstHabitBtn.addEventListener('click', () => {
+                    // Добавляем простую привычку для начала
+                    state.habits.push({
+                        id: Date.now(),
+                        name: 'Новая привычка',
+                        color: colors.primary,
+                        streak: 0,
+                        completed: false,
+                        lastCompletedDate: null
+                    });
+                    saveState();
+                    render();
+                });
+            }
         }
 
-        // Инициализация
+        // Сброс состояния привычек каждый день
+        function resetDailyHabits() {
+            const today = new Date().toDateString();
+            
+            state.habits.forEach(habit => {
+                if (habit.lastCompletedDate !== today) {
+                    habit.completed = false;
+                }
+            });
+            
+            saveState();
+        }
+
+        // Запуск приложения
+        resetDailyHabits();
         render();
     </script>
 </body>
