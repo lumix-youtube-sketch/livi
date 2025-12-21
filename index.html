@@ -295,15 +295,17 @@
         async function init() {
             await loadState();
             await resetDailyHabits();
+            
+            // Render content immediately
             render();
             
-            // Hide loading screen after 2.5 seconds
+            // Hide loading screen after animation
             setTimeout(() => {
                 const loadingScreen = document.getElementById('loadingScreen');
                 if (loadingScreen) {
-                    loadingScreen.style.display = 'none';
+                    loadingScreen.remove();
                 }
-            }, 2500);
+            }, 3000);
         }
 
         init();
