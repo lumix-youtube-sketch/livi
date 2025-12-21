@@ -295,6 +295,7 @@
         async function init() {
             await loadState();
             await resetDailyHabits();
+            render();
             
             // Hide loading screen after 2.5 seconds
             setTimeout(() => {
@@ -302,7 +303,6 @@
                 if (loadingScreen) {
                     loadingScreen.style.display = 'none';
                 }
-                render();
             }, 2500);
         }
 
