@@ -293,24 +293,30 @@
         }
 
         async function init() {
-            console.log('Init started');
-            await loadState();
-            console.log('State loaded:', state);
-            await resetDailyHabits();
-            console.log('Habits reset');
-            
-            // Render content immediately
-            render();
-            console.log('Rendered');
-            
-            // Hide loading screen after animation
-            setTimeout(() => {
-                const loadingScreen = document.getElementById('loadingScreen');
-                if (loadingScreen) {
-                    loadingScreen.classList.add('fade-out');
-                    setTimeout(() => loadingScreen.remove(), 500);
-                }
-            }, 2000);
+            try {
+                console.log('Init started');
+                await loadState();
+                console.log('State loaded:', state);
+                await resetDailyHabits();
+                console.log('Habits reset');
+                
+                // Render content immediately
+                render();
+                console.log('Rendered');
+            } catch (e) {
+                console.error('Init error:', e);
+                // Render anyway with default state
+                render();
+            } finally {
+                // Always hide loading screen
+                setTimeout(() => {
+                    const loadingScreen = document.getElementById('loadingScreen');
+                    if (loadingScreen) {
+                        loadingScreen.classList.add('fade-out');
+                        setTimeout(() => loadingScreen.remove(), 500);
+                    }
+                }, 1500);
+            }
         }
 
         init();
