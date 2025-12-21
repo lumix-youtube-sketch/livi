@@ -493,18 +493,6 @@
             warning: '#D4AF7A',
         };
 
-        // Функция для работы с данными в памяти
-        let appState = null;
-
-        const storage = {
-            get: (key) => {
-                return appState;
-            },
-            set: (key, value) => {
-                appState = value;
-            }
-        };
-
         // Инициализация состояния
         const getInitialState = () => ({
             hasCompletedOnboarding: false,
@@ -534,12 +522,29 @@
             lastActiveDate: new Date().toDateString()
         });
 
-        const savedState = storage.get('liviState');
-        const state = savedState || getInitialState();
+        let state = getInitialState();
+        let isLoading = true;
+
+        // Загрузка состояния
+        async function loadState() {
+            try {
+                const result = await window.storage.get('liviState');
+                if (result && result.value) {
+                    state = JSON.parse(result.value);
+                }
+            } catch (e) {
+                console.log('Первый запуск, используем начальное состояние');
+            }
+            isLoading = false;
+        }
 
         // Сохранение состояния
-        function saveState() {
-            storage.set('liviState', state);
+        async function saveState() {
+            try {
+                await window.storage.set('liviState', JSON.stringify(state));
+            } catch (e) {
+                console.error('Ошибка сохранения:', e);
+            }
         }
 
         // Проверка и обновление стрика
@@ -1215,7 +1220,7 @@
             }
 
             if (completeBtn) {
-                completeBtn.addEventListener('click', () => {
+                completeBtn.addEventListener('click', async () => {
                     state.userInfo.mainGoal = document.getElementById('mainGoal').value.trim();
                     state.hasCompletedOnboarding = true;
                     state.streak = 1;
@@ -1242,7 +1247,7 @@
                             lastCompletedDate: null
                         }));
                     
-                    saveState();
+                    await saveState();
                     render();
                 });
             }
@@ -1294,7 +1299,7 @@
             }
 
             habitCards.forEach(card => {
-                card.addEventListener('click', () => {
+                card.addEventListener('click', async () => {
                     const habitId = parseInt(card.dataset.habit);
                     const habit = state.habits.find(h => h.id === habitId);
                     
@@ -1312,7 +1317,7 @@
                             state.totalPoints = Math.max(0, state.totalPoints - 10);
                         }
                         
-                        saveState();
+                        await saveState();
                         render();
                     }
                 });
@@ -1335,7 +1340,7 @@
             }
 
             taskChecks.forEach(check => {
-                check.addEventListener('click', () => {
+                check.addEventListener('click', async () => {
                     const taskId = parseInt(check.dataset.taskCheck);
                     const task = state.tasks.find(t => t.id === taskId);
                     
@@ -1348,14 +1353,14 @@
                             state.totalPoints = Math.max(0, state.totalPoints - task.points);
                         }
                         
-                        saveState();
+                        await saveState();
                         render();
                     }
                 });
             });
 
             if (addTaskBtn && newTaskInput) {
-                const addTask = () => {
+                const addTask = async () => {
                     const title = newTaskInput.value.trim();
                     if (title) {
                         state.tasks.push({
@@ -1367,7 +1372,7 @@
                             createdAt: new Date().toISOString()
                         });
                         state.newTask = '';
-                        saveState();
+                        await saveState();
                         render();
                     }
                 };
@@ -1381,7 +1386,7 @@
             }
 
             deleteButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
+                btn.addEventListener('click', async (e) => {
                     e.stopPropagation();
                     const taskId = parseInt(btn.dataset.delete);
                     const task = state.tasks.find(t => t.id === taskId);
@@ -1391,7 +1396,7 @@
                     }
                     
                     state.tasks = state.tasks.filter(t => t.id !== taskId);
-                    saveState();
+                    await saveState();
                     render();
                 });
             });
@@ -1404,7 +1409,7 @@
             }
 
             if (addFirstHabitBtn) {
-                addFirstHabitBtn.addEventListener('click', () => {
+                addFirstHabitBtn.addEventListener('click', async () => {
                     // Добавляем простую привычку для начала
                     state.habits.push({
                         id: Date.now(),
@@ -1414,14 +1419,14 @@
                         completed: false,
                         lastCompletedDate: null
                     });
-                    saveState();
+                    await saveState();
                     render();
                 });
             }
         }
 
         // Сброс состояния привычек каждый день
-        function resetDailyHabits() {
+        async function resetDailyHabits() {
             const today = new Date().toDateString();
             
             state.habits.forEach(habit => {
@@ -1430,12 +1435,17 @@
                 }
             });
             
-            saveState();
+            await saveState();
         }
 
         // Запуск приложения
-        resetDailyHabits();
-        render();
+        async function init() {
+            await loadState();
+            await resetDailyHabits();
+            render();
+        }
+
+        init();
     </script>
 </body>
 </html>
