@@ -292,31 +292,50 @@
             await saveState();
         }
 
-        async function init() {
+        function loadState() {
             try {
-                console.log('Init started');
-                await loadState();
-                console.log('State loaded:', state);
-                await resetDailyHabits();
-                console.log('Habits reset');
-                
-                // Render content immediately
-                render();
-                console.log('Rendered');
+                if (tg.CloudStorage) {
+                    tg.CloudStorage.getItem('livi_state', (error, value) => {
+                        if (!error && value) {
+                            try {
+                                const loaded = JSON.parse(value);
+                                state = { ...getInitialState(), ...loaded };
+                                console.log('✅ Данные загружены');
+                            } catch (e) {
+                                console.log('⚠️ Ошибка парсинга');
+                            }
+                        }
+                    });
+                }
             } catch (e) {
-                console.error('Init error:', e);
-                // Render anyway with default state
-                render();
-            } finally {
-                // Always hide loading screen
-                setTimeout(() => {
-                    const loadingScreen = document.getElementById('loadingScreen');
-                    if (loadingScreen) {
-                        loadingScreen.classList.add('fade-out');
-                        setTimeout(() => loadingScreen.remove(), 500);
-                    }
-                }, 1500);
+                console.log('❌ Ошибка загрузки');
             }
+        }
+
+        function resetDailyHabits() {
+            const today = new Date().toDateString();
+            state.habits.forEach(habit => {
+                if (habit.lastCompletedDate !== today) {
+                    habit.completed = false;
+                }
+            });
+        }
+
+        function init() {
+            console.log('Init started');
+            loadState();
+            resetDailyHabits();
+            render();
+            console.log('Rendered');
+            
+            // Hide loading screen
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('fade-out');
+                    setTimeout(() => loadingScreen.remove(), 500);
+                }
+            }, 1500);
         }
 
         init();
