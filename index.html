@@ -484,6 +484,7 @@
 <body>
     <div id="app"></div>
 
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const colors = {
             primary: '#8B9A9C',
@@ -526,36 +527,76 @@
         let state = getInitialState();
         let isLoading = true;
 
-        // Загрузка состояния
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // Загрузка состояния из Telegram Cloud Storage
         async function loadState() {
             try {
-                if (typeof window.storage !== 'undefined') {
-                    const result = await window.storage.get('livi-app-state', false);
-                    if (result && result.value) {
-                        const loaded = JSON.parse(result.value);
-                        state = { ...getInitialState(), ...loaded };
-                        console.log('Данные загружены:', state);
-                    } else {
-                        console.log('Нет сохраненных данных, используем начальное состояние');
-                    }
+                // Проверяем, доступен ли CloudStorage
+                if (tg.CloudStorage) {
+                    return new Promise((resolve) => {
+                        tg.CloudStorage.getItem('livi_state', (error, value) => {
+                            if (!error && value) {
+                                try {
+                                    const loaded = JSON.parse(value);
+                                    state = { ...getInitialState(), ...loaded };
+                                    console.log('✅ Данные загружены из Telegram Cloud');
+                                } catch (e) {
+                                    console.log('⚠️ Ошибка парсинга данных:', e);
+                                }
+                            } else {
+                                console.log('📦 Первый запуск - используем начальное состояние');
+                            }
+                            isLoading = false;
+                            resolve();
+                        });
+                    });
                 } else {
-                    console.log('window.storage недоступен');
+                    // Fallback на window.storage для тестирования вне Telegram
+                    if (typeof window.storage !== 'undefined') {
+                        const result = await window.storage.get('livi-app-state', false);
+                        if (result && result.value) {
+                            const loaded = JSON.parse(result.value);
+                            state = { ...getInitialState(), ...loaded };
+                            console.log('✅ Данные загружены из window.storage');
+                        }
+                    }
+                    isLoading = false;
                 }
             } catch (e) {
-                console.log('Ошибка загрузки:', e.message);
+                console.log('❌ Ошибка загрузки:', e.message);
+                isLoading = false;
             }
-            isLoading = false;
         }
 
-        // Сохранение состояния
+        // Сохранение состояния в Telegram Cloud Storage
         async function saveState() {
             try {
-                if (typeof window.storage !== 'undefined') {
-                    await window.storage.set('livi-app-state', JSON.stringify(state), false);
-                    console.log('Данные сохранены');
+                const stateString = JSON.stringify(state);
+                
+                if (tg.CloudStorage) {
+                    return new Promise((resolve) => {
+                        tg.CloudStorage.setItem('livi_state', stateString, (error, saved) => {
+                            if (!error) {
+                                console.log('💾 Данные сохранены в Telegram Cloud');
+                            } else {
+                                console.error('❌ Ошибка сохранения:', error);
+                            }
+                            resolve();
+                        });
+                    });
+                } else {
+                    // Fallback на window.storage
+                    if (typeof window.storage !== 'undefined') {
+                        await window.storage.set('livi-app-state', stateString, false);
+                        console.log('💾 Данные сохранены в window.storage');
+                    }
                 }
             } catch (e) {
-                console.error('Ошибка сохранения:', e);
+                console.error('❌ Ошибка сохранения:', e);
             }
         }
 
