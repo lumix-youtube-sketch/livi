@@ -192,6 +192,7 @@
         .goal-title {
             font-weight: bold;
             margin-bottom: 4px;
+            color: white;
         }
 
         .goal-desc {
@@ -528,12 +529,20 @@
         // Загрузка состояния
         async function loadState() {
             try {
-                const result = await window.storage.get('liviState');
-                if (result && result.value) {
-                    state = JSON.parse(result.value);
+                if (typeof window.storage !== 'undefined') {
+                    const result = await window.storage.get('livi-app-state', false);
+                    if (result && result.value) {
+                        const loaded = JSON.parse(result.value);
+                        state = { ...getInitialState(), ...loaded };
+                        console.log('Данные загружены:', state);
+                    } else {
+                        console.log('Нет сохраненных данных, используем начальное состояние');
+                    }
+                } else {
+                    console.log('window.storage недоступен');
                 }
             } catch (e) {
-                console.log('Первый запуск, используем начальное состояние');
+                console.log('Ошибка загрузки:', e.message);
             }
             isLoading = false;
         }
@@ -541,7 +550,10 @@
         // Сохранение состояния
         async function saveState() {
             try {
-                await window.storage.set('liviState', JSON.stringify(state));
+                if (typeof window.storage !== 'undefined') {
+                    await window.storage.set('livi-app-state', JSON.stringify(state), false);
+                    console.log('Данные сохранены');
+                }
             } catch (e) {
                 console.error('Ошибка сохранения:', e);
             }
@@ -929,6 +941,117 @@
                                 <button class="btn btn-primary" id="goToTasks" style="margin-top: 16px;">Добавить задачу</button>
                             </div>
                         `}
+                    </div>
+
+                    <div class="section">
+                        <h2 class="section-title">📊 Статистика за неделю</h2>
+                        
+                        <div style="margin-bottom: 24px;">
+                            <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">Активность по дням</h3>
+                            <div style="display: flex; gap: 8px; align-items: flex-end; height: 120px;">
+                                ${['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((day, i) => {
+                                    const height = Math.random() * 80 + 20;
+                                    return `
+                                        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                            <div style="width: 100%; background: linear-gradient(to top, ${colors.primary}, ${colors.accent1}); border-radius: 8px 8px 0 0; height: ${height}px; position: relative;">
+                                                <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: bold; color: ${colors.primary};">${Math.round(height)}%</div>
+                                            </div>
+                                            <div style="font-size: 12px; color: #666; font-weight: 500;">${day}</div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 24px;">
+                            <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">Распределение задач</h3>
+                            <div style="display: flex; gap: 16px; align-items: center;">
+                                <div style="position: relative; width: 120px; height: 120px;">
+                                    <svg viewBox="0 0 120 120" style="transform: rotate(-90deg);">
+                                        <circle cx="60" cy="60" r="50" fill="none" stroke="#2a2a2a" stroke-width="20"/>
+                                        <circle cx="60" cy="60" r="50" fill="none" stroke="${colors.primary}" stroke-width="20" 
+                                                stroke-dasharray="${(state.tasks.filter(t => t.completed).length / (state.tasks.length || 1)) * 314} 314"
+                                                stroke-linecap="round"/>
+                                    </svg>
+                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                                        <div style="font-size: 24px; font-weight: bold;">${Math.round((state.tasks.filter(t => t.completed).length / (state.tasks.length || 1)) * 100)}%</div>
+                                        <div style="font-size: 10px; color: #666;">Выполнено</div>
+                                    </div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                                            <div style="width: 12px; height: 12px; border-radius: 3px; background-color: ${colors.primary};"></div>
+                                            Выполнено
+                                        </span>
+                                        <span style="font-size: 14px; font-weight: bold;">${state.tasks.filter(t => t.completed).length}</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                                            <div style="width: 12px; height: 12px; border-radius: 3px; background-color: #2a2a2a;"></div>
+                                            В процессе
+                                        </span>
+                                        <span style="font-size: 14px; font-weight: bold;">${state.tasks.filter(t => !t.completed).length}</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span style="font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                                            <div style="width: 12px; height: 12px; border-radius: 3px; background-color: ${colors.accent3};"></div>
+                                            Всего
+                                        </span>
+                                        <span style="font-size: 14px; font-weight: bold;">${state.tasks.length}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 24px;">
+                            <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">Прогресс привычек</h3>
+                            ${state.habits.slice(0, 4).map(habit => {
+                                const progress = Math.min((habit.streak / 30) * 100, 100);
+                                return `
+                                    <div style="margin-bottom: 16px;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                            <span style="font-size: 14px; font-weight: 500;">${habit.name}</span>
+                                            <span style="font-size: 14px; font-weight: bold; color: ${habit.color};">${habit.streak} дней</span>
+                                        </div>
+                                        <div style="height: 8px; background-color: #2a2a2a; border-radius: 4px; overflow: hidden;">
+                                            <div style="height: 100%; background: linear-gradient(to right, ${habit.color}, ${habit.color}80); width: ${progress}%; transition: width 0.3s ease;"></div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                            ${state.habits.length === 0 ? `
+                                <div class="empty-state" style="padding: 20px;">
+                                    <p style="font-size: 14px;">Добавьте привычки для отслеживания прогресса</p>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div>
+                            <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">Достижения</h3>
+                            <div class="grid-2">
+                                <div style="padding: 16px; border-radius: 12px; background-color: rgba(139, 154, 156, 0.15); text-align: center;">
+                                    <div style="font-size: 32px; margin-bottom: 8px;">🔥</div>
+                                    <div style="font-size: 20px; font-weight: bold; margin-bottom: 4px;">${state.streak}</div>
+                                    <div style="font-size: 12px; color: #999;">Дней подряд</div>
+                                </div>
+                                <div style="padding: 16px; border-radius: 12px; background-color: rgba(165, 189, 161, 0.15); text-align: center;">
+                                    <div style="font-size: 32px; margin-bottom: 8px;">⭐</div>
+                                    <div style="font-size: 20px; font-weight: bold; margin-bottom: 4px;">${state.totalPoints}</div>
+                                    <div style="font-size: 12px; color: #999;">Всего очков</div>
+                                </div>
+                                <div style="padding: 16px; border-radius: 12px; background-color: rgba(212, 175, 122, 0.15); text-align: center;">
+                                    <div style="font-size: 32px; margin-bottom: 8px;">✅</div>
+                                    <div style="font-size: 20px; font-weight: bold; margin-bottom: 4px;">${state.tasks.filter(t => t.completed).length}</div>
+                                    <div style="font-size: 12px; color: #999;">Задач выполнено</div>
+                                </div>
+                                <div style="padding: 16px; border-radius: 12px; background-color: rgba(168, 181, 199, 0.15); text-align: center;">
+                                    <div style="font-size: 32px; margin-bottom: 8px;">💪</div>
+                                    <div style="font-size: 20px; font-weight: bold; margin-bottom: 4px;">${state.habits.reduce((sum, h) => sum + h.streak, 0)}</div>
+                                    <div style="font-size: 12px; color: #999;">Дней привычек</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 `;
             } else if (state.activeTab === 'tasks') {
