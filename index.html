@@ -1611,5 +1611,260 @@
 
         init();
     </script>
+
+    <!-- === ADDITIONAL ENHANCEMENTS: SYNC, REMINDERS, AI IMPROVEMENTS === -->
+    <script>
+    // Добавляем поверх твоего кода расширения: sync (Cloud + local), reminders, улучшенный AI и история.
+    (function(){
+        const REMINDER_WEBHOOK_URL = null; // поставить URL сервера если нужен
+
+        // tg уже определён в основном скрипте
+        const tgApp = window.Telegram ? window.Telegram.WebApp : null;
+
+        // Перекрываем loadState и saveState, но сохраним старые на случай отката
+        const originalLoad = window.loadState;
+        const originalSave = window.saveState;
+
+        async function loadState() {
+            try {
+                // Используем Telegram CloudStorage если есть
+                if (tgApp && tgApp.CloudStorage) {
+                    return new Promise((resolve) => {
+                        tgApp.CloudStorage.getItem('livi_state', (err, value) => {
+                            if (!err && value) {
+                                try {
+                                    const remote = JSON.parse(value);
+                                    // Если есть локальная версия — сделаем merge по lastUpdated
+                                    const localRaw = localStorage.getItem('livi_state');
+                                    if (localRaw) {
+                                        try {
+                                            const localParsed = JSON.parse(localRaw);
+                                            // Если remote имеет поле lastUpdated, сравнить
+                                            if (remote.lastUpdated && localParsed.lastUpdated) {
+                                                if (remote.lastUpdated > localParsed.lastUpdated) {
+                                                    state = { ...getInitialState(), ...remote };
+                                                } else {
+                                                    state = { ...getInitialState(), ...localParsed };
+                                                }
+                                            } else {
+                                                state = { ...getInitialState(), ...remote };
+                                            }
+                                        } catch (e) {
+                                            state = { ...getInitialState(), ...remote };
+                                        }
+                                    } else {
+                                        state = { ...getInitialState(), ...remote };
+                                    }
+                                    console.log('✅ Loaded from Telegram.CloudStorage (enhanced)');
+                                } catch (e) { console.warn('Cloud parse error (enhanced)', e); }
+                            } else {
+                                // fallback localStorage
+                                const saved = localStorage.getItem('livi_state');
+                                if (saved) {
+                                    try { state = { ...getInitialState(), ...JSON.parse(saved) }; console.log('✅ Loaded from localStorage (enhanced)'); }
+                                    catch (e) { console.error('Parse localStorage failed (enhanced)', e); }
+                                } else {
+                                    console.log('📦 No saved state -> initial state (enhanced)');
+                                }
+                            }
+                            resolve();
+                        });
+                    });
+                } else {
+                    const saved = localStorage.getItem('livi_state');
+                    if (saved) {
+                        try { state = { ...getInitialState(), ...JSON.parse(saved) }; console.log('✅ Loaded from localStorage (enhanced)'); }
+                        catch (e) { console.error('Parse localStorage failed (enhanced)', e); }
+                    } else {
+                        console.log('📦 No saved state -> initial state (enhanced)');
+                    }
+                }
+            } catch (e) { console.error('loadState enhanced error', e); }
+        }
+
+        async function saveState() {
+            try {
+                // отметим метку времени
+                state.lastUpdated = Date.now();
+                const s = JSON.stringify(state);
+                localStorage.setItem('livi_state', s);
+                if (tgApp && tgApp.CloudStorage) {
+                    return new Promise((resolve) => {
+                        tgApp.CloudStorage.setItem('livi_state', s, (err)=>{
+                            if (!err) console.log('💾 Saved to Telegram.CloudStorage (enhanced)');
+                            else console.warn('Cloud save error (enhanced)', err);
+                            resolve();
+                        });
+                    });
+                }
+            } catch (e) { console.error('saveState enhanced error', e); }
+        }
+
+        // Sync loop
+        let cloudSyncInterval = null;
+        function startCloudSync() {
+            if (!(tgApp && tgApp.CloudStorage)) return;
+            if (cloudSyncInterval) clearInterval(cloudSyncInterval);
+            cloudSyncInterval = setInterval(()=>{
+                tgApp.CloudStorage.getItem('livi_state', async (err, value)=>{
+                    if (!err && value) {
+                        try {
+                            const remote = JSON.parse(value);
+                            if (remote.lastUpdated && remote.lastUpdated > (state.lastUpdated||0)) {
+                                console.log('🔁 Remote state newer — merging (enhanced)');
+                                // простое замещение — можно улучшить диффом
+                                state = { ...getInitialState(), ...remote };
+                                await saveState();
+                                render();
+                                scheduleAllReminders();
+                            }
+                        } catch(e) { console.warn('cloud parse err enhanced', e); }
+                    }
+                });
+            }, 30_000);
+        }
+
+        // Notifications & reminders
+        async function ensureNotifications() {
+            if (!('Notification' in window)) return false;
+            if (Notification.permission === 'granted') return true;
+            if (Notification.permission === 'denied') return false;
+            const res = await Notification.requestPermission();
+            return res === 'granted';
+        }
+
+        const reminderTimers = {};
+        function scheduleAllReminders() {
+            Object.keys(reminderTimers).forEach(k=>clearTimeout(reminderTimers[k]));
+            const now = Date.now();
+            (state.reminders || []).forEach(rem=>{
+                if (!rem.enabled) return;
+                const next = nextOccurrence(rem, now);
+                if (!next) return;
+                const ms = next - now;
+                if (ms>0 && ms<=365*24*60*60*1000) {
+                    reminderTimers[rem.id] = setTimeout(()=>{
+                        triggerReminder(rem);
+                        render();
+                    }, ms);
+                }
+            });
+        }
+
+        function nextOccurrence(rem, after=Date.now()){
+            try{
+                const dt = new Date(rem.datetimeISO);
+                if (dt.getTime()>after) return dt.getTime();
+                if (rem.repeat==='none') return null;
+                if (rem.repeat==='daily'){
+                    const next = new Date(dt);
+                    while(next.getTime()<=after) next.setDate(next.getDate()+1);
+                    return next.getTime();
+                }
+                if (rem.repeat==='weekly'){
+                    const next = new Date(dt);
+                    while(next.getTime()<=after) next.setDate(next.getDate()+7);
+                    return next.getTime();
+                }
+                return null;
+            } catch(e){ return null; }
+        }
+
+        async function triggerReminder(rem){
+            try{
+                if (Notification.permission==='granted') new Notification('Livi', { body: rem.title });
+            } catch(e){ console.warn('notification', e); }
+            try{ if (tgApp && typeof tgApp.showPopup==='function') tgApp.showPopup({ title:'Напоминание', message: rem.title }); else if (tgApp && typeof tgApp.showAlert==='function') tgApp.showAlert(rem.title); } catch(e){}
+            if (REMINDER_WEBHOOK_URL) {
+                try{ await fetch(REMINDER_WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ reminder: rem, user: state.userInfo }) }); } catch(e){ console.warn('webhook send failed', e); }
+            }
+        }
+
+        // History & AI improvements
+        function recordDailySnapshot(){
+            const today = new Date().toDateString();
+            const completedTasks = state.tasks.filter(t=>t.completed).length;
+            const habitsCompleted = state.habits.filter(h=>h.completed).length;
+            const idx = (state.history||[]).findIndex(h=>h.date===today);
+            const snap = { date: today, completedTasks, habitsCompleted, totalPoints: state.totalPoints };
+            if (idx>=0) state.history[idx]=snap; else { state.history = state.history||[]; state.history.push(snap); }
+        }
+
+        function generateAIAnalysis() {
+            // более честная аналитика на основе истории
+            const completedTasks = state.tasks.filter(t => t.completed).length;
+            const totalTasks = state.tasks.length || 1;
+            const completionRate = Math.round((completedTasks / totalTasks) * 100);
+            const activeHabits = state.habits.filter(h=>h.completed).length;
+
+            const last7 = (state.history||[]).slice(-7);
+            const avgTasks = last7.length ? Math.round(last7.reduce((s,x)=>s+x.completedTasks,0)/last7.length) : completedTasks;
+            const trend = completedTasks >= avgTasks ? '↗' : '↘';
+
+            const insights=[]; const recommendations=[];
+            insights.push(`${completionRate}% задач сегодня`);
+            insights.push(`Привычек выполнено: ${activeHabits}/${state.habits.length}`);
+            insights.push(`Тренд выполнения задач: ${trend} (средне ${avgTasks}/день)`);
+
+            if (completionRate>=80) insights.push('Отличная продуктивность — сохраняй темп!');
+            else if (completionRate>=50) { insights.push('Неплохо, но можно лучше'); recommendations.push('Разбей крупные задачи на подзадачи'); }
+            else { insights.push('Нужен толчок в действии'); recommendations.push('Ставь 2–3 маленькие цели на день'); }
+
+            if (activeHabits>=Math.min(3, state.habits.length)) insights.push('Хорошая дисциплина привычек');
+            else if (activeHabits>0) { insights.push('Начало положено'); recommendations.push('Добавь ещё одну простую привычку'); }
+            else { recommendations.push('Сфокусируйся на одной привычке в течение недели'); }
+
+            // streak risk
+            const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+            const mightLoseStreak = state.lastActiveDate !== new Date().toDateString() && state.lastActiveDate !== yesterday.toDateString();
+            if (mightLoseStreak) recommendations.push('Не теряй серию — выполни хотя бы одну задачу сегодня');
+
+            return { completionRate, activeHabits, insights, recommendations, trend, avgTasks };
+        }
+
+        // Улучшенный дневной ресет — обнуляет streak при больших разрывах
+        async function resetDailyHabitsEnhanced(){
+            const today = new Date().toDateString();
+            const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+            state.habits.forEach(h=>{
+                if (h.lastCompletedDate !== today) h.completed = false;
+                if (h.lastCompletedDate && h.lastCompletedDate !== today && h.lastCompletedDate !== yesterday.toDateString()) h.streak = 0;
+            });
+            // streak logic
+            if (state.lastActiveDate !== today) {
+                if (state.lastActiveDate === yesterday.toDateString()) {
+                    // continue only when action occurs — lastActiveDate should be updated on action
+                } else {
+                    state.streak = 0;
+                }
+            }
+            recordDailySnapshot();
+            await saveState();
+        }
+
+        // Enhanced init: переинициализируем состояние (без удаления оригинального UI)
+        async function enhancedInit(){
+            if (tgApp) {
+                try { tgApp.expand(); tgApp.ready(); } catch(e){}
+            }
+            await loadState();
+            await ensureNotifications();
+            await resetDailyHabitsEnhanced();
+            render();
+            scheduleAllReminders();
+            startCloudSync();
+
+            document.addEventListener('visibilitychange', ()=>{ if (document.visibilityState==='hidden') saveState(); });
+            window.addEventListener('beforeunload', ()=>{ saveState(); });
+        }
+
+        // Запускаем enhanced init поверх уже выполненного init — это обновит поведение без удаления UI
+        enhancedInit();
+
+        // Экспортим в глобальную область для отладки
+        window.livi_enhanced = { loadState, saveState, scheduleAllReminders, triggerReminder, generateAIAnalysis };
+
+    })();
+    </script>
 </body>
 </html>
