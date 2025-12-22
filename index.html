@@ -9,7 +9,6 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         body {
@@ -530,6 +529,11 @@
             text-align: center;
             cursor: pointer;
             animation: scaleIn 0.4s ease-out backwards;
+            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .habit-card:active {
+            transform: scale(0.95);
         }
 
         .habit-card:nth-child(1) { animation-delay: 0.1s; }
@@ -944,8 +948,19 @@
             };
         }
 
-        function renderCompactCode() {
-            return `<div class="code-compact">// livi v1.0 - Compact Core<br>const save=()=>tg.CloudStorage.setItem('s',JSON.stringify(state))<br>const load=()=>tg.CloudStorage.getItem('s',(e,v)=>v?state=JSON.parse(v):0)<br>// State: ${Object.keys(state).length} keys | Streak: ${state.streak}d</div>`;
+        function renderLiviPreview() {
+            const aiAnalysis = generateAIAnalysis();
+            const liviState = getLiviState(aiAnalysis.avgEnergy, aiAnalysis.completionRate, aiAnalysis.activeHabits);
+            
+            return `
+                <div class="section" style="text-align: center; padding: 40px 24px;">
+                    <div class="livi-circle" style="width: ${liviState.size}px; height: ${liviState.size}px; background-color: ${liviState.color}20; border: 2px solid ${liviState.color}; opacity: ${liviState.opacity}; box-shadow: ${liviState.glow}; margin: 0 auto;">
+                        <div class="livi-inner" style="width: ${liviState.innerSize}px; height: ${liviState.innerSize}px; background-color: ${liviState.color}40; border: 1px solid ${liviState.color};"></div>
+                    </div>
+                    <div style="margin-top: 24px; font-size: 20px; font-weight: bold; color: ${liviState.color};">${liviState.label}</div>
+                    <div style="margin-top: 8px; font-size: 14px; color: #666;">Твоё текущее состояние</div>
+                </div>
+            `;
         }
 
         function renderHabitModal() {
@@ -1227,7 +1242,7 @@
         function renderTabContent(completedTasks, currentRank, aiAnalysis) {
             if (state.activeTab === 'home') {
                 return `
-                    ${renderCompactCode()}
+                    ${renderLiviPreview()}
                     
                     <div class="grid-2">
                         <div class="stat-card card-hover" style="background-color: #0f0f0f;">
@@ -1249,6 +1264,37 @@
                             ${createSvg('award', currentRank.color)}
                             <div class="stat-value">${currentRank.icon}</div>
                             <div class="stat-label">${currentRank.title}</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2 class="section-title">Прогресс за неделю</h2>
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-size: 14px; color: #999;">Задачи</span>
+                                <span style="font-size: 14px; font-weight: bold;">${aiAnalysis.completionRate}%</span>
+                            </div>
+                            <div style="height: 8px; background-color: #2a2a2a; border-radius: 4px; overflow: hidden;">
+                                <div style="height: 100%; background: linear-gradient(90deg, ${colors.primary}, ${colors.accent3}); width: ${aiAnalysis.completionRate}%; border-radius: 4px; animation: progressFill 1s ease-out;"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-size: 14px; color: #999;">Привычки</span>
+                                <span style="font-size: 14px; font-weight: bold;">${Math.round((state.habits.filter(h => h.completed).length / Math.max(state.habits.length, 1)) * 100)}%</span>
+                            </div>
+                            <div style="height: 8px; background-color: #2a2a2a; border-radius: 4px; overflow: hidden;">
+                                <div style="height: 100%; background: linear-gradient(90deg, ${colors.accent2}, ${colors.secondary}); width: ${Math.round((state.habits.filter(h => h.completed).length / Math.max(state.habits.length, 1)) * 100)}%; border-radius: 4px; animation: progressFill 1s ease-out;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-size: 14px; color: #999;">Энергия</span>
+                                <span style="font-size: 14px; font-weight: bold;">${aiAnalysis.avgEnergy}%</span>
+                            </div>
+                            <div style="height: 8px; background-color: #2a2a2a; border-radius: 4px; overflow: hidden;">
+                                <div style="height: 100%; background: linear-gradient(90deg, ${colors.warning}, #FFD700); width: ${aiAnalysis.avgEnergy}%; border-radius: 4px; animation: progressFill 1s ease-out;"></div>
+                            </div>
                         </div>
                     </div>
 
