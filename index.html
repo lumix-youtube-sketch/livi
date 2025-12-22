@@ -21,7 +21,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ================= SIMPLIFIED ANIMATIONS ================= */
+        /* ================= ANIMATIONS ================= */
 
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -35,7 +35,7 @@
 
         @keyframes gentleFloat {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-3px); }
+            50% { transform: translateY(-5px); }
         }
 
         @keyframes blink {
@@ -43,16 +43,22 @@
             95% { opacity: 0; }
         }
 
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
         .fade-in { animation: fadeIn 0.2s ease-out; }
         .slide-up { animation: slideUp 0.2s ease-out; }
 
         .card-hover {
             cursor: pointer;
-            transition: opacity 0.1s ease;
+            transition: transform 0.2s ease, opacity 0.1s ease;
         }
 
         .card-hover:active {
             opacity: 0.7;
+            transform: scale(0.98);
         }
 
         .hidden { display: none !important; }
@@ -169,11 +175,12 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: opacity 0.1s;
+            transition: opacity 0.1s, transform 0.2s;
         }
 
         .btn:active {
             opacity: 0.7;
+            transform: scale(0.98);
         }
 
         .btn-primary {
@@ -204,6 +211,7 @@
             flex: 1;
             border-radius: 2px;
             background-color: #2a2a2a;
+            transition: background-color 0.3s;
         }
 
         .progress-bar.active {
@@ -222,7 +230,7 @@
             gap: 16px;
             cursor: pointer;
             margin-bottom: 12px;
-            transition: all 0.1s;
+            transition: all 0.2s;
         }
 
         .goal-button.selected {
@@ -231,7 +239,7 @@
         }
 
         .goal-button:active {
-            opacity: 0.7;
+            transform: scale(0.98);
         }
 
         .goal-icon {
@@ -296,11 +304,12 @@
             font-weight: bold;
             font-size: 18px;
             cursor: pointer;
-            transition: opacity 0.1s;
+            transition: transform 0.2s, opacity 0.1s;
         }
 
         .stat-badge:active {
             opacity: 0.7;
+            transform: scale(0.95);
         }
 
         .tabs {
@@ -322,7 +331,7 @@
             border-bottom: 2px solid transparent;
             white-space: nowrap;
             cursor: pointer;
-            transition: color 0.1s;
+            transition: color 0.2s, border-color 0.2s;
         }
 
         .tab.active {
@@ -347,11 +356,12 @@
             border-radius: 16px;
             padding: 20px;
             cursor: pointer;
-            transition: opacity 0.1s;
+            transition: transform 0.2s, opacity 0.1s;
         }
 
         .stat-card:active {
             opacity: 0.7;
+            transform: scale(0.98);
         }
 
         .stat-value {
@@ -393,11 +403,12 @@
             background-color: #0a0a0a;
             text-align: center;
             cursor: pointer;
-            transition: opacity 0.1s;
+            transition: transform 0.2s, opacity 0.1s;
         }
 
         .habit-card:active {
             opacity: 0.7;
+            transform: scale(0.98);
         }
 
         .habit-icon {
@@ -431,7 +442,7 @@
             justify-content: center;
             flex-shrink: 0;
             cursor: pointer;
-            transition: all 0.1s;
+            transition: all 0.2s;
         }
 
         .checkbox.checked {
@@ -440,7 +451,7 @@
         }
 
         .checkbox:active {
-            opacity: 0.7;
+            transform: scale(0.9);
         }
 
         .task-title {
@@ -487,7 +498,7 @@
             margin: 0 auto 24px;
         }
 
-        /* ================= LIVI CHARACTER WITH FACE ================= */
+        /* ================= LIVI CHARACTER ================= */
 
         .livi-compact {
             display: flex;
@@ -499,64 +510,124 @@
             margin-bottom: 16px;
         }
 
-        .livi-circle {
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .livi-character {
             position: relative;
-            animation: gentleFloat 4s ease-in-out infinite;
+            width: 80px;
+            height: 80px;
             flex-shrink: 0;
+            animation: gentleFloat 4s ease-in-out infinite;
         }
 
-        .livi-face {
-            position: absolute;
+        .livi-body {
             width: 100%;
             height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background-color: #8B9A9C;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .livi-face-bg {
+            position: absolute;
+            width: 70%;
+            height: 70%;
+            background-color: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .livi-antenna {
+            position: absolute;
+            width: 3px;
+            height: 15px;
+            background-color: #8B9A9C;
+            border-radius: 2px;
+        }
+
+        .livi-antenna.left {
+            top: -12px;
+            left: 25%;
+        }
+
+        .livi-antenna.right {
+            top: -12px;
+            right: 25%;
+        }
+
+        .livi-antenna-ball {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #8B9A9C;
+            border-radius: 50%;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .livi-ear {
+            position: absolute;
+            width: 20px;
+            height: 25px;
+            background-color: #7A8A8C;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .livi-ear.left {
+            left: -8px;
+        }
+
+        .livi-ear.right {
+            right: -8px;
         }
 
         .livi-eyes {
             position: absolute;
-            top: 35%;
-            width: 60%;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             display: flex;
-            justify-content: space-around;
+            gap: 15px;
+            z-index: 2;
         }
 
         .livi-eye {
             width: 8px;
-            height: 8px;
-            background-color: white;
+            height: 10px;
+            background-color: #8B9A9C;
             border-radius: 50%;
             animation: blink 5s infinite;
         }
 
         .livi-mouth {
             position: absolute;
-            bottom: 35%;
-            width: 30%;
+            bottom: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 10px;
+            border: 2px solid #8B9A9C;
+            border-top: none;
+            border-radius: 0 0 20px 20px;
+            z-index: 2;
+        }
+
+        .livi-mouth.neutral {
+            width: 15px;
             height: 2px;
-            background-color: white;
+            border: none;
+            background-color: #8B9A9C;
             border-radius: 2px;
         }
 
-        .livi-mouth.happy {
-            border-radius: 0 0 15px 15px;
-            height: 12px;
-            background: transparent;
-            border: 2px solid white;
-            border-top: none;
-        }
-
         .livi-mouth.sad {
-            border-radius: 15px 15px 0 0;
-            height: 12px;
-            background: transparent;
-            border: 2px solid white;
+            border: 2px solid #8B9A9C;
             border-bottom: none;
+            border-radius: 20px 20px 0 0;
         }
 
         .livi-info {
@@ -606,6 +677,12 @@
             align-items: center;
             height: 100%;
             justify-content: flex-end;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .bar-wrapper:hover {
+            transform: translateY(-2px);
         }
 
         .bar {
@@ -613,7 +690,23 @@
             background: linear-gradient(180deg, #8B9A9C 0%, #9CB3B5 100%);
             border-radius: 4px 4px 0 0;
             position: relative;
-            transition: height 0.3s ease;
+            transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: bold;
+            color: #8B9A9C;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .bar-wrapper:hover .bar-value {
+            opacity: 1;
         }
 
         .bar-label {
@@ -621,6 +714,59 @@
             font-size: 10px;
             color: #666;
             white-space: nowrap;
+        }
+
+        /* ================= CIRCULAR PROGRESS ================= */
+
+        .circular-progress-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        .circular-progress {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .circular-progress svg {
+            transform: rotate(-90deg);
+        }
+
+        .circular-progress-bg {
+            fill: none;
+            stroke: #2a2a2a;
+            stroke-width: 8;
+        }
+
+        .circular-progress-bar {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .circular-progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .circular-progress-value {
+            font-size: 20px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .circular-progress-label {
+            font-size: 10px;
+            color: #666;
+            display: block;
+            margin-top: 2px;
         }
 
         /* ================= CHALLENGE CARD ================= */
@@ -683,7 +829,7 @@
             height: 100%;
             background: linear-gradient(90deg, #D4AF7A 0%, #FFD700 100%);
             border-radius: 4px;
-            transition: width 0.3s ease;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .empty-state {
@@ -706,11 +852,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.1s;
+            transition: opacity 0.1s, transform 0.2s;
         }
 
         .delete-btn:active {
             opacity: 0.7;
+            transform: scale(0.95);
         }
 
         svg {
@@ -771,7 +918,18 @@
         .recommendation-text {
             font-size: 13px;
             line-height: 1.5;
-            flex: 1;
+        }
+
+        .countdown-timer {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background-color: rgba(139, 154, 156, 0.2);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #8B9A9C;
         }
     </style>
 </head>
@@ -795,36 +953,36 @@
 
         // Челленджи на каждый день (30 разных)
         const dailyChallenges = [
-            { title: '10 отжиманий', description: 'Сделай 10 отжиманий с правильной техникой', target: 10, unit: 'раз', category: 'Спорт', icon: '💪' },
-            { title: '20 приседаний', description: 'Выполни 20 глубоких приседаний', target: 20, unit: 'раз', category: 'Спорт', icon: '🦵' },
-            { title: 'Планка 60 секунд', description: 'Держи планку ровно минуту', target: 60, unit: 'сек', category: 'Спорт', icon: '⏱️' },
-            { title: 'Выпить 8 стаканов воды', description: 'Поддержи водный баланс организма', target: 8, unit: 'стаканов', category: 'Здоровье', icon: '💧' },
-            { title: 'Прочитать 10 страниц', description: 'Уделите время чтению книги', target: 10, unit: 'страниц', category: 'Обучение', icon: '📚' },
-            { title: 'Медитация 10 минут', description: 'Практика осознанности и релакса', target: 10, unit: 'минут', category: 'Осознанность', icon: '🧘' },
-            { title: '30 минут прогулки', description: 'Пройдись на свежем воздухе', target: 30, unit: 'минут', category: 'Спорт', icon: '🚶' },
-            { title: 'Написать 3 благодарности', description: 'За что ты благодарен сегодня?', target: 3, unit: 'записи', category: 'Осознанность', icon: '✨' },
-            { title: '50 прыжков на скакалке', description: 'Отличное кардио упражнение', target: 50, unit: 'раз', category: 'Спорт', icon: '🪢' },
-            { title: 'Растяжка 15 минут', description: 'Улучши гибкость тела', target: 15, unit: 'минут', category: 'Спорт', icon: '🤸' },
-            { title: 'Выучить 10 новых слов', description: 'На иностранном языке', target: 10, unit: 'слов', category: 'Обучение', icon: '🗣️' },
-            { title: 'Без соцсетей 2 часа', description: 'Цифровой детокс', target: 120, unit: 'минут', category: 'Продуктивность', icon: '📱' },
-            { title: 'Позвонить другу', description: 'Поддержи социальные связи', target: 1, unit: 'звонок', category: 'Социальное', icon: '☎️' },
-            { title: 'Съесть 5 порций овощей', description: 'Здоровое питание', target: 5, unit: 'порций', category: 'Здоровье', icon: '🥗' },
-            { title: 'Лечь спать до 23:00', description: 'Качественный сон важен', target: 1, unit: '', category: 'Здоровье', icon: '😴' },
-            { title: 'Убрать рабочее место', description: 'Порядок в пространстве', target: 1, unit: '', category: 'Продуктивность', icon: '🧹' },
-            { title: '15 минут йоги', description: 'Практика асан', target: 15, unit: 'минут', category: 'Спорт', icon: '🧘‍♀️' },
-            { title: 'Выполнить 3 главные задачи', description: 'Сфокусируйся на важном', target: 3, unit: 'задачи', category: 'Продуктивность', icon: '🎯' },
-            { title: 'Послушать подкаст', description: 'Обучение через аудио', target: 1, unit: 'эпизод', category: 'Обучение', icon: '🎧' },
-            { title: 'Приготовить здоровый завтрак', description: 'Начни день правильно', target: 1, unit: '', category: 'Здоровье', icon: '🍳' },
-            { title: 'Дыхательная практика 5 минут', description: 'Успокой нервную систему', target: 5, unit: 'минут', category: 'Осознанность', icon: '💨' },
-            { title: 'Написать цели на день', description: 'Планирование утром', target: 1, unit: '', category: 'Продуктивность', icon: '📝' },
-            { title: '100 прыжков', description: 'Энергичное упражнение', target: 100, unit: 'раз', category: 'Спорт', icon: '🦘' },
-            { title: 'Час без телефона', description: 'Осознанный отдых', target: 60, unit: 'минут', category: 'Осознанность', icon: '📵' },
-            { title: 'Выразить благодарность', description: 'Скажи спасибо кому-то', target: 1, unit: '', category: 'Социальное', icon: '💝' },
-            { title: '20 выпадов', description: 'На каждую ногу', target: 20, unit: 'раз', category: 'Спорт', icon: '🏋️' },
-            { title: 'Посмотреть обучающее видео', description: 'Узнай что-то новое', target: 1, unit: 'видео', category: 'Обучение', icon: '🎬' },
-            { title: 'Здоровый перекус', description: 'Фрукты или орехи', target: 1, unit: '', category: 'Здоровье', icon: '🍎' },
-            { title: 'Написать в дневник', description: 'Рефлексия дня', target: 1, unit: 'запись', category: 'Осознанность', icon: '📔' },
-            { title: 'Помочь кому-то', description: 'Доброе дело', target: 1, unit: '', category: 'Социальное', icon: '🤝' }
+            { title: '10 отжиманий', description: 'Сделай 10 отжиманий с правильной техникой', target: 10, unit: 'раз', category: 'Спорт' },
+            { title: '20 приседаний', description: 'Выполни 20 глубоких приседаний', target: 20, unit: 'раз', category: 'Спорт' },
+            { title: 'Планка 60 секунд', description: 'Держи планку ровно минуту', target: 60, unit: 'сек', category: 'Спорт' },
+            { title: 'Выпить 8 стаканов воды', description: 'Поддержи водный баланс организма', target: 8, unit: 'стаканов', category: 'Здоровье' },
+            { title: 'Прочитать 10 страниц', description: 'Уделите время чтению книги', target: 10, unit: 'страниц', category: 'Обучение' },
+            { title: 'Медитация 10 минут', description: 'Практика осознанности и релакса', target: 10, unit: 'минут', category: 'Осознанность' },
+            { title: '30 минут прогулки', description: 'Пройдись на свежем воздухе', target: 30, unit: 'минут', category: 'Спорт' },
+            { title: 'Написать 3 благодарности', description: 'За что ты благодарен сегодня?', target: 3, unit: 'записи', category: 'Осознанность' },
+            { title: '50 прыжков на скакалке', description: 'Отличное кардио упражнение', target: 50, unit: 'раз', category: 'Спорт' },
+            { title: 'Растяжка 15 минут', description: 'Улучши гибкость тела', target: 15, unit: 'минут', category: 'Спорт' },
+            { title: 'Выучить 10 новых слов', description: 'На иностранном языке', target: 10, unit: 'слов', category: 'Обучение' },
+            { title: 'Без соцсетей 2 часа', description: 'Цифровой детокс', target: 120, unit: 'минут', category: 'Продуктивность' },
+            { title: 'Позвонить другу', description: 'Поддержи социальные связи', target: 1, unit: 'звонок', category: 'Социальное' },
+            { title: 'Съесть 5 порций овощей', description: 'Здоровое питание', target: 5, unit: 'порций', category: 'Здоровье' },
+            { title: 'Лечь спать до 23:00', description: 'Качественный сон важен', target: 1, unit: '', category: 'Здоровье' },
+            { title: 'Убрать рабочее место', description: 'Порядок в пространстве', target: 1, unit: '', category: 'Продуктивность' },
+            { title: '15 минут йоги', description: 'Практика асан', target: 15, unit: 'минут', category: 'Спорт' },
+            { title: 'Выполнить 3 главные задачи', description: 'Сфокусируйся на важном', target: 3, unit: 'задачи', category: 'Продуктивность' },
+            { title: 'Послушать подкаст', description: 'Обучение через аудио', target: 1, unit: 'эпизод', category: 'Обучение' },
+            { title: 'Приготовить здоровый завтрак', description: 'Начни день правильно', target: 1, unit: '', category: 'Здоровье' },
+            { title: 'Дыхательная практика 5 минут', description: 'Успокой нервную систему', target: 5, unit: 'минут', category: 'Осознанность' },
+            { title: 'Написать цели на день', description: 'Планирование утром', target: 1, unit: '', category: 'Продуктивность' },
+            { title: '100 прыжков', description: 'Энергичное упражнение', target: 100, unit: 'раз', category: 'Спорт' },
+            { title: 'Час без телефона', description: 'Осознанный отдых', target: 60, unit: 'минут', category: 'Осознанность' },
+            { title: 'Выразить благодарность', description: 'Скажи спасибо кому-то', target: 1, unit: '', category: 'Социальное' },
+            { title: '20 выпадов', description: 'На каждую ногу', target: 20, unit: 'раз', category: 'Спорт' },
+            { title: 'Посмотреть обучающее видео', description: 'Узнай что-то новое', target: 1, unit: 'видео', category: 'Обучение' },
+            { title: 'Здоровый перекус', description: 'Фрукты или орехи', target: 1, unit: '', category: 'Здоровье' },
+            { title: 'Написать в дневник', description: 'Рефлексия дня', target: 1, unit: 'запись', category: 'Осознанность' },
+            { title: 'Помочь кому-то', description: 'Доброе дело', target: 1, unit: '', category: 'Социальное' }
         ];
 
         const getInitialState = () => ({
@@ -855,10 +1013,12 @@
             lastActiveDate: new Date().toDateString(),
             dailyChallenge: null,
             challengeProgress: 0,
+            challengeStartTime: null,
             weeklyStats: [75, 60, 85, 70, 90, 80, 65]
         });
 
         let state = getInitialState();
+        let countdownInterval = null;
         const tg = window.Telegram?.WebApp || { expand: () => {}, ready: () => {}, CloudStorage: null };
         tg.expand();
         tg.ready();
@@ -892,18 +1052,55 @@
         }
 
         function getDailyChallenge() {
-            const today = new Date().toDateString();
+            const now = new Date();
+            const today = now.toDateString();
+
+            // Проверяем, нужно ли обновить челлендж
             if (!state.dailyChallenge || state.dailyChallenge.date !== today) {
                 const dayIndex = Math.floor(Date.now() / 86400000) % dailyChallenges.length;
+                const challengeStartTime = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
                 state.dailyChallenge = {
                     ...dailyChallenges[dayIndex],
                     date: today,
                     completed: false
                 };
                 state.challengeProgress = 0;
+                state.challengeStartTime = challengeStartTime;
                 saveState();
             }
             return state.dailyChallenge;
+        }
+
+        function getTimeUntilNextChallenge() {
+            const now = new Date();
+            const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            const diff = tomorrow - now;
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            return { hours, minutes, seconds };
+        }
+
+        function startCountdown() {
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            countdownInterval = setInterval(() => {
+                const timeLeft = getTimeUntilNextChallenge();
+                const timerElement = document.getElementById('challengeTimer');
+
+                if (timerElement) {
+                    timerElement.textContent = `${String(timeLeft.hours).padStart(2, '0')}:${String(timeLeft.minutes).padStart(2, '0')}:${String(timeLeft.seconds).padStart(2, '0')}`;
+                }
+
+                // Проверяем, не пора ли обновить челлендж
+                if (timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0) {
+                    getDailyChallenge();
+                    render();
+                }
+            }, 1000);
         }
 
         function updateStreak() {
@@ -956,7 +1153,7 @@
                 innerSize: 55,
                 label: 'Процветающий',
                 mood: 'happy',
-                phrase: 'Отличная работа! Ты на высоте! 🌟'
+                phrase: 'Отличная работа! Ты на высоте!'
             };
             if (avgScore >= 70) return {
                 size: 75,
@@ -964,7 +1161,7 @@
                 innerSize: 52,
                 label: 'Стабильный',
                 mood: 'happy',
-                phrase: 'Хороший прогресс! Продолжай! 💪'
+                phrase: 'Хороший прогресс! Продолжай!'
             };
             if (avgScore >= 50) return {
                 size: 70,
@@ -972,7 +1169,7 @@
                 innerSize: 48,
                 label: 'Формирующийся',
                 mood: 'neutral',
-                phrase: 'Ты на правильном пути! 🌱'
+                phrase: 'Ты на правильном пути!'
             };
             return {
                 size: 65,
@@ -980,7 +1177,7 @@
                 innerSize: 45,
                 label: 'Зарождающийся',
                 mood: 'sad',
-                phrase: 'Начни с малого, все получится! 💫'
+                phrase: 'Начни с малого, все получится!'
             };
         }
 
@@ -1014,19 +1211,16 @@
             // Паттерны
             if (trend > 15) {
                 patterns.push({
-                    icon: '📈',
                     title: 'Восходящий тренд',
                     text: `Твоя продуктивность выросла на ${Math.round(trend)}% за неделю. Отличная динамика!`
                 });
             } else if (trend < -15) {
                 patterns.push({
-                    icon: '📉',
                     title: 'Снижение активности',
                     text: `Продуктивность упала на ${Math.abs(Math.round(trend))}%. Возможно, стоит пересмотреть нагрузку.`
                 });
             } else {
                 patterns.push({
-                    icon: '➡️',
                     title: 'Стабильная активность',
                     text: `Ты поддерживаешь стабильный темп. Средняя продуктивность: ${Math.round(weekAvg)}%`
                 });
@@ -1034,19 +1228,16 @@
 
             if (consistency >= 5) {
                 patterns.push({
-                    icon: '🎯',
                     title: 'Высокая консистентность',
                     text: `${consistency} из 7 дней недели были продуктивными (>60%). Продолжай в том же духе!`
                 });
             } else if (consistency >= 3) {
                 patterns.push({
-                    icon: '⚡',
                     title: 'Средняя консистентность',
                     text: `${consistency} продуктивных дней. Попробуй увеличить до 5 дней в неделю.`
                 });
             } else {
                 patterns.push({
-                    icon: '🌱',
                     title: 'Начальный этап',
                     text: `Всего ${consistency} продуктивных дней. Начни с малого - 3 дня в неделю.`
                 });
@@ -1055,14 +1246,12 @@
             // Детальные инсайты
             if (completionRate >= 80) {
                 insights.push({
-                    icon: '🏆',
                     title: 'Превосходная продуктивность',
                     text: `Ты выполняешь ${Math.round(completionRate)}% задач. Это топ-10% пользователей!`
                 });
                 recommendations.push('Попробуй добавить более амбициозные цели для дальнейшего роста');
             } else if (completionRate >= 60) {
                 insights.push({
-                    icon: '✅',
                     title: 'Хорошая продуктивность',
                     text: `${Math.round(completionRate)}% выполненных задач - это отличный результат с резервом для роста.`
                 });
@@ -1070,7 +1259,6 @@
                 recommendations.push('Попробуй метод "Съешь лягушку" - делай самое сложное утром');
             } else if (completionRate >= 40) {
                 insights.push({
-                    icon: '📊',
                     title: 'Средняя продуктивность',
                     text: `${Math.round(completionRate)}% - есть потенциал для улучшения.`
                 });
@@ -1079,7 +1267,6 @@
                 recommendations.push('Устанавливай конкретные дедлайны для каждой задачи');
             } else {
                 insights.push({
-                    icon: '🌱',
                     title: 'Начальный этап',
                     text: `${Math.round(completionRate)}% выполнения - начни с простых задач.`
                 });
@@ -1091,20 +1278,17 @@
             // Анализ привычек
             if (habitRate >= 75) {
                 insights.push({
-                    icon: '💎',
                     title: 'Отличные привычки',
                     text: `${activeHabits} из ${state.habits.length} привычек активны (${Math.round(habitRate)}%). Ты формируешь сильный фундамент!`
                 });
             } else if (habitRate >= 50) {
                 insights.push({
-                    icon: '🌟',
                     title: 'Хороший прогресс с привычками',
                     text: `${Math.round(habitRate)}% активных привычек. Продолжай в том же духе!`
                 });
                 recommendations.push('Выбери одну привычку и сфокусируйся на ней неделю');
             } else if (habitRate > 0) {
                 insights.push({
-                    icon: '🌱',
                     title: 'Формирование привычек',
                     text: `Привычки только начинают формироваться (${Math.round(habitRate)}%).`
                 });
@@ -1112,7 +1296,6 @@
                 recommendations.push('Начни с самой простой привычки из списка');
             } else {
                 insights.push({
-                    icon: '💡',
                     title: 'Время начать',
                     text: 'Пора начать формировать полезные привычки.'
                 });
@@ -1123,20 +1306,17 @@
             // Анализ стрика
             if (state.streak >= 30) {
                 insights.push({
-                    icon: '🔥',
                     title: 'Впечатляющий стрик',
                     text: `${state.streak} дней подряд! Ты демонстрируешь настоящую дисциплину и силу воли.`
                 });
             } else if (state.streak >= 7) {
                 insights.push({
-                    icon: '⚡',
                     title: 'Отличный стрик',
                     text: `${state.streak} дней! Первая неделя - самая сложная, ты справился.`
                 });
                 recommendations.push('Продолжай развивать momentum - не прерывай цепочку');
             } else if (state.streak >= 3) {
                 insights.push({
-                    icon: '🌟',
                     title: 'Хорошее начало',
                     text: `${state.streak} дня подряд. Первые дни закладывают фундамент.`
                 });
@@ -1148,7 +1328,6 @@
             // Анализ челленджа
             if (state.dailyChallenge?.completed) {
                 insights.push({
-                    icon: '🎯',
                     title: 'Челлендж выполнен',
                     text: 'Ты выполнил ежедневный челлендж! Это повышает мотивацию и дисциплину.'
                 });
@@ -1215,8 +1394,10 @@
                         ${stats.map((value, i) => {
                             const height = (value / 100) * 100;
                             return `
-                                <div class="bar-wrapper">
-                                    <div class="bar" style="height: ${height}%;"></div>
+                                <div class="bar-wrapper" data-day="${i}">
+                                    <div class="bar" style="height: ${height}%;">
+                                        <div class="bar-value">${value}%</div>
+                                    </div>
                                     <div class="bar-label">${days[i]}</div>
                                 </div>
                             `;
@@ -1226,15 +1407,43 @@
             `;
         }
 
+        function renderCircularProgress(value, label, color) {
+            const radius = 40;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (value / 100) * circumference;
+
+            return `
+                <div class="circular-progress">
+                    <svg width="100" height="100">
+                        <circle class="circular-progress-bg" cx="50" cy="50" r="${radius}"/>
+                        <circle class="circular-progress-bar" cx="50" cy="50" r="${radius}"
+                            style="stroke: ${color}; stroke-dasharray: ${circumference}; stroke-dashoffset: ${offset};"/>
+                    </svg>
+                    <div class="circular-progress-text">
+                        <span class="circular-progress-value" style="color: ${color};">${value}%</span>
+                        <span class="circular-progress-label">${label}</span>
+                    </div>
+                </div>
+            `;
+        }
+
         function renderLiviCompact(liviState) {
-            const mouthClass = liviState.mood === 'happy' ? 'happy' :
-                              liviState.mood === 'sad' ? 'sad' : '';
+            const mouthClass = liviState.mood === 'happy' ? '' :
+                              liviState.mood === 'sad' ? 'sad' : 'neutral';
 
             return `
                 <div class="livi-compact">
-                    <div class="livi-circle" style="width: ${liviState.size}px; height: ${liviState.size}px; background-color: ${liviState.color}20; border: 2px solid ${liviState.color};">
-                        <div style="width: ${liviState.innerSize}px; height: ${liviState.innerSize}px; background-color: ${liviState.color}40; border: 1px solid ${liviState.color}; border-radius: 50%;"></div>
-                        <div class="livi-face">
+                    <div class="livi-character">
+                        <div class="livi-body" style="background-color: ${liviState.color};">
+                            <div class="livi-antenna left">
+                                <div class="livi-antenna-ball"></div>
+                            </div>
+                            <div class="livi-antenna right">
+                                <div class="livi-antenna-ball"></div>
+                            </div>
+                            <div class="livi-ear left"></div>
+                            <div class="livi-ear right"></div>
+                            <div class="livi-face-bg"></div>
                             <div class="livi-eyes">
                                 <div class="livi-eye"></div>
                                 <div class="livi-eye"></div>
@@ -1253,17 +1462,24 @@
         function renderDailyChallenge() {
             const challenge = getDailyChallenge();
             const progress = (state.challengeProgress / challenge.target) * 100;
+            const timeLeft = getTimeUntilNextChallenge();
 
             return `
                 <div class="challenge-card">
                     <div class="challenge-header">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 24px;">${challenge.icon}</span>
-                            <div class="challenge-title">${challenge.title}</div>
+                            <div class="challenge-title">Челлендж дня</div>
                         </div>
-                        <div class="challenge-badge">+50</div>
+                        <div class="countdown-timer">
+                            ${createSvg('clock', colors.primary)}
+                            <span id="challengeTimer">${String(timeLeft.hours).padStart(2, '0')}:${String(timeLeft.minutes).padStart(2, '0')}:${String(timeLeft.seconds).padStart(2, '0')}</span>
+                        </div>
                     </div>
+                    <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">${challenge.title}</div>
                     <div class="challenge-description">${challenge.description}</div>
+                    <div style="display: inline-block; padding: 4px 12px; background-color: rgba(139, 154, 156, 0.2); border-radius: 8px; font-size: 12px; color: #999; margin-bottom: 16px;">
+                        ${challenge.category}
+                    </div>
                     <div class="challenge-progress">
                         <div class="progress-label">
                             <span>Прогресс</span>
@@ -1275,11 +1491,11 @@
                     </div>
                     ${!challenge.completed ? `
                         <button class="btn btn-primary" id="completeChallenge" style="margin-top: 12px;">
-                            ${progress >= 100 ? 'Завершить челлендж 🎉' : 'Обновить прогресс'}
+                            ${progress >= 100 ? 'Завершить челлендж' : 'Обновить прогресс'}
                         </button>
                     ` : `
                         <div style="text-align: center; padding: 12px; background-color: rgba(165, 189, 161, 0.2); border-radius: 12px; margin-top: 12px;">
-                            <strong style="color: ${colors.accent3};">✓ Челлендж выполнен!</strong>
+                            <strong style="color: ${colors.accent3};">✓ Челлендж выполнен! +50 баллов</strong>
                         </div>
                     `}
                 </div>
@@ -1298,12 +1514,13 @@
             updateStreak();
             app.innerHTML = renderMain();
             attachMainListeners();
+            startCountdown();
         }
 
         function renderOnboarding() {
             const steps = [
                 {
-                    title: 'Добро пожаловать в livi! 👋',
+                    title: 'Добро пожаловать в livi',
                     subtitle: 'Давайте настроим приложение под ваши цели',
                     content: `
                         <div style="text-align: center;">
@@ -1376,7 +1593,7 @@
                     `
                 },
                 {
-                    title: 'Последний шаг!',
+                    title: 'Последний шаг',
                     subtitle: 'Какая ваша главная цель на ближайший месяц?',
                     content: `
                         <div>
@@ -1503,9 +1720,9 @@
                         </div>
                     </div>
                     <div class="tabs">
-                        ${['home', 'tasks', 'analysis'].map(tab => `
+                        ${['home', 'challenge', 'tasks', 'analysis'].map(tab => `
                             <div class="tab ${state.activeTab === tab ? 'active' : ''}" data-tab="${tab}">
-                                ${tab === 'home' ? 'Главная' : tab === 'tasks' ? 'Задачи' : 'Анализ'}
+                                ${tab === 'home' ? 'Главная' : tab === 'challenge' ? 'Челлендж' : tab === 'tasks' ? 'Задачи' : 'Анализ'}
                             </div>
                         `).join('')}
                     </div>
@@ -1523,8 +1740,6 @@
 
                 return `
                     ${renderLiviCompact(liviState)}
-
-                    ${renderDailyChallenge()}
 
                     ${renderWeeklyChart(state.weeklyStats)}
 
@@ -1571,7 +1786,7 @@
                         ` : `
                             <div class="empty-state">
                                 <div class="empty-state-icon">🌱</div>
-                                <p>Добавьте первую привычку!</p>
+                                <p>Добавьте первую привычку</p>
                             </div>
                         `}
                     </div>
@@ -1591,15 +1806,33 @@
                                 </div>
                             `).join('')}
                             ${state.tasks.length > 4 ? `
-                                <button class="btn btn-secondary" id="goToTasks" style="margin-top: 16px;">Все задачи →</button>
+                                <button class="btn btn-secondary" id="goToTasks" style="margin-top: 16px;">Все задачи</button>
                             ` : ''}
                         ` : `
                             <div class="empty-state">
                                 <div class="empty-state-icon">✨</div>
-                                <p>Начните день с первой задачи!</p>
+                                <p>Начните день с первой задачи</p>
                                 <button class="btn btn-primary" id="goToTasks" style="margin-top: 16px;">Добавить задачу</button>
                             </div>
                         `}
+                    </div>
+                `;
+            } else if (state.activeTab === 'challenge') {
+                return `
+                    <div class="section">
+                        <h2 class="section-title">Ежедневный Челлендж</h2>
+                        <p style="font-size: 14px; color: #999; margin-bottom: 24px;">
+                            Выполняй ежедневные челленджи, чтобы получать бонусные баллы и развивать новые навыки. Каждый день - новое испытание!
+                        </p>
+                        ${renderDailyChallenge()}
+                    </div>
+
+                    <div class="section">
+                        <h2 class="section-title">История челленджей</h2>
+                        <div style="text-align: center; padding: 40px 20px; color: #666;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                            <p>История выполненных челленджей появится здесь</p>
+                        </div>
                     </div>
                 `;
             } else if (state.activeTab === 'tasks') {
@@ -1650,15 +1883,10 @@
                             </div>
                         </div>
 
-                        <div class="grid-2" style="margin-bottom: 24px;">
-                            <div style="padding: 20px; border-radius: 12px; background-color: rgba(139, 154, 156, 0.15); text-align: center;">
-                                <div style="font-size: 36px; font-weight: bold; margin-bottom: 4px;">${aiAnalysis.completionRate}%</div>
-                                <div style="font-size: 12px; font-weight: 500; color: #999;">Выполнение задач</div>
-                            </div>
-                            <div style="padding: 20px; border-radius: 12px; background-color: rgba(165, 189, 161, 0.15); text-align: center;">
-                                <div style="font-size: 36px; font-weight: bold; margin-bottom: 4px;">${aiAnalysis.habitRate}%</div>
-                                <div style="font-size: 12px; font-weight: 500; color: #999;">Активность привычек</div>
-                            </div>
+                        <div class="circular-progress-container">
+                            ${renderCircularProgress(aiAnalysis.completionRate, 'Задачи', colors.primary)}
+                            ${renderCircularProgress(aiAnalysis.habitRate, 'Привычки', colors.accent3)}
+                            ${renderCircularProgress(aiAnalysis.avgEnergy, 'Энергия', colors.warning)}
                         </div>
 
                         ${renderWeeklyChart(state.weeklyStats)}
@@ -1678,10 +1906,7 @@
                             </h3>
                             ${aiAnalysis.patterns.map(pattern => `
                                 <div class="insight-card">
-                                    <div class="insight-title">
-                                        <span style="font-size: 20px;">${pattern.icon}</span>
-                                        ${pattern.title}
-                                    </div>
+                                    <div class="insight-title">${pattern.title}</div>
                                     <div class="insight-text">${pattern.text}</div>
                                 </div>
                             `).join('')}
@@ -1694,10 +1919,7 @@
                             </h3>
                             ${aiAnalysis.insights.map(insight => `
                                 <div class="insight-card">
-                                    <div class="insight-title">
-                                        <span style="font-size: 20px;">${insight.icon}</span>
-                                        ${insight.title}
-                                    </div>
+                                    <div class="insight-title">${insight.title}</div>
                                     <div class="insight-text">${insight.text}</div>
                                 </div>
                             `).join('')}
@@ -1718,7 +1940,7 @@
 
                         ${state.userInfo.mainGoal ? `
                             <div style="padding: 16px; border-radius: 12px; background-color: rgba(212, 175, 122, 0.15); border: 1px solid rgba(212, 175, 122, 0.3);">
-                                <p style="font-size: 12px; font-weight: bold; color: ${colors.warning}; margin-bottom: 8px;">🎯 ВАША ГЛАВНАЯ ЦЕЛЬ</p>
+                                <p style="font-size: 12px; font-weight: bold; color: ${colors.warning}; margin-bottom: 8px;">ВАША ГЛАВНАЯ ЦЕЛЬ</p>
                                 <p style="font-size: 14px;">${state.userInfo.mainGoal}</p>
                             </div>
                         ` : ''}
@@ -1846,6 +2068,7 @@
             });
 
             taskChecks.forEach(check => {
+                check.addEventListener('click',            taskChecks.forEach(check => {
                 check.addEventListener('click', async () => {
                     const taskId = parseInt(check.dataset.taskCheck);
                     const task = state.tasks.find(t => t.id === taskId);
@@ -1854,11 +2077,9 @@
                         task.completed = !task.completed;
 
                         if (task.completed) {
-                            state.totalPoints += task.points;
-                            state.weeklyStats[6] = Math.min(100, state.weeklyStats[6] + 5);
+                            state.totalPoints += task.points || 5;
                         } else {
-                            state.totalPoints = Math.max(0, state.totalPoints - task.points);
-                            state.weeklyStats[6] = Math.max(0, state.weeklyStats[6] - 5);
+                            state.totalPoints = Math.max(0, state.totalPoints - (task.points || 5));
                         }
 
                         await saveState();
@@ -1867,41 +2088,29 @@
                 });
             });
 
-            if (addTaskBtn && newTaskInput) {
-                const addTask = async () => {
+            if (addTaskBtn) {
+                addTaskBtn.addEventListener('click', async () => {
                     const title = newTaskInput.value.trim();
-                    if (title) {
-                        state.tasks.push({
-                            id: Date.now(),
-                            title,
-                            completed: false,
-                            points: 5,
-                            category: 'Общее',
-                            createdAt: new Date().toISOString()
-                        });
-                        state.newTask = '';
-                        await saveState();
-                        render();
-                    }
-                };
+                    if (!title) return;
 
-                addTaskBtn.addEventListener('click', addTask);
-                newTaskInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') addTask();
+                    state.tasks.push({
+                        id: Date.now(),
+                        title,
+                        completed: false,
+                        points: 5,
+                        category: 'Общее'
+                    });
+
+                    newTaskInput.value = '';
+                    await saveState();
+                    render();
                 });
             }
 
             deleteButtons.forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const taskId = parseInt(btn.dataset.delete);
-                    const task = state.tasks.find(t => t.id === taskId);
-
-                    if (task && task.completed) {
-                        state.totalPoints = Math.max(0, state.totalPoints - task.points);
-                    }
-
-                    state.tasks = state.tasks.filter(t => t.id !== taskId);
+                btn.addEventListener('click', async () => {
+                    const id = parseInt(btn.dataset.delete);
+                    state.tasks = state.tasks.filter(t => t.id !== id);
                     await saveState();
                     render();
                 });
@@ -1917,52 +2126,37 @@
             if (completeChallengeBtn) {
                 completeChallengeBtn.addEventListener('click', async () => {
                     const challenge = state.dailyChallenge;
+                    if (!challenge || challenge.completed) return;
+
+                    state.challengeProgress += 1;
+
                     if (state.challengeProgress >= challenge.target) {
                         challenge.completed = true;
                         state.totalPoints += 50;
-                        state.weeklyStats[6] = Math.min(100, state.weeklyStats[6] + 10);
-                        await saveState();
-                        render();
-                    } else {
-                        const newProgress = prompt(`Введите прогресс (максимум ${challenge.target} ${challenge.unit}):`, state.challengeProgress);
-                        if (newProgress !== null) {
-                            state.challengeProgress = Math.min(parseInt(newProgress) || 0, challenge.target);
-                            await saveState();
-                            render();
-                        }
                     }
+
+                    await saveState();
+                    render();
                 });
             }
         }
 
-        async function resetDailyHabits() {
-            const today = new Date().toDateString();
-
-            state.habits.forEach(habit => {
-                if (habit.lastCompletedDate !== today) {
-                    habit.completed = false;
-                }
-            });
-
-            await saveState();
-        }
-
         async function init() {
             await loadState();
-            await resetDailyHabits();
             getDailyChallenge();
             render();
 
-            setTimeout(() => {
-                const loadingScreen = document.getElementById('loadingScreen');
-                if (loadingScreen) {
-                    loadingScreen.classList.add('fade-out');
-                    setTimeout(() => loadingScreen.remove(), 300);
-                }
-            }, 800);
+            const loading = document.getElementById('loadingScreen');
+            if (loading) {
+                setTimeout(() => {
+                    loading.classList.add('fade-out');
+                    setTimeout(() => loading.remove(), 300);
+                }, 500);
+            }
         }
 
         init();
     </script>
 </body>
 </html>
+
