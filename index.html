@@ -21,24 +21,49 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ================= LOADING SCREEN ================= */
+        /* ================= SIMPLIFIED ANIMATIONS ================= */
         
-        @keyframes loadingPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.15); opacity: 0.7; }
-        }
-
-        @keyframes loadingFade {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0; }
+            from { transform: translateY(20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
 
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes blink {
+            0%, 90%, 100% { opacity: 1; }
+            95% { opacity: 0; }
+        }
+
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        
+        .card-hover {
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        
+        .card-hover:active {
+            transform: scale(0.98);
+        }
+
+        .hidden { display: none !important; }
+
+        /* ================= LOADING SCREEN ================= */
+        
         .loading-screen {
             position: fixed;
             inset: 0;
@@ -63,113 +88,6 @@
             font-weight: bold;
             color: #8B9A9C;
             margin-bottom: 24px;
-            animation: loadingPulse 2s ease-in-out infinite;
-        }
-
-        .loading-text {
-            font-size: 16px;
-            color: #999;
-            animation: loadingFade 2s ease-in-out infinite;
-        }
-
-        .loading-spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid #2a2a2a;
-            border-top-color: #8B9A9C;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-top: 32px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* ================= ENHANCED ANIMATIONS ================= */
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes gentlePulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.02); opacity: 0.95; }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(139, 154, 156, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(139, 154, 156, 0.6); }
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
-        @keyframes scaleIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes progressFill {
-            from { width: 0%; }
-            to { width: var(--progress); }
-        }
-
-        .fade-in { animation: fadeIn 0.6s ease-out; }
-        .slide-in { animation: slideIn 0.5s ease-out; }
-        .gentle-pulse { animation: gentlePulse 3s ease-in-out infinite; }
-        .float { animation: float 3s ease-in-out infinite; }
-        .glow { animation: glow 2s ease-in-out infinite; }
-        .bounce { animation: bounce 0.5s ease-out; }
-        .scale-in { animation: scaleIn 0.3s ease-out; }
-        
-        .card-hover {
-            cursor: pointer;
-        }
-        
-        .card-hover:active {
-            transform: scale(0.97);
-        }
-
-        .shimmer {
-            background: linear-gradient(90deg, transparent, rgba(139, 154, 156, 0.3), transparent);
-            background-size: 1000px 100%;
-            animation: shimmer 2s infinite;
-        }
-
-        .hidden { display: none !important; }
-
-        /* ================= COMPACT CODE BLOCK ================= */
-        
-        .code-compact {
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            background: #0a0a0a;
-            border: 1px solid #2a2a2a;
-            border-radius: 8px;
-            padding: 12px;
-            margin: 16px 0;
-            overflow-x: auto;
-            color: #8B9A9C;
-            line-height: 1.4;
         }
 
         /* ================= UI COMPONENTS ================= */
@@ -197,7 +115,6 @@
             font-weight: bold;
             color: #8B9A9C;
             margin-bottom: 12px;
-            animation: float 3s ease-in-out infinite;
         }
 
         .logo-subtitle {
@@ -210,7 +127,6 @@
             border: 1px solid #2a2a2a;
             border-radius: 24px;
             padding: 32px;
-            animation: slideUp 0.6s ease-out;
         }
 
         .form-group {
@@ -234,11 +150,11 @@
             color: white;
             font-size: 16px;
             outline: none;
+            transition: border-color 0.2s;
         }
 
         input:focus, textarea:focus {
             border-color: #8B9A9C;
-            box-shadow: 0 0 0 3px rgba(139, 154, 156, 0.1);
         }
 
         textarea {
@@ -258,26 +174,11 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            position: relative;
-            overflow: hidden;
+            transition: opacity 0.2s;
         }
 
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:active::before {
-            width: 300px;
-            height: 300px;
+        .btn:active {
+            opacity: 0.8;
         }
 
         .btn-primary {
@@ -308,12 +209,10 @@
             flex: 1;
             border-radius: 2px;
             background-color: #2a2a2a;
-            overflow: hidden;
         }
 
         .progress-bar.active {
             background-color: #8B9A9C;
-            animation: progressFill 0.5s ease-out;
         }
 
         .goal-button {
@@ -328,20 +227,12 @@
             gap: 16px;
             cursor: pointer;
             margin-bottom: 12px;
-            animation: fadeIn 0.4s ease-out backwards;
+            transition: all 0.2s;
         }
-
-        .goal-button:nth-child(1) { animation-delay: 0.1s; }
-        .goal-button:nth-child(2) { animation-delay: 0.15s; }
-        .goal-button:nth-child(3) { animation-delay: 0.2s; }
-        .goal-button:nth-child(4) { animation-delay: 0.25s; }
-        .goal-button:nth-child(5) { animation-delay: 0.3s; }
-        .goal-button:nth-child(6) { animation-delay: 0.35s; }
 
         .goal-button.selected {
             background-color: rgba(139, 154, 156, 0.2);
             border-color: rgba(139, 154, 156, 0.4);
-            transform: scale(1.02);
         }
 
         .goal-icon {
@@ -378,12 +269,6 @@
             backdrop-filter: blur(20px);
             border-bottom: 1px solid #2a2a2a;
             padding: 16px 20px;
-            animation: slideDown 0.4s ease-out;
-        }
-
-        @keyframes slideDown {
-            from { transform: translateY(-100%); }
-            to { transform: translateY(0); }
         }
 
         .header-top {
@@ -412,6 +297,11 @@
             font-weight: bold;
             font-size: 18px;
             cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        .stat-badge:active {
+            transform: scale(0.95);
         }
 
         .tabs {
@@ -433,28 +323,12 @@
             border-bottom: 2px solid transparent;
             white-space: nowrap;
             cursor: pointer;
-            position: relative;
+            transition: color 0.2s;
         }
 
         .tab.active {
             color: white;
             border-bottom-color: #8B9A9C;
-        }
-
-        .tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #8B9A9C;
-            animation: expandWidth 0.3s ease-out;
-        }
-
-        @keyframes expandWidth {
-            from { width: 0; left: 50%; }
-            to { width: 100%; left: 0; }
         }
 
         .content {
@@ -474,18 +348,11 @@
             border-radius: 16px;
             padding: 20px;
             cursor: pointer;
-            animation: fadeIn 0.5s ease-out backwards;
+            transition: transform 0.15s;
         }
 
-        .stat-card:nth-child(1) { animation-delay: 0.1s; }
-        .stat-card:nth-child(2) { animation-delay: 0.15s; }
-        .stat-card:nth-child(3) { animation-delay: 0.2s; }
-        .stat-card:nth-child(4) { animation-delay: 0.25s; }
-
-        .stat-icon {
-            width: 28px;
-            height: 28px;
-            margin-bottom: 12px;
+        .stat-card:active {
+            transform: scale(0.98);
         }
 
         .stat-value {
@@ -506,7 +373,6 @@
             border-radius: 16px;
             padding: 24px;
             margin-top: 24px;
-            animation: fadeIn 0.6s ease-out;
         }
 
         .section-title {
@@ -528,18 +394,12 @@
             background-color: #0a0a0a;
             text-align: center;
             cursor: pointer;
-            animation: scaleIn 0.4s ease-out backwards;
-            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+            transition: all 0.2s;
         }
 
         .habit-card:active {
             transform: scale(0.95);
         }
-
-        .habit-card:nth-child(1) { animation-delay: 0.1s; }
-        .habit-card:nth-child(2) { animation-delay: 0.15s; }
-        .habit-card:nth-child(3) { animation-delay: 0.2s; }
-        .habit-card:nth-child(4) { animation-delay: 0.25s; }
 
         .habit-icon {
             width: 48px;
@@ -560,13 +420,7 @@
             background-color: #0a0a0a;
             border-radius: 12px;
             margin-bottom: 12px;
-            animation: slideIn 0.4s ease-out backwards;
         }
-
-        .task-item:nth-child(1) { animation-delay: 0.05s; }
-        .task-item:nth-child(2) { animation-delay: 0.1s; }
-        .task-item:nth-child(3) { animation-delay: 0.15s; }
-        .task-item:nth-child(4) { animation-delay: 0.2s; }
 
         .checkbox {
             width: 24px;
@@ -578,12 +432,12 @@
             justify-content: center;
             flex-shrink: 0;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
         .checkbox.checked {
             background-color: #8B9A9C;
             border-color: #8B9A9C;
-            animation: bounce 0.5s ease-out;
         }
 
         .task-title {
@@ -609,7 +463,6 @@
             display: flex;
             align-items: flex-end;
             background-color: rgba(0, 0, 0, 0.8);
-            animation: fadeIn 0.3s ease-out;
         }
 
         .modal-content {
@@ -621,7 +474,6 @@
             padding: 32px;
             max-height: 85vh;
             overflow-y: auto;
-            animation: slideUp 0.4s ease-out;
         }
 
         .modal-handle {
@@ -632,6 +484,8 @@
             margin: 0 auto 24px;
         }
 
+        /* ================= LIVI CHARACTER WITH FACE ================= */
+        
         .livi-character {
             display: flex;
             flex-direction: column;
@@ -646,30 +500,184 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            animation: float 3s ease-in-out infinite, glow 2s ease-in-out infinite;
+            animation: gentleFloat 4s ease-in-out infinite;
         }
 
-        .livi-inner {
+        .livi-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .livi-eyes {
+            position: absolute;
+            top: 35%;
+            width: 60%;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .livi-eye {
+            width: 10px;
+            height: 10px;
+            background-color: white;
             border-radius: 50%;
-            animation: float 3s ease-in-out infinite 0.5s;
+            animation: blink 5s infinite;
         }
 
-        .livi-label {
-            margin-top: 24px;
-            font-size: 18px;
+        .livi-mouth {
+            position: absolute;
+            bottom: 35%;
+            width: 30%;
+            height: 3px;
+            background-color: white;
+            border-radius: 2px;
+        }
+
+        .livi-mouth.happy {
+            border-radius: 0 0 20px 20px;
+            height: 15px;
+            background: transparent;
+            border: 3px solid white;
+            border-top: none;
+        }
+
+        .livi-mouth.sad {
+            border-radius: 20px 20px 0 0;
+            height: 15px;
+            background: transparent;
+            border: 3px solid white;
+            border-bottom: none;
+        }
+
+        .livi-speech {
+            margin-top: 16px;
+            padding: 12px 20px;
+            background-color: #0a0a0a;
+            border-radius: 16px;
+            font-size: 14px;
+            text-align: center;
+            max-width: 280px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* ================= CHARTS ================= */
+        
+        .chart-container {
+            background-color: #0a0a0a;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .chart-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #999;
+            margin-bottom: 12px;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 120px;
+            gap: 8px;
+        }
+
+        .bar {
+            flex: 1;
+            background: linear-gradient(180deg, #8B9A9C 0%, #9CB3B5 100%);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: height 0.5s ease;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        /* ================= CHALLENGE CARD ================= */
+        
+        .challenge-card {
+            background: linear-gradient(135deg, rgba(139, 154, 156, 0.2) 0%, rgba(156, 179, 181, 0.1) 100%);
+            border: 1px solid rgba(139, 154, 156, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .challenge-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .challenge-title {
+            font-size: 16px;
             font-weight: bold;
         }
 
-        .livi-desc {
-            margin-top: 8px;
+        .challenge-badge {
+            padding: 4px 12px;
+            background-color: rgba(212, 175, 122, 0.3);
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #D4AF7A;
+        }
+
+        .challenge-description {
             font-size: 14px;
+            color: #999;
+            margin-bottom: 16px;
+        }
+
+        .challenge-progress {
+            margin-bottom: 12px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .progress-track {
+            height: 8px;
+            background-color: #2a2a2a;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #D4AF7A 0%, #FFD700 100%);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
             color: #666;
         }
 
-        input[type="time"] {
-            text-align: center;
-            font-weight: bold;
-            font-size: 18px;
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
         }
 
         .delete-btn {
@@ -681,19 +689,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: opacity 0.2s;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #666;
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            animation: float 3s ease-in-out infinite;
+        .delete-btn:active {
+            opacity: 0.7;
         }
 
         svg {
@@ -706,11 +706,8 @@
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-logo">livi</div>
-        <div class="loading-text">Загружаем ваш прогресс...</div>
-        <div class="loading-spinner"></div>
     </div>
 
     <div id="app"></div>
@@ -725,6 +722,40 @@
             accent3: '#A5BDA1',
             warning: '#D4AF7A',
         };
+
+        // Челленджи на каждый день
+        const dailyChallenges = [
+            { title: '10 отжиманий', description: 'Сделай 10 отжиманий с правильной техникой', target: 10, unit: 'раз', category: 'Спорт', icon: '💪' },
+            { title: '20 приседаний', description: 'Выполни 20 глубоких приседаний', target: 20, unit: 'раз', category: 'Спорт', icon: '🦵' },
+            { title: 'Планка 60 секунд', description: 'Держи планку ровно минуту', target: 60, unit: 'сек', category: 'Спорт', icon: '⏱️' },
+            { title: 'Выпить 8 стаканов воды', description: 'Поддержи водный баланс организма', target: 8, unit: 'стаканов', category: 'Здоровье', icon: '💧' },
+            { title: 'Прочитать 10 страниц', description: 'Уделите время чтению книги', target: 10, unit: 'страниц', category: 'Обучение', icon: '📚' },
+            { title: 'Медитация 10 минут', description: 'Практика осознанности и релакса', target: 10, unit: 'минут', category: 'Осознанность', icon: '🧘' },
+            { title: '30 минут прогулки', description: 'Пройдись на свежем воздухе', target: 30, unit: 'минут', category: 'Спорт', icon: '🚶' },
+            { title: 'Написать 3 благодарности', description: 'За что ты благодарен сегодня?', target: 3, unit: 'записи', category: 'Осознанность', icon: '✨' },
+            { title: '50 прыжков на скакалке', description: 'Отличное кардио упражнение', target: 50, unit: 'раз', category: 'Спорт', icon: '🪢' },
+            { title: 'Растяжка 15 минут', description: 'Улучши гибкость тела', target: 15, unit: 'минут', category: 'Спорт', icon: '🤸' },
+            { title: 'Выучить 10 новых слов', description: 'На иностранном языке', target: 10, unit: 'слов', category: 'Обучение', icon: '🗣️' },
+            { title: 'Без соцсетей 2 часа', description: 'Цифровой детокс', target: 120, unit: 'минут', category: 'Продуктивность', icon: '📱' },
+            { title: 'Позвонить другу', description: 'Поддержи социальные связи', target: 1, unit: 'звонок', category: 'Социальное', icon: '☎️' },
+            { title: 'Съесть 5 порций овощей', description: 'Здоровое питание', target: 5, unit: 'порций', category: 'Здоровье', icon: '🥗' },
+            { title: 'Лечь спать до 23:00', description: 'Качественный сон важен', target: 1, unit: '', category: 'Здоровье', icon: '😴' },
+            { title: 'Убрать рабочее место', description: 'Порядок в пространстве', target: 1, unit: '', category: 'Продуктивность', icon: '🧹' },
+            { title: '15 минут йоги', description: 'Практика асан', target: 15, unit: 'минут', category: 'Спорт', icon: '🧘‍♀️' },
+            { title: 'Выполнить 3 главные задачи', description: 'Сфокусируйся на важном', target: 3, unit: 'задачи', category: 'Продуктивность', icon: '🎯' },
+            { title: 'Послушать подкаст', description: 'Обучение через аудио', target: 1, unit: 'эпизод', category: 'Обучение', icon: '🎧' },
+            { title: 'Приготовить здоровый завтрак', description: 'Начни день правильно', target: 1, unit: '', category: 'Здоровье', icon: '🍳' },
+            { title: 'Дыхательная практика 5 минут', description: 'Успокой нервную систему', target: 5, unit: 'минут', category: 'Осознанность', icon: '💨' },
+            { title: 'Написать цели на день', description: 'Планирование утром', target: 1, unit: '', category: 'Продуктивность', icon: '📝' },
+            { title: '100 прыжков', description: 'Энергичное упражнение', target: 100, unit: 'раз', category: 'Спорт', icon: '🦘' },
+            { title: 'Час без телефона', description: 'Осознанный отдых', target: 60, unit: 'минут', category: 'Осознанность', icon: '📵' },
+            { title: 'Выразить благодарность', description: 'Скажи спасибо кому-то', target: 1, unit: '', category: 'Социальное', icon: '💝' },
+            { title: '20 выпадов', description: 'На каждую ногу', target: 20, unit: 'раз', category: 'Спорт', icon: '🏋️' },
+            { title: 'Посмотреть обучающее видео', description: 'Узнай что-то новое', target: 1, unit: 'видео', category: 'Обучение', icon: '🎬' },
+            { title: 'Здоровый перекус', description: 'Фрукты или орехи', target: 1, unit: '', category: 'Здоровье', icon: '🍎' },
+            { title: 'Написать в дневник', description: 'Рефлексия дня', target: 1, unit: 'запись', category: 'Осознанность', icon: '📔' },
+            { title: 'Помочь кому-то', description: 'Доброе дело', target: 1, unit: '', category: 'Социальное', icon: '🤝' }
+        ];
 
         const getInitialState = () => ({
             hasCompletedOnboarding: false,
@@ -751,12 +782,13 @@
             habits: [],
             streak: 0,
             totalPoints: 0,
-            lastActiveDate: new Date().toDateString()
+            lastActiveDate: new Date().toDateString(),
+            dailyChallenge: null,
+            challengeProgress: 0,
+            weeklyStats: [75, 60, 85, 70, 90, 80, 65] // Последние 7 дней
         });
 
         let state = getInitialState();
-        let isLoading = true;
-
         const tg = window.Telegram?.WebApp || { expand: () => {}, ready: () => {}, CloudStorage: null };
         tg.expand();
         tg.ready();
@@ -770,48 +802,38 @@
                                 try {
                                     const loaded = JSON.parse(value);
                                     state = { ...getInitialState(), ...loaded };
-                                    console.log('✅ Данные загружены из Telegram Cloud');
-                                } catch (e) {
-                                    console.log('⚠️ Ошибка парсинга данных:', e);
-                                }
-                            } else {
-                                console.log('📦 Первый запуск - используем начальное состояние');
+                                } catch (e) {}
                             }
-                            isLoading = false;
                             resolve();
                         });
                     });
-                } else {
-                    console.log('📦 CloudStorage недоступен - используем начальное состояние');
-                    isLoading = false;
-                    return Promise.resolve();
                 }
-            } catch (e) {
-                console.log('❌ Ошибка загрузки:', e.message);
-                isLoading = false;
-                return Promise.resolve();
-            }
+            } catch (e) {}
         }
 
         async function saveState() {
             try {
-                const stateString = JSON.stringify(state);
-                
                 if (tg.CloudStorage) {
                     return new Promise((resolve) => {
-                        tg.CloudStorage.setItem('livi_state', stateString, (error, saved) => {
-                            if (!error) {
-                                console.log('💾 Данные сохранены в Telegram Cloud');
-                            } else {
-                                console.error('❌ Ошибка сохранения:', error);
-                            }
-                            resolve();
-                        });
+                        tg.CloudStorage.setItem('livi_state', JSON.stringify(state), () => resolve());
                     });
                 }
-            } catch (e) {
-                console.error('❌ Ошибка сохранения:', e);
+            } catch (e) {}
+        }
+
+        function getDailyChallenge() {
+            const today = new Date().toDateString();
+            if (!state.dailyChallenge || state.dailyChallenge.date !== today) {
+                const dayIndex = Math.floor(Date.now() / 86400000) % dailyChallenges.length;
+                state.dailyChallenge = {
+                    ...dailyChallenges[dayIndex],
+                    date: today,
+                    completed: false
+                };
+                state.challengeProgress = 0;
+                saveState();
             }
+            return state.dailyChallenge;
         }
 
         function updateStreak() {
@@ -835,22 +857,20 @@
                 heart: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
                 book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
                 target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
-                brain: '<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>',
+                brain: '<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>',
                 moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
-                coffee: '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>',
-                sunrise: '<path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/><polyline points="8 6 12 2 16 6"/>',
+                coffee: '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>',
+                sunrise: '<path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/>',
                 check: '<polyline points="20 6 9 17 4 12"/>',
-                sparkles: '<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>',
+                sparkles: '<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>',
                 flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
                 star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
                 clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
                 zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
                 award: '<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>',
                 trendingUp: '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
-                chevronRight: '<polyline points="9 18 15 12 9 6"/>',
                 plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
                 trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
-                circle: '<circle cx="12" cy="12" r="10"/>'
             };
             return `<svg width="24" height="24" viewBox="0 0 24 24" style="color: ${color}">${icons[name]}</svg>`;
         }
@@ -859,36 +879,36 @@
             const avgScore = (energy + completion + (habits / 4 * 100)) / 3;
             
             if (avgScore >= 85) return {
-                size: 140,
-                opacity: 1,
-                glow: '0 0 40px rgba(139, 154, 156, 0.6)',
+                size: 120,
                 color: colors.primary,
-                innerSize: 100,
-                label: 'Процветающий'
+                innerSize: 80,
+                label: 'Процветающий',
+                mood: 'happy',
+                phrase: 'Отличная работа! Ты на высоте! 🌟'
             };
             if (avgScore >= 70) return {
-                size: 120,
-                opacity: 0.9,
-                glow: '0 0 30px rgba(139, 154, 156, 0.4)',
+                size: 110,
                 color: colors.primary,
-                innerSize: 85,
-                label: 'Стабильный'
+                innerSize: 75,
+                label: 'Стабильный',
+                mood: 'happy',
+                phrase: 'Хороший прогресс! Продолжай! 💪'
             };
             if (avgScore >= 50) return {
                 size: 100,
-                opacity: 0.75,
-                glow: '0 0 20px rgba(139, 154, 156, 0.3)',
                 color: colors.primary,
                 innerSize: 70,
-                label: 'Формирующийся'
+                label: 'Формирующийся',
+                mood: 'neutral',
+                phrase: 'Ты на правильном пути! 🌱'
             };
             return {
-                size: 80,
-                opacity: 0.6,
-                glow: '0 0 10px rgba(139, 154, 156, 0.2)',
+                size: 90,
                 color: '#666',
-                innerSize: 55,
-                label: 'Зарождающийся'
+                innerSize: 60,
+                label: 'Зарождающийся',
+                mood: 'sad',
+                phrase: 'Начни с малого, все получится! 🌟'
             };
         }
 
@@ -906,87 +926,180 @@
             const totalTasks = state.tasks.length || 1;
             const completionRate = (completedTasks / totalTasks) * 100;
             const activeHabits = state.habits.filter(h => h.completed).length;
+            const totalHabits = state.habits.length || 1;
+            const habitRate = (activeHabits / totalHabits) * 100;
             
-            const avgEnergy = completionRate >= 75 ? 90 : completionRate >= 50 ? 75 : 60;
+            const avgEnergy = (completionRate + habitRate) / 2;
 
             let insights = [];
             let recommendations = [];
-            let reflections = [];
+            let patterns = [];
 
-            reflections.push(`${Math.round(completionRate)}% задач выполнено`);
-            reflections.push(`Средний уровень энергии: ${Math.round(avgEnergy)}%`);
-            reflections.push(`${activeHabits} из ${state.habits.length} привычек активны`);
-            reflections.push(`Текущая серия: ${state.streak} дней`);
-
-            if (completionRate >= 75) {
-                insights.push('Отличная продуктивность! Вы выполняете большинство задач.');
-            } else if (completionRate >= 50) {
-                insights.push('Хорошая продуктивность, но есть куда расти.');
-                recommendations.push('Попробуйте разбить крупные задачи на более мелкие');
+            // Анализ паттернов недели
+            const weekAvg = state.weeklyStats.reduce((a, b) => a + b, 0) / 7;
+            const trend = state.weeklyStats[6] - state.weeklyStats[0];
+            
+            if (trend > 10) {
+                patterns.push('📈 Восходящий тренд: ты становишься продуктивнее с каждым днем');
+            } else if (trend < -10) {
+                patterns.push('📉 Снижение активности: возможно, стоит пересмотреть нагрузку');
             } else {
-                insights.push('Начните с малого - добавьте простые задачи на сегодня.');
-                recommendations.push('Начните с 2-3 простых задач в день');
+                patterns.push('➡️ Стабильная активность: поддерживай темп');
             }
 
-            if (activeHabits >= 3) {
-                insights.push('Вы отлично справляетесь с привычками!');
-            } else if (activeHabits > 0) {
-                insights.push('Хорошее начало с привычками!');
-                recommendations.push('Добавьте ещё одну привычку для баланса');
+            // Детальные инсайты
+            if (completionRate >= 80) {
+                insights.push('Превосходная продуктивность! Ты выполняешь более 80% задач.');
+                recommendations.push('Попробуй добавить более амбициозные цели для роста');
+            } else if (completionRate >= 60) {
+                insights.push('Хорошая продуктивность с небольшим резервом для роста.');
+                recommendations.push('Анализируй, что мешает выполнять оставшиеся 20-40% задач');
+            } else if (completionRate >= 40) {
+                insights.push('Средняя продуктивность - есть потенциал для улучшения.');
+                recommendations.push('Попробуй метод "Помодоро" для лучшей концентрации');
+                recommendations.push('Разбивай большие задачи на маленькие подзадачи');
             } else {
-                insights.push('Добавьте первую привычку для отслеживания прогресса.');
-                recommendations.push('Начните с одной простой привычки');
+                insights.push('Низкая продуктивность - начни с простых задач.');
+                recommendations.push('Добавляй не более 3 задач в день на начальном этапе');
+                recommendations.push('Выбирай самую важную задачу и делай её первой');
+            }
+
+            // Анализ привычек
+            if (habitRate >= 75) {
+                insights.push('Отличное формирование привычек! ' + activeHabits + ' из ' + state.habits.length + ' активны.');
+            } else if (habitRate >= 50) {
+                insights.push('Хороший прогресс с привычками, продолжай в том же духе.');
+                recommendations.push('Выбери одну привычку и сфокусируйся на ней неделю');
+            } else if (habitRate > 0) {
+                insights.push('Привычки только начинают формироваться.');
+                recommendations.push('Привязывай новые привычки к существующим действиям');
+                recommendations.push('Начни с самой простой привычки из списка');
+            } else {
+                insights.push('Пора начать формировать полезные привычки.');
+                recommendations.push('Добавь одну простую привычку и делай её каждый день');
+            }
+
+            // Анализ стрика
+            if (state.streak >= 30) {
+                insights.push('Впечатляющий стрик в ' + state.streak + ' дней! Ты демонстрируешь настоящую дисциплину.');
+            } else if (state.streak >= 7) {
+                insights.push('Отличный стрик! Первая неделя - самая сложная, ты справился.');
+                recommendations.push('Продолжай развивать momentum - не прерывай цепочку');
+            } else if (state.streak >= 3) {
+                insights.push('Хорошее начало! Первые дни закладывают фундамент.');
+                recommendations.push('Постарайся дойти до 7 дней - это критический порог');
+            } else {
+                recommendations.push('Сфокусируйся на создании стрика хотя бы в 3 дня подряд');
+            }
+
+            // Анализ челленджа
+            if (state.dailyChallenge?.completed) {
+                insights.push('Ты выполнил ежедневный челлендж! Это повышает мотивацию.');
+            } else {
+                recommendations.push('Не забудь про ежедневный челлендж - это бонусные очки');
+            }
+
+            // Рекомендации по времени
+            const hour = new Date().getHours();
+            if (hour < 12 && completionRate < 30) {
+                recommendations.push('Утро - лучшее время для важных задач. Начни с главного!');
+            } else if (hour >= 18 && completionRate < 50) {
+                recommendations.push('День подходит к концу. Выполни хотя бы одну задачу сегодня.');
+            }
+
+            // Персональные рекомендации на основе целей
+            const goalKeys = Object.entries(state.userGoals).filter(([_, v]) => v).map(([k]) => k);
+            if (goalKeys.includes('health') && activeHabits < 2) {
+                recommendations.push('Добавь привычку "Прогулка 30 мин" для здоровья');
+            }
+            if (goalKeys.includes('learning') && state.tasks.length < 3) {
+                recommendations.push('Создай задачу обучения на сегодня');
             }
 
             return {
                 insights,
-                recommendations,
-                reflections,
+                recommendations: recommendations.slice(0, 4),
+                patterns,
                 completionRate: Math.round(completionRate),
                 avgEnergy: Math.round(avgEnergy),
-                activeHabits
+                activeHabits,
+                habitRate: Math.round(habitRate),
+                weekAvg: Math.round(weekAvg)
             };
         }
 
-        function renderLiviPreview() {
-            const aiAnalysis = generateAIAnalysis();
-            const liviState = getLiviState(aiAnalysis.avgEnergy, aiAnalysis.completionRate, aiAnalysis.activeHabits);
+        function renderWeeklyChart(stats) {
+            const days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
+            const maxHeight = 100;
             
             return `
-                <div class="section" style="text-align: center; padding: 40px 24px;">
-                    <div class="livi-circle" style="width: ${liviState.size}px; height: ${liviState.size}px; background-color: ${liviState.color}20; border: 2px solid ${liviState.color}; opacity: ${liviState.opacity}; box-shadow: ${liviState.glow}; margin: 0 auto;">
-                        <div class="livi-inner" style="width: ${liviState.innerSize}px; height: ${liviState.innerSize}px; background-color: ${liviState.color}40; border: 1px solid ${liviState.color};"></div>
+                <div class="chart-container">
+                    <div class="chart-title">Продуктивность за неделю</div>
+                    <div class="bar-chart">
+                        ${stats.map((value, i) => `
+                            <div class="bar" style="height: ${value}%; max-height: ${maxHeight}px;">
+                                <div class="bar-label">${days[i]}</div>
+                            </div>
+                        `).join('')}
                     </div>
-                    <div style="margin-top: 24px; font-size: 20px; font-weight: bold; color: ${liviState.color};">${liviState.label}</div>
-                    <div style="margin-top: 8px; font-size: 14px; color: #666;">Твоё текущее состояние</div>
                 </div>
             `;
         }
 
-        function renderHabitModal() {
-            const habit = state.selectedHabit;
+        function renderLiviWithFace(liviState) {
+            const mouthClass = liviState.mood === 'happy' ? 'happy' : 
+                              liviState.mood === 'sad' ? 'sad' : '';
+            
             return `
-                <div class="modal" id="habitModal">
-                    <div class="modal-content" onclick="event.stopPropagation();">
-                        <div class="modal-handle"></div>
-                        <div style="text-align: center;">
-                            <div style="width: 80px; height: 80px; border-radius: 16px; background-color: ${habit.color}30; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 36px;">
-                                ${habit.completed ? '✓' : '○'}
+                <div class="livi-character">
+                    <div class="livi-circle" style="width: ${liviState.size}px; height: ${liviState.size}px; background-color: ${liviState.color}20; border: 2px solid ${liviState.color};">
+                        <div style="width: ${liviState.innerSize}px; height: ${liviState.innerSize}px; background-color: ${liviState.color}40; border: 1px solid ${liviState.color}; border-radius: 50%;"></div>
+                        <div class="livi-face">
+                            <div class="livi-eyes">
+                                <div class="livi-eye"></div>
+                                <div class="livi-eye"></div>
                             </div>
-                            <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 16px;">${habit.name}</h2>
-                            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 24px;">
-                                ${createSvg('flame', colors.warning)}
-                                <span style="font-size: 32px; font-weight: bold;">${habit.streak}</span>
-                                <span style="font-size: 18px; color: #999;">дней</span>
-                            </div>
-                            <p style="font-size: 16px; color: #999; margin-bottom: 24px;">
-                                ${habit.completed ? 'Выполнено сегодня! 🎉' : 'Не забудь выполнить'}
-                            </p>
-                            <button class="btn" style="background-color: ${habit.color}; color: white;" id="closeHabitModal">
-                                Закрыть
-                            </button>
+                            <div class="livi-mouth ${mouthClass}"></div>
                         </div>
                     </div>
+                    <div style="margin-top: 16px; font-size: 18px; font-weight: bold; color: ${liviState.color};">${liviState.label}</div>
+                    <div class="livi-speech">${liviState.phrase}</div>
+                </div>
+            `;
+        }
+
+        function renderDailyChallenge() {
+            const challenge = getDailyChallenge();
+            const progress = (state.challengeProgress / challenge.target) * 100;
+            
+            return `
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 24px;">${challenge.icon}</span>
+                            <div class="challenge-title">${challenge.title}</div>
+                        </div>
+                        <div class="challenge-badge">+50</div>
+                    </div>
+                    <div class="challenge-description">${challenge.description}</div>
+                    <div class="challenge-progress">
+                        <div class="progress-label">
+                            <span>Прогресс</span>
+                            <span><strong>${state.challengeProgress}</strong> / ${challenge.target} ${challenge.unit}</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width: ${Math.min(progress, 100)}%;"></div>
+                        </div>
+                    </div>
+                    ${!challenge.completed ? `
+                        <button class="btn btn-primary" id="completeChallenge" style="margin-top: 12px;">
+                            ${progress >= 100 ? 'Завершить челлендж 🎉' : 'Обновить прогресс'}
+                        </button>
+                    ` : `
+                        <div style="text-align: center; padding: 12px; background-color: rgba(165, 189, 161, 0.2); border-radius: 12px; margin-top: 12px;">
+                            <strong style="color: ${colors.accent3};">✓ Челлендж выполнен!</strong>
+                        </div>
+                    `}
                 </div>
             `;
         }
@@ -1097,7 +1210,7 @@
             const currentStep = steps[state.onboardingStep];
 
             return `
-                <div class="onboarding-container slide-in">
+                <div class="onboarding-container slide-up">
                     <div class="onboarding-box">
                         ${state.onboardingStep === 0 ? `
                             <div class="logo-section">
@@ -1134,18 +1247,10 @@
             const goalButtons = document.querySelectorAll('[data-goal]');
             const userName = document.getElementById('userName');
 
-            if (startBtn) {
-                startBtn.addEventListener('click', () => {
-                    state.onboardingStep = 1;
-                    render();
-                });
-            }
-
+            if (startBtn) startBtn.addEventListener('click', () => { state.onboardingStep = 1; render(); });
             if (nextBtn) {
                 nextBtn.addEventListener('click', () => {
-                    if (state.onboardingStep === 1 && userName) {
-                        state.userInfo.name = userName.value.trim();
-                    }
+                    if (state.onboardingStep === 1 && userName) state.userInfo.name = userName.value.trim();
                     if (state.onboardingStep === 3) {
                         state.userInfo.wakeUpTime = document.getElementById('wakeUpTime').value;
                         state.userInfo.sleepTime = document.getElementById('sleepTime').value;
@@ -1154,14 +1259,7 @@
                     render();
                 });
             }
-
-            if (prevBtn) {
-                prevBtn.addEventListener('click', () => {
-                    state.onboardingStep--;
-                    render();
-                });
-            }
-
+            if (prevBtn) prevBtn.addEventListener('click', () => { state.onboardingStep--; render(); });
             if (completeBtn) {
                 completeBtn.addEventListener('click', async () => {
                     state.userInfo.mainGoal = document.getElementById('mainGoal').value.trim();
@@ -1170,12 +1268,12 @@
                     state.lastActiveDate = new Date().toDateString();
                     
                     const habitsByGoal = {
-                        health: { name: 'Зарядка', color: colors.accent3, icon: '💪' },
-                        learning: { name: 'Чтение', color: colors.accent2, icon: '📚' },
-                        productivity: { name: 'Планирование', color: colors.primary, icon: '📋' },
-                        mindfulness: { name: 'Медитация', color: colors.secondary, icon: '🧘' },
-                        sleep: { name: 'Сон 8 часов', color: colors.accent1, icon: '😴' },
-                        social: { name: 'Общение', color: colors.warning, icon: '☕' }
+                        health: { name: 'Зарядка', color: colors.accent3 },
+                        learning: { name: 'Чтение', color: colors.accent2 },
+                        productivity: { name: 'Планирование', color: colors.primary },
+                        mindfulness: { name: 'Медитация', color: colors.secondary },
+                        sleep: { name: 'Сон 8 часов', color: colors.accent1 },
+                        social: { name: 'Общение', color: colors.warning }
                     };
                     
                     state.habits = Object.entries(state.userGoals)
@@ -1193,7 +1291,6 @@
                     render();
                 });
             }
-
             goalButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const goal = btn.dataset.goal;
@@ -1213,7 +1310,7 @@
                     <div class="header-top">
                         <div class="header-title">livi</div>
                         <div class="header-stats">
-                            <button class="stat-badge gentle-pulse" style="background-color: rgba(212, 175, 122, 0.2);" id="showRank">
+                            <button class="stat-badge" style="background-color: rgba(212, 175, 122, 0.2);" id="showRank">
                                 ${createSvg('flame', colors.warning)}
                                 <span>${state.streak}</span>
                             </button>
@@ -1224,9 +1321,9 @@
                         </div>
                     </div>
                     <div class="tabs">
-                        ${['home', 'tasks', 'analysis', 'livi'].map(tab => `
+                        ${['home', 'tasks', 'analysis'].map(tab => `
                             <div class="tab ${state.activeTab === tab ? 'active' : ''}" data-tab="${tab}">
-                                ${tab === 'home' ? 'Главная' : tab === 'tasks' ? 'Задачи' : tab === 'analysis' ? 'Анализ' : 'Livi'}
+                                ${tab === 'home' ? 'Главная' : tab === 'tasks' ? 'Задачи' : 'Анализ'}
                             </div>
                         `).join('')}
                     </div>
@@ -1235,32 +1332,37 @@
                     <div id="tabContent">${renderTabContent(completedTasks, currentRank, aiAnalysis)}</div>
                 </div>
                 ${state.showRankModal ? renderRankModal(currentRank) : ''}
-                ${state.selectedHabit ? renderHabitModal() : ''}
             `;
         }
 
         function renderTabContent(completedTasks, currentRank, aiAnalysis) {
             if (state.activeTab === 'home') {
+                const liviState = getLiviState(aiAnalysis.avgEnergy, aiAnalysis.completionRate, aiAnalysis.activeHabits);
+                
                 return `
-                    ${renderLiviPreview()}
+                    <div class="section">
+                        ${renderLiviWithFace(liviState)}
+                    </div>
+
+                    ${renderDailyChallenge()}
                     
                     <div class="grid-2">
-                        <div class="stat-card card-hover" style="background-color: #0f0f0f;">
+                        <div class="stat-card card-hover">
                             ${createSvg('target', colors.primary)}
                             <div class="stat-value">${completedTasks}/${state.tasks.length}</div>
                             <div class="stat-label">Задачи</div>
                         </div>
-                        <div class="stat-card card-hover" style="background-color: #0f0f0f;">
+                        <div class="stat-card card-hover">
                             ${createSvg('clock', colors.accent3)}
                             <div class="stat-value">${state.habits.filter(h => h.completed).length}/${state.habits.length}</div>
                             <div class="stat-label">Привычки</div>
                         </div>
-                        <div class="stat-card card-hover" style="background-color: #0f0f0f;">
+                        <div class="stat-card card-hover">
                             ${createSvg('zap', colors.warning)}
                             <div class="stat-value">${aiAnalysis.avgEnergy}%</div>
                             <div class="stat-label">Энергия</div>
                         </div>
-                        <div class="stat-card card-hover" style="background-color: #0f0f0f;">
+                        <div class="stat-card card-hover">
                             ${createSvg('award', currentRank.color)}
                             <div class="stat-value">${currentRank.icon}</div>
                             <div class="stat-label">${currentRank.title}</div>
@@ -1268,34 +1370,7 @@
                     </div>
 
                     <div class="section">
-                        <h2 class="section-title">Прогресс за неделю</h2>
-                        <div style="margin-bottom: 20px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <span style="font-size: 14px; color: #999;">Задачи</span>
-                                <span style="font-size: 14px; font-weight: bold;">${aiAnalysis.completionRate}%</span>
-                            </div>
-                            <div style="height: 8px; background-color: #2a2a2a; border-radius: 4px; overflow: hidden;">
-                                <div style="height: 100%; background: linear-gradient(90deg, ${colors.primary}, ${colors.accent3}); width: ${aiAnalysis.completionRate}%; border-radius: 4px; animation: progressFill 1s ease-out;"></div>
-                            </div>
-                        </div>
-                        <div style="margin-bottom: 20px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <span style="font-size: 14px; color: #999;">Привычки</span>
-                                <span style="font-size: 14px; font-weight: bold;">${Math.round((state.habits.filter(h => h.completed).length / Math.max(state.habits.length, 1)) * 100)}%</span>
-                            </div>
-                            <div style="height: 8px; background-color: #2a2a2a; border-radius: 4px; overflow: hidden;">
-                                <div style="height: 100%; background: linear-gradient(90deg, ${colors.accent2}, ${colors.secondary}); width: ${Math.round((state.habits.filter(h => h.completed).length / Math.max(state.habits.length, 1)) * 100)}%; border-radius: 4px; animation: progressFill 1s ease-out;"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <span style="font-size: 14px; color: #999;">Энергия</span>
-                                <span style="font-size: 14px; font-weight: bold;">${aiAnalysis.avgEnergy}%</span>
-                            </div>
-                            <div style="height: 8px; background-color: #2a2a2a; border-radius: 4px; overflow: hidden;">
-                                <div style="height: 100%; background: linear-gradient(90deg, ${colors.warning}, #FFD700); width: ${aiAnalysis.avgEnergy}%; border-radius: 4px; animation: progressFill 1s ease-out;"></div>
-                            </div>
-                        </div>
+                        ${renderWeeklyChart(state.weeklyStats)}
                     </div>
 
                     <div class="section">
@@ -1319,7 +1394,6 @@
                             <div class="empty-state">
                                 <div class="empty-state-icon">🌱</div>
                                 <p>Добавьте первую привычку!</p>
-                                <button class="btn btn-primary" id="addFirstHabit" style="margin-top: 16px;">Добавить привычку</button>
                             </div>
                         `}
                     </div>
@@ -1328,7 +1402,7 @@
                         <h2 class="section-title">Сегодня</h2>
                         ${state.tasks.length > 0 ? `
                             ${state.tasks.slice(0, 4).map(task => `
-                                <div class="task-item card-hover">
+                                <div class="task-item">
                                     <div class="checkbox ${task.completed ? 'checked' : ''}" data-task-check="${task.id}">
                                         ${task.completed ? createSvg('check', 'white') : ''}
                                     </div>
@@ -1366,7 +1440,7 @@
                         <h2 class="section-title">Все задачи</h2>
                         ${state.tasks.length > 0 ? `
                             ${state.tasks.map(task => `
-                                <div class="task-item" style="margin-bottom: 12px;">
+                                <div class="task-item">
                                     <div class="checkbox ${task.completed ? 'checked' : ''}" data-task-check="${task.id}">
                                         ${task.completed ? createSvg('check', 'white') : ''}
                                     </div>
@@ -1393,20 +1467,34 @@
                         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
                             ${createSvg('brain', colors.primary)}
                             <div>
-                                <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 4px;">ИИ Анализ</h2>
-                                <p style="font-size: 14px; color: #999;">Персональные рекомендации</p>
+                                <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 4px;">Умный Анализ</h2>
+                                <p style="font-size: 14px; color: #999;">Персональные инсайты и рекомендации</p>
                             </div>
                         </div>
 
                         <div class="grid-2" style="margin-bottom: 24px;">
-                            <div style="padding: 16px; border-radius: 12px; background-color: rgba(139, 154, 156, 0.15); text-align: center;">
-                                <div style="font-size: 32px; font-weight: bold; margin-bottom: 4px;">${aiAnalysis.completionRate}%</div>
-                                <div style="font-size: 12px; font-weight: 500; color: #999;">Выполнение</div>
+                            <div style="padding: 20px; border-radius: 12px; background-color: rgba(139, 154, 156, 0.15); text-align: center;">
+                                <div style="font-size: 36px; font-weight: bold; margin-bottom: 4px;">${aiAnalysis.completionRate}%</div>
+                                <div style="font-size: 12px; font-weight: 500; color: #999;">Выполнение задач</div>
                             </div>
-                            <div style="padding: 16px; border-radius: 12px; background-color: rgba(165, 189, 161, 0.15); text-align: center;">
-                                <div style="font-size: 32px; font-weight: bold; margin-bottom: 4px;">${aiAnalysis.avgEnergy}%</div>
-                                <div style="font-size: 12px; font-weight: 500; color: #999;">Энергия</div>
+                            <div style="padding: 20px; border-radius: 12px; background-color: rgba(165, 189, 161, 0.15); text-align: center;">
+                                <div style="font-size: 36px; font-weight: bold; margin-bottom: 4px;">${aiAnalysis.habitRate}%</div>
+                                <div style="font-size: 12px; font-weight: 500; color: #999;">Активность привычек</div>
                             </div>
+                        </div>
+
+                        ${renderWeeklyChart(state.weeklyStats)}
+
+                        <div style="margin-bottom: 24px;">
+                            <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                ${createSvg('trendingUp', colors.accent3)}
+                                Паттерны активности
+                            </h3>
+                            ${aiAnalysis.patterns.map(pattern => `
+                                <div style="padding: 12px; border-radius: 12px; background-color: #0a0a0a; margin-bottom: 8px;">
+                                    <p style="font-size: 14px;">${pattern}</p>
+                                </div>
+                            `).join('')}
                         </div>
 
                         <div style="margin-bottom: 24px;">
@@ -1423,47 +1511,23 @@
 
                         <div style="margin-bottom: 24px;">
                             <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                                ${createSvg('trendingUp', colors.accent3)}
-                                Рекомендации
+                                ${createSvg('target', colors.accent3)}
+                                Персональные рекомендации
                             </h3>
-                            ${aiAnalysis.recommendations.map(rec => `
+                            ${aiAnalysis.recommendations.map((rec, i) => `
                                 <div style="padding: 12px; border-radius: 12px; background-color: rgba(165, 189, 161, 0.15); margin-bottom: 8px; display: flex; align-items: start; gap: 12px;">
-                                    ${createSvg('chevronRight', colors.accent3)}
-                                    <p style="font-size: 14px;">${rec}</p>
+                                    <div style="min-width: 24px; height: 24px; background-color: ${colors.accent3}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">${i + 1}</div>
+                                    <p style="font-size: 14px; flex: 1;">${rec}</p>
                                 </div>
                             `).join('')}
                         </div>
 
                         ${state.userInfo.mainGoal ? `
-                            <div style="padding: 16px; border-radius: 12px; background-color: rgba(212, 175, 122, 0.15);">
-                                <p style="font-size: 12px; font-weight: bold; color: ${colors.warning}; margin-bottom: 8px;">ВАША ЦЕЛЬ</p>
+                            <div style="padding: 16px; border-radius: 12px; background-color: rgba(212, 175, 122, 0.15); border: 1px solid rgba(212, 175, 122, 0.3);">
+                                <p style="font-size: 12px; font-weight: bold; color: ${colors.warning}; margin-bottom: 8px;">🎯 ВАША ГЛАВНАЯ ЦЕЛЬ</p>
                                 <p style="font-size: 14px;">${state.userInfo.mainGoal}</p>
                             </div>
                         ` : ''}
-                    </div>
-                `;
-            } else if (state.activeTab === 'livi') {
-                const liviState = getLiviState(aiAnalysis.avgEnergy, aiAnalysis.completionRate, aiAnalysis.activeHabits);
-                
-                return `
-                    <div class="section">
-                        <div class="livi-character">
-                            <div class="livi-circle" style="width: ${liviState.size}px; height: ${liviState.size}px; background-color: ${liviState.color}20; border: 2px solid ${liviState.color}; opacity: ${liviState.opacity}; box-shadow: ${liviState.glow};">
-                                <div class="livi-inner" style="width: ${liviState.innerSize}px; height: ${liviState.innerSize}px; background-color: ${liviState.color}40; border: 1px solid ${liviState.color};"></div>
-                            </div>
-                            <div class="livi-label" style="color: ${liviState.color};">${liviState.label}</div>
-                            <div class="livi-desc">Отражение текущего состояния</div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <h2 class="section-title">Текущее состояние</h2>
-                        ${aiAnalysis.reflections.map(reflection => `
-                            <div style="padding: 16px; border-radius: 12px; background-color: #0a0a0a; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">
-                                <div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${colors.primary}; flex-shrink: 0;"></div>
-                                <p style="font-size: 14px;">${reflection}</p>
-                            </div>
-                        `).join('')}
                     </div>
                 `;
             }
@@ -1474,8 +1538,8 @@
             const progressToNext = currentRank.min === 100 ? 100 : ((state.streak - currentRank.min) / (nextRank.min - currentRank.min)) * 100;
 
             return `
-                <div class="modal" id="rankModal">
-                    <div class="modal-content" onclick="event.stopPropagation();">
+                <div class="modal fade-in" id="rankModal">
+                    <div class="modal-content slide-up" onclick="event.stopPropagation();">
                         <div class="modal-handle"></div>
                         <div style="text-align: center; margin-bottom: 24px;">
                             <div style="font-size: 48px; margin-bottom: 16px;">${currentRank.icon}</div>
@@ -1492,7 +1556,7 @@
                                 </span>
                             </div>
                             <div style="height: 12px; border-radius: 6px; background-color: #2a2a2a;">
-                                <div style="height: 100%; border-radius: 6px; background-color: ${colors.primary}; width: ${progressToNext}%; animation: progressFill 0.8s ease-out;"></div>
+                                <div style="height: 100%; border-radius: 6px; background-color: ${colors.primary}; width: ${progressToNext}%; transition: width 0.5s;"></div>
                             </div>
                             ${currentRank.min !== 100 ? `
                                 <p style="font-size: 12px; color: #666; text-align: center; margin-top: 8px;">
@@ -1532,14 +1596,12 @@
             const showRankBtn = document.getElementById('showRank');
             const rankModal = document.getElementById('rankModal');
             const habitCards = document.querySelectorAll('[data-habit]');
-            const habitModal = document.getElementById('habitModal');
-            const closeHabitModalBtn = document.getElementById('closeHabitModal');
             const taskChecks = document.querySelectorAll('[data-task-check]');
             const addTaskBtn = document.getElementById('addTask');
             const newTaskInput = document.getElementById('newTaskInput');
             const deleteButtons = document.querySelectorAll('[data-delete]');
             const goToTasksBtn = document.getElementById('goToTasks');
-            const addFirstHabitBtn = document.getElementById('addFirstHabit');
+            const completeChallengeBtn = document.getElementById('completeChallenge');
 
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -1589,22 +1651,6 @@
                 });
             });
 
-            if (closeHabitModalBtn) {
-                closeHabitModalBtn.addEventListener('click', () => {
-                    state.selectedHabit = null;
-                    render();
-                });
-            }
-
-            if (habitModal) {
-                habitModal.addEventListener('click', (e) => {
-                    if (e.target === habitModal) {
-                        state.selectedHabit = null;
-                        render();
-                    }
-                });
-            }
-
             taskChecks.forEach(check => {
                 check.addEventListener('click', async () => {
                     const taskId = parseInt(check.dataset.taskCheck);
@@ -1615,8 +1661,11 @@
                         
                         if (task.completed) {
                             state.totalPoints += task.points;
+                            // Update weekly stats
+                            state.weeklyStats[6] = Math.min(100, state.weeklyStats[6] + 5);
                         } else {
                             state.totalPoints = Math.max(0, state.totalPoints - task.points);
+                            state.weeklyStats[6] = Math.max(0, state.weeklyStats[6] - 5);
                         }
                         
                         await saveState();
@@ -1645,9 +1694,7 @@
 
                 addTaskBtn.addEventListener('click', addTask);
                 newTaskInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        addTask();
-                    }
+                    if (e.key === 'Enter') addTask();
                 });
             }
 
@@ -1674,18 +1721,23 @@
                 });
             }
 
-            if (addFirstHabitBtn) {
-                addFirstHabitBtn.addEventListener('click', async () => {
-                    state.habits.push({
-                        id: Date.now(),
-                        name: 'Новая привычка',
-                        color: colors.primary,
-                        streak: 0,
-                        completed: false,
-                        lastCompletedDate: null
-                    });
-                    await saveState();
-                    render();
+            if (completeChallengeBtn) {
+                completeChallengeBtn.addEventListener('click', async () => {
+                    const challenge = state.dailyChallenge;
+                    if (state.challengeProgress >= challenge.target) {
+                        challenge.completed = true;
+                        state.totalPoints += 50;
+                        state.weeklyStats[6] = Math.min(100, state.weeklyStats[6] + 10);
+                        await saveState();
+                        render();
+                    } else {
+                        const newProgress = prompt(`Введите прогресс (максимум ${challenge.target} ${challenge.unit}):`, state.challengeProgress);
+                        if (newProgress !== null) {
+                            state.challengeProgress = Math.min(parseInt(newProgress) || 0, challenge.target);
+                            await saveState();
+                            render();
+                        }
+                    }
                 });
             }
         }
@@ -1703,11 +1755,10 @@
         }
 
         async function init() {
-            console.log('Init started');
             await loadState();
             await resetDailyHabits();
+            getDailyChallenge();
             render();
-            console.log('Rendered');
             
             setTimeout(() => {
                 const loadingScreen = document.getElementById('loadingScreen');
@@ -1715,7 +1766,7 @@
                     loadingScreen.classList.add('fade-out');
                     setTimeout(() => loadingScreen.remove(), 500);
                 }
-            }, 1500);
+            }, 1000);
         }
 
         init();
