@@ -12,337 +12,6 @@
             transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        function renderHabitModal() {
-            const habit = state.selectedHabit;
-            return `
-                <div class="modal" id="habitModal">
-                    <div class="modal-content" onclick="event.stopPropagation();">
-                        <div class="modal-handle"></div>
-                        <div style="text-align: center;">
-                            <div style="width: 80px; height: 80px; border-radius: 16px; background-color: ${habit.color}30; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 36px;">
-                                ${habit.completed ? '✓' : '○'}
-                            </div>
-                            <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 16px;">${habit.name}</h2>
-                            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 24px;">
-                                ${createSvg('flame', colors.warning)}
-                                <span style="font-size: 32px; font-weight: bold;">${habit.streak}</span>
-                                <span style="font-size: 18px; color: #999;">дней</span>
-                            </div>
-                            <p style="font-size: 16px; color: #999; margin-bottom: 24px;">
-                                ${habit.completed ? 'Выполнено сегодня! 🎉' : 'Не забудь выполнить'}
-                            </p>
-                            <button class="btn" style="background-color: ${habit.color}; color: white;" id="closeHabitModal">
-                                Закрыть
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function attachOnboardingListeners() {
-            const startBtn = document.getElementById('startOnboarding');
-            const nextBtn = document.getElementById('nextStep');
-            const prevBtn = document.getElementById('prevStep');
-            const completeBtn = document.getElementById('completeOnboarding');
-            const goalButtons = document.querySelectorAll('[data-goal]');
-            const userName = document.getElementById('userName');
-
-            if (startBtn) {
-                startBtn.addEventListener('click', () => {
-                    state.onboardingStep = 1;
-                    render();
-                });
-            }
-
-            if (nextBtn) {
-                nextBtn.addEventListener('click', () => {
-                    if (state.onboardingStep === 1 && userName) {
-                        state.userInfo.name = userName.value.trim();
-                    }
-                    if (state.onboardingStep === 3) {
-                        state.userInfo.wakeUpTime = document.getElementById('wakeUpTime').value;
-                        state.userInfo.sleepTime = document.getElementById('sleepTime').value;
-                    }
-                    state.onboardingStep++;
-                    render();
-                });
-            }
-
-            if (prevBtn) {
-                prevBtn.addEventListener('click', () => {
-                    state.onboardingStep--;
-                    render();
-                });
-            }
-
-            if (completeBtn) {
-                completeBtn.addEventListener('click', async () => {
-                    state.userInfo.mainGoal = document.getElementById('mainGoal').value.trim();
-                    state.hasCompletedOnboarding = true;
-                    state.streak = 1;
-                    state.lastActiveDate = new Date().toDateString();
-                    
-                    const habitsByGoal = {
-                        health: { name: 'Зарядка', color: colors.accent3, icon: '💪' },
-                        learning: { name: 'Чтение', color: colors.accent2, icon: '📚' },
-                        productivity: { name: 'Планирование', color: colors.primary, icon: '📋' },
-                        mindfulness: { name: 'Медитация', color: colors.secondary, icon: '🧘' },
-                        sleep: { name: 'Сон 8 часов', color: colors.accent1, icon: '😴' },
-                        social: { name: 'Общение', color: colors.warning, icon: '☕' }
-                    };
-                    
-                    state.habits = Object.entries(state.userGoals)
-                        .filter(([_, selected]) => selected)
-                        .map(([goal], index) => ({
-                            id: Date.now() + index,
-                            name: habitsByGoal[goal].name,
-                            color: habitsByGoal[goal].color,
-                            streak: 0,
-                            completed: false,
-                            lastCompletedDate: null
-                        }));
-                    
-                    await saveState();
-                    render();
-                });
-            }
-
-            goalButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const goal = btn.dataset.goal;
-                    state.userGoals[goal] = !state.userGoals[goal];
-                    render();
-                });
-            });
-        }
-
-        function attachMainListeners() {
-            const tabs = document.querySelectorAll('[data-tab]');
-            const showRankBtn = document.getElementById('showRank');
-            const rankModal = document.getElementById('rankModal');
-            const habitCards = document.querySelectorAll('[data-habit]');
-            const habitModal = document.getElementById('habitModal');
-            const closeHabitModalBtn = document.getElementById('closeHabitModal');
-            const taskChecks = document.querySelectorAll('[data-task-check]');
-            const addTaskBtn = document.getElementById('addTask');
-            const newTaskInput = document.getElementById('newTaskInput');
-            const deleteButtons = document.querySelectorAll('[data-delete]');
-            const goToTasksBtn = document.getElementById('goToTasks');
-            const addFirstHabitBtn = document.getElementById('addFirstHabit');
-
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    state.activeTab = tab.dataset.tab;
-                    render();
-                });
-            });
-
-            if (showRankBtn) {
-                showRankBtn.addEventListener('click', () => {
-                    state.showRankModal = true;
-                    render();
-                });
-            }
-
-            if (rankModal) {
-                rankModal.addEventListener('click', (e) => {
-                    if (e.target === rankModal) {
-                        state.showRankModal = false;
-                        render();
-                    }
-                });
-            }
-
-            habitCards.forEach(card => {
-                card.addEventListener('click', async () => {
-                    const habitId = parseInt(card.dataset.habit);
-                    const habit = state.habits.find(h => h.id === habitId);
-                    
-                    if (habit) {
-                        const today = new Date().toDateString();
-                        
-                        if (!habit.completed) {
-                            habit.completed = true;
-                            habit.lastCompletedDate = today;
-                            habit.streak++;
-                            state.totalPoints += 10;
-                        } else {
-                            habit.completed = false;
-                            if (habit.streak > 0) habit.streak--;
-                            state.totalPoints = Math.max(0, state.totalPoints - 10);
-                        }
-                        
-                        await saveState();
-                        render();
-                    }
-                });
-            });
-
-            if (closeHabitModalBtn) {
-                closeHabitModalBtn.addEventListener('click', () => {
-                    state.selectedHabit = null;
-                    render();
-                });
-            }
-
-            if (habitModal) {
-                habitModal.addEventListener('click', (e) => {
-                    if (e.target === habitModal) {
-                        state.selectedHabit = null;
-                        render();
-                    }
-                });
-            }
-
-            taskChecks.forEach(check => {
-                check.addEventListener('click', async () => {
-                    const taskId = parseInt(check.dataset.taskCheck);
-                    const task = state.tasks.find(t => t.id === taskId);
-                    
-                    if (task) {
-                        task.completed = !task.completed;
-                        
-                        if (task.completed) {
-                            state.totalPoints += task.points;
-                        } else {
-                            state.totalPoints = Math.max(0, state.totalPoints - task.points);
-                        }
-                        
-                        await saveState();
-                        render();
-                    }
-                });
-            });
-
-            if (addTaskBtn && newTaskInput) {
-                const addTask = async () => {
-                    const title = newTaskInput.value.trim();
-                    if (title) {
-                        state.tasks.push({
-                            id: Date.now(),
-                            title,
-                            completed: false,
-                            points: 5,
-                            category: 'Общее',
-                            createdAt: new Date().toISOString()
-                        });
-                        state.newTask = '';
-                        await saveState();
-                        render();
-                    }
-                };
-
-                addTaskBtn.addEventListener('click', addTask);
-                newTaskInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        addTask();
-                    }
-                });
-            }
-
-            deleteButtons.forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const taskId = parseInt(btn.dataset.delete);
-                    const task = state.tasks.find(t => t.id === taskId);
-                    
-                    if (task && task.completed) {
-                        state.totalPoints = Math.max(0, state.totalPoints - task.points);
-                    }
-                    
-                    state.tasks = state.tasks.filter(t => t.id !== taskId);
-                    await saveState();
-                    render();
-                });
-            });
-
-            if (goToTasksBtn) {
-                goToTasksBtn.addEventListener('click', () => {
-                    state.activeTab = 'tasks';
-                    render();
-                });
-            }
-
-            if (addFirstHabitBtn) {
-                addFirstHabitBtn.addEventListener('click', async () => {
-                    state.habits.push({
-                        id: Date.now(),
-                        name: 'Новая привычка',
-                        color: colors.primary,
-                        streak: 0,
-                        completed: false,
-                        lastCompletedDate: null
-                    });
-                    await saveState();
-                    render();
-                });
-            }
-        }
-
-        async function resetDailyHabits() {
-            const today = new Date().toDateString();
-            
-            state.habits.forEach(habit => {
-                if (habit.lastCompletedDate !== today) {
-                    habit.completed = false;
-                }
-            });
-            
-            await saveState();
-        }
-
-        function loadState() {
-            try {
-                if (tg.CloudStorage) {
-                    tg.CloudStorage.getItem('livi_state', (error, value) => {
-                        if (!error && value) {
-                            try {
-                                const loaded = JSON.parse(value);
-                                state = { ...getInitialState(), ...loaded };
-                                console.log('✅ Данные загружены');
-                            } catch (e) {
-                                console.log('⚠️ Ошибка парсинга');
-                            }
-                        }
-                    });
-                }
-            } catch (e) {
-                console.log('❌ Ошибка загрузки');
-            }
-        }
-
-        function resetDailyHabits() {
-            const today = new Date().toDateString();
-            state.habits.forEach(habit => {
-                if (habit.lastCompletedDate !== today) {
-                    habit.completed = false;
-                }
-            });
-        }
-
-        function init() {
-            console.log('Init started');
-            loadState();
-            resetDailyHabits();
-            render();
-            console.log('Rendered');
-            
-            // Hide loading screen
-            setTimeout(() => {
-                const loadingScreen = document.getElementById('loadingScreen');
-                if (loadingScreen) {
-                    loadingScreen.classList.add('fade-out');
-                    setTimeout(() => loadingScreen.remove(), 500);
-                }
-            }, 1500);
-        }
-
-        init();
-    </script>
-</body>
-</html>
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #1a1a1a;
@@ -1084,7 +753,7 @@
         let state = getInitialState();
         let isLoading = true;
 
-        const tg = window.Telegram.WebApp;
+        const tg = window.Telegram?.WebApp || { expand: () => {}, ready: () => {}, CloudStorage: null };
         tg.expand();
         tg.ready();
 
@@ -1275,9 +944,36 @@
             };
         }
 
-        // COMPACT CODE HELPER
         function renderCompactCode() {
             return `<div class="code-compact">// livi v1.0 - Compact Core<br>const save=()=>tg.CloudStorage.setItem('s',JSON.stringify(state))<br>const load=()=>tg.CloudStorage.getItem('s',(e,v)=>v?state=JSON.parse(v):0)<br>// State: ${Object.keys(state).length} keys | Streak: ${state.streak}d</div>`;
+        }
+
+        function renderHabitModal() {
+            const habit = state.selectedHabit;
+            return `
+                <div class="modal" id="habitModal">
+                    <div class="modal-content" onclick="event.stopPropagation();">
+                        <div class="modal-handle"></div>
+                        <div style="text-align: center;">
+                            <div style="width: 80px; height: 80px; border-radius: 16px; background-color: ${habit.color}30; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                                ${habit.completed ? '✓' : '○'}
+                            </div>
+                            <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 16px;">${habit.name}</h2>
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 24px;">
+                                ${createSvg('flame', colors.warning)}
+                                <span style="font-size: 32px; font-weight: bold;">${habit.streak}</span>
+                                <span style="font-size: 18px; color: #999;">дней</span>
+                            </div>
+                            <p style="font-size: 16px; color: #999; margin-bottom: 24px;">
+                                ${habit.completed ? 'Выполнено сегодня! 🎉' : 'Не забудь выполнить'}
+                            </p>
+                            <button class="btn" style="background-color: ${habit.color}; color: white;" id="closeHabitModal">
+                                Закрыть
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         function render() {
@@ -1413,6 +1109,83 @@
                     </div>
                 </div>
             `;
+        }
+
+        function attachOnboardingListeners() {
+            const startBtn = document.getElementById('startOnboarding');
+            const nextBtn = document.getElementById('nextStep');
+            const prevBtn = document.getElementById('prevStep');
+            const completeBtn = document.getElementById('completeOnboarding');
+            const goalButtons = document.querySelectorAll('[data-goal]');
+            const userName = document.getElementById('userName');
+
+            if (startBtn) {
+                startBtn.addEventListener('click', () => {
+                    state.onboardingStep = 1;
+                    render();
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    if (state.onboardingStep === 1 && userName) {
+                        state.userInfo.name = userName.value.trim();
+                    }
+                    if (state.onboardingStep === 3) {
+                        state.userInfo.wakeUpTime = document.getElementById('wakeUpTime').value;
+                        state.userInfo.sleepTime = document.getElementById('sleepTime').value;
+                    }
+                    state.onboardingStep++;
+                    render();
+                });
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    state.onboardingStep--;
+                    render();
+                });
+            }
+
+            if (completeBtn) {
+                completeBtn.addEventListener('click', async () => {
+                    state.userInfo.mainGoal = document.getElementById('mainGoal').value.trim();
+                    state.hasCompletedOnboarding = true;
+                    state.streak = 1;
+                    state.lastActiveDate = new Date().toDateString();
+                    
+                    const habitsByGoal = {
+                        health: { name: 'Зарядка', color: colors.accent3, icon: '💪' },
+                        learning: { name: 'Чтение', color: colors.accent2, icon: '📚' },
+                        productivity: { name: 'Планирование', color: colors.primary, icon: '📋' },
+                        mindfulness: { name: 'Медитация', color: colors.secondary, icon: '🧘' },
+                        sleep: { name: 'Сон 8 часов', color: colors.accent1, icon: '😴' },
+                        social: { name: 'Общение', color: colors.warning, icon: '☕' }
+                    };
+                    
+                    state.habits = Object.entries(state.userGoals)
+                        .filter(([_, selected]) => selected)
+                        .map(([goal], index) => ({
+                            id: Date.now() + index,
+                            name: habitsByGoal[goal].name,
+                            color: habitsByGoal[goal].color,
+                            streak: 0,
+                            completed: false,
+                            lastCompletedDate: null
+                        }));
+                    
+                    await saveState();
+                    render();
+                });
+            }
+
+            goalButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const goal = btn.dataset.goal;
+                    state.userGoals[goal] = !state.userGoals[goal];
+                    render();
+                });
+            });
         }
 
         function renderMain() {
@@ -1705,4 +1478,201 @@
                         `).join('')}
                     </div>
                 </div>
-            `
+            `;
+        }
+
+        function attachMainListeners() {
+            const tabs = document.querySelectorAll('[data-tab]');
+            const showRankBtn = document.getElementById('showRank');
+            const rankModal = document.getElementById('rankModal');
+            const habitCards = document.querySelectorAll('[data-habit]');
+            const habitModal = document.getElementById('habitModal');
+            const closeHabitModalBtn = document.getElementById('closeHabitModal');
+            const taskChecks = document.querySelectorAll('[data-task-check]');
+            const addTaskBtn = document.getElementById('addTask');
+            const newTaskInput = document.getElementById('newTaskInput');
+            const deleteButtons = document.querySelectorAll('[data-delete]');
+            const goToTasksBtn = document.getElementById('goToTasks');
+            const addFirstHabitBtn = document.getElementById('addFirstHabit');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    state.activeTab = tab.dataset.tab;
+                    render();
+                });
+            });
+
+            if (showRankBtn) {
+                showRankBtn.addEventListener('click', () => {
+                    state.showRankModal = true;
+                    render();
+                });
+            }
+
+            if (rankModal) {
+                rankModal.addEventListener('click', (e) => {
+                    if (e.target === rankModal) {
+                        state.showRankModal = false;
+                        render();
+                    }
+                });
+            }
+
+            habitCards.forEach(card => {
+                card.addEventListener('click', async () => {
+                    const habitId = parseInt(card.dataset.habit);
+                    const habit = state.habits.find(h => h.id === habitId);
+                    
+                    if (habit) {
+                        const today = new Date().toDateString();
+                        
+                        if (!habit.completed) {
+                            habit.completed = true;
+                            habit.lastCompletedDate = today;
+                            habit.streak++;
+                            state.totalPoints += 10;
+                        } else {
+                            habit.completed = false;
+                            if (habit.streak > 0) habit.streak--;
+                            state.totalPoints = Math.max(0, state.totalPoints - 10);
+                        }
+                        
+                        await saveState();
+                        render();
+                    }
+                });
+            });
+
+            if (closeHabitModalBtn) {
+                closeHabitModalBtn.addEventListener('click', () => {
+                    state.selectedHabit = null;
+                    render();
+                });
+            }
+
+            if (habitModal) {
+                habitModal.addEventListener('click', (e) => {
+                    if (e.target === habitModal) {
+                        state.selectedHabit = null;
+                        render();
+                    }
+                });
+            }
+
+            taskChecks.forEach(check => {
+                check.addEventListener('click', async () => {
+                    const taskId = parseInt(check.dataset.taskCheck);
+                    const task = state.tasks.find(t => t.id === taskId);
+                    
+                    if (task) {
+                        task.completed = !task.completed;
+                        
+                        if (task.completed) {
+                            state.totalPoints += task.points;
+                        } else {
+                            state.totalPoints = Math.max(0, state.totalPoints - task.points);
+                        }
+                        
+                        await saveState();
+                        render();
+                    }
+                });
+            });
+
+            if (addTaskBtn && newTaskInput) {
+                const addTask = async () => {
+                    const title = newTaskInput.value.trim();
+                    if (title) {
+                        state.tasks.push({
+                            id: Date.now(),
+                            title,
+                            completed: false,
+                            points: 5,
+                            category: 'Общее',
+                            createdAt: new Date().toISOString()
+                        });
+                        state.newTask = '';
+                        await saveState();
+                        render();
+                    }
+                };
+
+                addTaskBtn.addEventListener('click', addTask);
+                newTaskInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        addTask();
+                    }
+                });
+            }
+
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const taskId = parseInt(btn.dataset.delete);
+                    const task = state.tasks.find(t => t.id === taskId);
+                    
+                    if (task && task.completed) {
+                        state.totalPoints = Math.max(0, state.totalPoints - task.points);
+                    }
+                    
+                    state.tasks = state.tasks.filter(t => t.id !== taskId);
+                    await saveState();
+                    render();
+                });
+            });
+
+            if (goToTasksBtn) {
+                goToTasksBtn.addEventListener('click', () => {
+                    state.activeTab = 'tasks';
+                    render();
+                });
+            }
+
+            if (addFirstHabitBtn) {
+                addFirstHabitBtn.addEventListener('click', async () => {
+                    state.habits.push({
+                        id: Date.now(),
+                        name: 'Новая привычка',
+                        color: colors.primary,
+                        streak: 0,
+                        completed: false,
+                        lastCompletedDate: null
+                    });
+                    await saveState();
+                    render();
+                });
+            }
+        }
+
+        async function resetDailyHabits() {
+            const today = new Date().toDateString();
+            
+            state.habits.forEach(habit => {
+                if (habit.lastCompletedDate !== today) {
+                    habit.completed = false;
+                }
+            });
+            
+            await saveState();
+        }
+
+        async function init() {
+            console.log('Init started');
+            await loadState();
+            await resetDailyHabits();
+            render();
+            console.log('Rendered');
+            
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('fade-out');
+                    setTimeout(() => loadingScreen.remove(), 500);
+                }
+            }, 1500);
+        }
+
+        init();
+    </script>
+</body>
+</html>
