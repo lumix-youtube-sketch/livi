@@ -1288,6 +1288,14 @@
 
             } catch (error) {
                 console.error('❌ Ошибка:', error);
+                if (tg.showAlert) {
+                    tg.showAlert('Не удалось создать счет. Попробуйте позже.');
+                }
+            }
+        }
+
+            } catch (error) {
+                console.error('❌ Ошибка:', error);
                 if (tg.showPopup) {
                     tg.showPopup({
                         title: 'Ошибка',
