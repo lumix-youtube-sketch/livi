@@ -11,49 +11,48 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Статический хостинг для index.html
+app.use(express.static('.'));
+
 console.log('🤖 Бот livi запущен!');
 
-// API endpoint для создания invoice
+// API для создания invoice link
 app.post('/create-invoice', async (req, res) => {
     try {
-        const { userId, amount } = req.body;
+        const { amount } = req.body;
         
-        console.log(`💰 Создание invoice: ${amount} Stars для пользователя ${userId}`);
+        console.log(`💰 Создание invoice на ${amount} Stars`);
 
-        // Используем правильный метод для создания invoice link
-        const invoice = await bot.createInvoiceLink(
+        // Создаем invoice link
+        const invoiceLink = await bot.createInvoiceLink(
             'Поддержка livi 💖',
             `Спасибо за поддержку проекта на ${amount} Stars!`,
-            `donate_${userId}_${amount}_${Date.now()}`,
+            `donate_${Date.now()}`,
             'XTR',
             [{ label: `${amount} Stars`, amount: amount }]
         );
 
-        console.log('✅ Invoice создан:', invoice);
-        res.json({ invoiceLink: invoice });
+        console.log('✅ Invoice link создан');
+        res.json({ success: true, invoiceLink });
+        
     } catch (error) {
-        console.error('❌ Ошибка создания invoice:', error);
+        console.error('❌ Ошибка создания invoice:', error.message);
         res.status(500).json({ 
-            error: 'Не удалось создать invoice',
-            details: error.message 
+            success: false, 
+            error: error.message 
         });
     }
 });
 
-// Тестовый endpoint
-app.get('/test', (req, res) => {
-    res.json({ status: 'ok', message: 'Сервер работает' });
-});
-
 // Обычная команда /start
-bot.onText(/\/start$/, (msg) => {
+bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, '👋 Добро пожаловать в livi!\n\n💫 Используйте веб-приложение для управления задачами и привычками.');
 });
 
 // Подтверждение платежа (ОБЯЗАТЕЛЬНО!)
 bot.on('pre_checkout_query', (query) => {
-    console.log('🔍 Pre-checkout:', query.id);
+    console.log('🔍 Pre-checkout запрос:', query.id);
     bot.answerPreCheckoutQuery(query.id, true);
 });
 
@@ -63,7 +62,7 @@ bot.on('successful_payment', (msg) => {
     const userId = msg.from.id;
     const username = msg.from.username || msg.from.first_name;
 
-    console.log(`✅ Платеж получен: ${amount} Stars от @${username} (${userId})`);
+    console.log(`✅ Платеж получен: ${amount} Stars от @${username}`);
 
     bot.sendMessage(
         userId,
@@ -71,11 +70,9 @@ bot.on('successful_payment', (msg) => {
     );
 });
 
-console.log('✅ Бот готов принимать платежи!');
-
-// Запуск веб-сервера
+// Запуск сервера
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🌐 Сервер запущен на порту ${PORT}`);
-    console.log(`📍 Тест: http://localhost:${PORT}/test`);
+    console.log(`✅ Сервер запущен на http://localhost:${PORT}`);
+    console.log(`📱 Откройте веб-приложение в Telegram`);
 });
