@@ -1210,66 +1210,73 @@
         }
 
         async function sendStars(amount) {
+            console.log('🌟 Запрос оплаты:', amount, 'Stars');
+            
+            // Проверяем доступность tg.openInvoice
             if (!tg.openInvoice) {
-                if (tg.showPopup) {
-                    tg.showPopup({
-                        title: 'Ошибка',
-                        message: 'Оплата доступна только в Telegram приложении',
-                        buttons: [{type: 'ok'}]
-                    });
-                }
+                console.error('❌ tg.openInvoice недоступен');
+                alert('Оплата доступна только в Telegram приложении');
                 return;
             }
 
             try {
-                // Генерируем уникальный invoice link через бота
+                // Запрашиваем invoice link у сервера
+                console.log('📡 Запрос к серверу...');
                 const response = await fetch('/create-invoice', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        userId: tg.initDataUnsafe?.user?.id,
-                        amount: amount 
-                    })
+                    body: JSON.stringify({ amount })
                 });
 
                 const data = await response.json();
-                
-                if (data.invoiceLink) {
-                    // Открываем invoice прямо в приложении
-                    tg.openInvoice(data.invoiceLink, (status) => {
-                        if (status === 'paid') {
-                            if (tg.showPopup) {
-                                tg.showPopup({
-                                    title: '🎉 Спасибо!',
-                                    message: `Вы поддержали проект на ${amount} Stars!\n\nВаша поддержка помогает развивать livi!`,
-                                    buttons: [{type: 'ok'}]
-                                });
-                            }
-                        } else if (status === 'cancelled') {
-                            console.log('Оплата отменена');
-                        } else if (status === 'failed') {
-                            if (tg.showPopup) {
-                                tg.showPopup({
-                                    title: 'Ошибка',
-                                    message: 'Не удалось завершить оплату',
-                                    buttons: [{type: 'ok'}]
-                                });
-                            }
-                        }
-                    });
+                console.log('📦 Ответ сервера:', data);
+
+                if (!data.success || !data.invoiceLink) {
+                    throw new Error(data.error || 'Не удалось создать invoice');
                 }
+
+                console.log('✅ Invoice link получен, открываем...');
+                
+                // Открываем invoice прямо в приложении
+                tg.openInvoice(data.invoiceLink, (status) => {
+                    console.log('💳 Статус оплаты:', status);
+                    
+                    if (status === 'paid') {
+                        // Платеж успешен
+                        if (tg.showPopup) {
+                            tg.showPopup({
+                                title: '🎉 Спасибо!',
+                                message: `Вы поддержали livi на ${amount} Stars!\n\nВаша поддержка очень важна для развития проекта!`,
+                                buttons: [{ type: 'ok' }]
+                            });
+                        }
+                    } else if (status === 'cancelled') {
+                        console.log('ℹ️ Пользователь отменил оплату');
+                    } else if (status === 'failed') {
+                        if (tg.showPopup) {
+                            tg.showPopup({
+                                title: 'Ошибка',
+                                message: 'Не удалось завершить оплату. Попробуйте еще раз.',
+                                buttons: [{ type: 'ok' }]
+                            });
+                        }
+                    }
+                });
+
             } catch (error) {
-                console.error('Ошибка создания счета:', error);
+                console.error('❌ Ошибка:', error);
                 if (tg.showPopup) {
                     tg.showPopup({
                         title: 'Ошибка',
                         message: 'Не удалось создать счет. Попробуйте позже.',
-                        buttons: [{type: 'ok'}]
+                        buttons: [{ type: 'ok' }]
                     });
+                } else {
+                    alert('Ошибка создания счета');
                 }
             }
         }
-
+        
         async function resetDailyHabits() {
             const today = new Date().toDateString();
             state.habits.forEach(habit => {
