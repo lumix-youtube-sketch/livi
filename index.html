@@ -1212,56 +1212,71 @@
         async function sendStars(amount) {
             console.log('🌟 Запрос оплаты:', amount, 'Stars');
             
-            // Проверяем доступность tg.openInvoice
             if (!tg.openInvoice) {
                 console.error('❌ tg.openInvoice недоступен');
-                alert('Оплата доступна только в Telegram приложении');
+                if (tg.showAlert) {
+                    tg.showAlert('Оплата доступна только в Telegram приложении');
+                }
                 return;
             }
 
             try {
-                // Запрашиваем invoice link у сервера
-                console.log('📡 Запрос к серверу...');
-                const response = await fetch('/create-invoice', {
+                console.log('📡 Отправка запроса на сервер...');
+                
+                // Запрос к API на том же домене
+                const response = await fetch('/api/create-invoice', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount })
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ amount: amount })
                 });
 
-                const data = await response.json();
-                console.log('📦 Ответ сервера:', data);
-
-                if (!data.success || !data.invoiceLink) {
-                    throw new Error(data.error || 'Не удалось создать invoice');
+                console.log('📥 Статус ответа:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
                 }
 
-                console.log('✅ Invoice link получен, открываем...');
+                const data = await response.json();
+                console.log('📦 Данные получены:', data.success);
+
+                if (!data.success || !data.invoiceLink) {
+                    throw new Error(data.error || 'Нет invoice link');
+                }
+
+                console.log('✅ Открытие invoice...');
                 
                 // Открываем invoice прямо в приложении
                 tg.openInvoice(data.invoiceLink, (status) => {
                     console.log('💳 Статус оплаты:', status);
                     
                     if (status === 'paid') {
-                        // Платеж успешен
+                        console.log('✅ Оплата успешна!');
                         if (tg.showPopup) {
                             tg.showPopup({
                                 title: '🎉 Спасибо!',
-                                message: `Вы поддержали livi на ${amount} Stars!\n\nВаша поддержка очень важна для развития проекта!`,
+                                message: `Вы поддержали livi на ${amount} Stars!\n\nВаша поддержка очень важна!`,
                                 buttons: [{ type: 'ok' }]
                             });
                         }
                     } else if (status === 'cancelled') {
-                        console.log('ℹ️ Пользователь отменил оплату');
+                        console.log('ℹ️ Оплата отменена');
                     } else if (status === 'failed') {
-                        if (tg.showPopup) {
-                            tg.showPopup({
-                                title: 'Ошибка',
-                                message: 'Не удалось завершить оплату. Попробуйте еще раз.',
-                                buttons: [{ type: 'ok' }]
-                            });
+                        console.log('❌ Оплата не удалась');
+                        if (tg.showAlert) {
+                            tg.showAlert('Не удалось завершить оплату');
                         }
                     }
                 });
+
+            } catch (error) {
+                console.error('❌ Ошибка:', error);
+                if (tg.showAlert) {
+                    tg.showAlert('Не удалось создать счет. Попробуйте позже.');
+                }
+            }
+        }
 
             } catch (error) {
                 console.error('❌ Ошибка:', error);
