@@ -20,27 +20,29 @@ app.post('/create-invoice', async (req, res) => {
         
         console.log(`💰 Создание invoice: ${amount} Stars для пользователя ${userId}`);
 
+        // Используем правильный метод для создания invoice link
         const invoice = await bot.createInvoiceLink(
-            'Поддержка livi 💖', // title
-            `Спасибо за поддержку проекта на ${amount} Stars!`, // description
-            `donate_${userId}_${amount}_${Date.now()}`, // payload
-            'XTR', // currency (Telegram Stars)
-            [{ label: `${amount} Stars`, amount: amount }], // prices
-            {
-                // Дополнительные параметры
-                need_name: false,
-                need_phone_number: false,
-                need_email: false,
-                need_shipping_address: false,
-                is_flexible: false
-            }
+            'Поддержка livi 💖',
+            `Спасибо за поддержку проекта на ${amount} Stars!`,
+            `donate_${userId}_${amount}_${Date.now()}`,
+            'XTR',
+            [{ label: `${amount} Stars`, amount: amount }]
         );
 
+        console.log('✅ Invoice создан:', invoice);
         res.json({ invoiceLink: invoice });
     } catch (error) {
         console.error('❌ Ошибка создания invoice:', error);
-        res.status(500).json({ error: 'Не удалось создать invoice' });
+        res.status(500).json({ 
+            error: 'Не удалось создать invoice',
+            details: error.message 
+        });
     }
+});
+
+// Тестовый endpoint
+app.get('/test', (req, res) => {
+    res.json({ status: 'ok', message: 'Сервер работает' });
 });
 
 // Обычная команда /start
@@ -75,4 +77,5 @@ console.log('✅ Бот готов принимать платежи!');
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🌐 Сервер запущен на порту ${PORT}`);
+    console.log(`📍 Тест: http://localhost:${PORT}/test`);
 });
