@@ -1209,66 +1209,22 @@
             });
         }
 
-        async function sendStars(amount) {
-            console.log('🌟 Запрос оплаты:', amount, 'Stars');
+        function sendStars(amount) {
+            const botUsername = '@livi_app_bot'; // ЗАМЕНИТЕ!
             
-            if (!tg.openInvoice) {
-                console.error('❌ tg.openInvoice недоступен');
-                if (tg.showAlert) {
-                    tg.showAlert('Оплата доступна только в Telegram приложении');
-                }
-                return;
-            }
-
-            try {
-                console.log('📡 Отправка запроса на сервер...');
-                
-                // Запрос к API на том же домене
-                const response = await fetch('/api/create-invoice', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ amount: amount })
-                });
-
-                console.log('📥 Статус ответа:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const data = await response.json();
-                console.log('📦 Данные получены:', data.success);
-
-                if (!data.success || !data.invoiceLink) {
-                    throw new Error(data.error || 'Нет invoice link');
-                }
-
-                console.log('✅ Открытие invoice...');
-                
-                // Открываем invoice прямо в приложении
-                tg.openInvoice(data.invoiceLink, (status) => {
-                    console.log('💳 Статус оплаты:', status);
-                    
-                    if (status === 'paid') {
-                        console.log('✅ Оплата успешна!');
-                        if (tg.showPopup) {
-                            tg.showPopup({
-                                title: '🎉 Спасибо!',
-                                message: `Вы поддержали livi на ${amount} Stars!\n\nВаша поддержка очень важна!`,
-                                buttons: [{ type: 'ok' }]
-                            });
-                        }
-                    } else if (status === 'cancelled') {
-                        console.log('ℹ️ Оплата отменена');
-                    } else if (status === 'failed') {
-                        console.log('❌ Оплата не удалась');
-                        if (tg.showAlert) {
-                            tg.showAlert('Не удалось завершить оплату');
+            if (tg.showConfirm) {
+                tg.showConfirm(
+                    `Поддержать проект на ${amount} Stars?`,
+                    (confirmed) => {
+                        if (confirmed) {
+                            tg.openTelegramLink(`https://t.me/${botUsername}?start=pay_${amount}`);
                         }
                     }
-                });
+                );
+            } else {
+                tg.openTelegramLink(`https://t.me/${botUsername}?start=pay_${amount}`);
+            }
+        }
 
             } catch (error) {
                 console.error('❌ Ошибка:', error);
