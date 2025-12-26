@@ -1210,17 +1210,12 @@
         }
 
         function sendStars(amount) {
-            if (tg.openInvoice) {
-                const invoiceLink = `https://t.me/$livi_support_bot?start=donate_${amount}`;
+            const botUsername = 'livi_app_bot'; // замените на username вашего бота
+            const invoiceLink = `https://t.me/${botUsername}?start=donate_${amount}`;
+            if (tg.openTelegramLink) {
                 tg.openTelegramLink(invoiceLink);
-            } else if (tg.showPopup) {
-                tg.showPopup({
-                    title: 'Поддержка разработчика',
-                    message: `Спасибо за желание поддержать проект на ${amount} Stars! Функция в разработке.`,
-                    buttons: [{type: 'ok'}]
-                });
             } else {
-                alert(`Спасибо за желание поддержать проект на ${amount} Stars!`);
+                window.open(invoiceLink, '_blank');
             }
         }
 
