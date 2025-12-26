@@ -1,31 +1,29 @@
 const TelegramBot = require('node-telegram-bot-api');
+const express = require('express');
+const cors = require('cors');
 
 // ЗАМЕНИТЕ на ваш токен от @BotFather
 const token = '8447413317:AAEWCdX9_W_50EHg8Z4-lJ47apW-sVUoVk8';
 
 const bot = new TelegramBot(token, { polling: true });
+const app = express();
+
+app.use(cors());
+app.use(express.json());
 
 console.log('🤖 Бот livi запущен!');
 
-// Обычная команда /start
-bot.onText(/\/start$/, (msg) => {
-    const chatId = msg.chat.id;
-    bot.sendMessage(chatId, '👋 Добро пожаловать в livi!\n\n💫 Используйте веб-приложение для управления задачами и привычками.');
-});
-
-// Команда /start donate_X (приходит из веб-приложения)
-bot.onText(/\/start donate_(\d+)/, async (msg, match) => {
-    const userId = msg.from.id;
-    const amount = parseInt(match[1]);
-
-    console.log(`💰 Запрос платежа: ${amount} Stars от пользователя ${userId}`);
-
+// API endpoint для создания invoice
+app.post('/create-invoice', async (req, res) => {
     try {
-        await bot.sendInvoice(
-            userId,
+        const { userId, amount } = req.body;
+        
+        console.log(`💰 Создание invoice: ${amount} Stars для пользователя ${userId}`);
+
+        const invoice = await bot.createInvoiceLink(
             'Поддержка livi 💖', // title
-            `Спасибо за поддержку! Вы отправляете ${amount} Stars`, // description
-            `donate_${amount}_${Date.now()}`, // payload
+            `Спасибо за поддержку проекта на ${amount} Stars!`, // description
+            `donate_${userId}_${amount}_${Date.now()}`, // payload
             'XTR', // currency (Telegram Stars)
             [{ label: `${amount} Stars`, amount: amount }], // prices
             {
@@ -37,10 +35,18 @@ bot.onText(/\/start donate_(\d+)/, async (msg, match) => {
                 is_flexible: false
             }
         );
+
+        res.json({ invoiceLink: invoice });
     } catch (error) {
-        console.error('❌ Ошибка при создании счета:', error);
-        bot.sendMessage(userId, '⚠️ Не удалось создать платеж. Попробуйте позже.');
+        console.error('❌ Ошибка создания invoice:', error);
+        res.status(500).json({ error: 'Не удалось создать invoice' });
     }
+});
+
+// Обычная команда /start
+bot.onText(/\/start$/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, '👋 Добро пожаловать в livi!\n\n💫 Используйте веб-приложение для управления задачами и привычками.');
 });
 
 // Подтверждение платежа (ОБЯЗАТЕЛЬНО!)
@@ -64,3 +70,9 @@ bot.on('successful_payment', (msg) => {
 });
 
 console.log('✅ Бот готов принимать платежи!');
+
+// Запуск веб-сервера
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🌐 Сервер запущен на порту ${PORT}`);
+});
