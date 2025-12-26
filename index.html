@@ -1226,44 +1226,6 @@
             }
         }
 
-            } catch (error) {
-                console.error('❌ Ошибка:', error);
-                if (tg.showAlert) {
-                    tg.showAlert('Не удалось создать счет. Попробуйте позже.');
-                }
-            }
-        }
-
-            } catch (error) {
-                console.error('❌ Ошибка:', error);
-                if (tg.showAlert) {
-                    tg.showAlert('Не удалось создать счет. Попробуйте позже.');
-                }
-            }
-        }
-
-            } catch (error) {
-                console.error('❌ Ошибка:', error);
-                if (tg.showAlert) {
-                    tg.showAlert('Не удалось создать счет. Попробуйте позже.');
-                }
-            }
-        }
-
-            } catch (error) {
-                console.error('❌ Ошибка:', error);
-                if (tg.showPopup) {
-                    tg.showPopup({
-                        title: 'Ошибка',
-                        message: 'Не удалось создать счет. Попробуйте позже.',
-                        buttons: [{ type: 'ok' }]
-                    });
-                } else {
-                    alert('Ошибка создания счета');
-                }
-            }
-        }
-        
         async function resetDailyHabits() {
             const today = new Date().toDateString();
             state.habits.forEach(habit => {
