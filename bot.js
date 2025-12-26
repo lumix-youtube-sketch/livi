@@ -1,7 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 // ЗАМЕНИТЕ на ваш токен от @BotFather
-const token = 'ВАХХХ_ТОКЕН_БОТА';
+const token = '8447413317:AAEWCdX9_W_50EHg8Z4-lJ47apW-sVUoVk8';
 
 const bot = new TelegramBot(token, { polling: true });
 
@@ -55,5 +55,6 @@ bot.on('successful_payment', (msg) => {
         `🎉 Огромное спасибо за поддержку!\n\n💫 Вы отправили ${amount} Stars\n\n💖 Ваша поддержка помогает развивать livi!`
     );
 });
+
 
 console.log('✅ Бот готов принимать платежи!');
