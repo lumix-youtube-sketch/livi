@@ -23,15 +23,22 @@ bot.onText(/\/start donate_(\d+)/, async (msg, match) => {
     try {
         await bot.sendInvoice(
             userId,
-            'Поддержка livi 💖', // Заголовок
-            `Спасибо за поддержку! Вы отправляете ${amount} Stars`, // Описание
-            `donate_${amount}_${Date.now()}`, // Уникальный payload
-            '', // provider_token (для Stars пустая строка)
-            'XTR', // Валюта - Telegram Stars
-            [{ label: `${amount} Stars`, amount: amount }] // Цена
+            'Поддержка livi 💖', // title
+            `Спасибо за поддержку! Вы отправляете ${amount} Stars`, // description
+            `donate_${amount}_${Date.now()}`, // payload
+            'XTR', // currency (Telegram Stars)
+            [{ label: `${amount} Stars`, amount: amount }], // prices
+            {
+                // Дополнительные параметры
+                need_name: false,
+                need_phone_number: false,
+                need_email: false,
+                need_shipping_address: false,
+                is_flexible: false
+            }
         );
     } catch (error) {
-        console.error('❌ Ошибка:', error);
+        console.error('❌ Ошибка при создании счета:', error);
         bot.sendMessage(userId, '⚠️ Не удалось создать платеж. Попробуйте позже.');
     }
 });
@@ -55,6 +62,5 @@ bot.on('successful_payment', (msg) => {
         `🎉 Огромное спасибо за поддержку!\n\n💫 Вы отправили ${amount} Stars\n\n💖 Ваша поддержка помогает развивать livi!`
     );
 });
-
 
 console.log('✅ Бот готов принимать платежи!');
