@@ -2,510 +2,373 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>livi</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>livi - AI Productivity</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-/* --- BASE STYLES --- */
+/* --- БАЗОВЫЕ СТИЛИ --- */
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 100%);color:white;max-width:428px;margin:0 auto;overflow-x:hidden;-webkit-tap-highlight-color:transparent;padding-bottom:90px;min-height:100vh}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0a0a;color:white;max-width:428px;margin:0 auto;overflow-x:hidden;padding-bottom:100px}
 
-/* --- ANIMATIONS --- */
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+/* --- АНИМАЦИИ --- */
 @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-@keyframes gentleFloat{0%,100%{transform:translateY(0px) rotate(0deg)}50%{transform:translateY(-8px) rotate(2deg)}}
-@keyframes blink{0%,90%,100%{opacity:1}95%{opacity:.3}}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes roll{from{transform:translateX(0)}to{transform:translateX(-80%)}}
 
-/* --- UTILITIES --- */
-.fade-in{animation:fadeIn .3s ease-out}
 .slide-up{animation:slideUp .3s ease-out}
-.pulse{animation:pulse 2s infinite}
-.hidden{display:none!important}
+.float{animation:float 3s ease-in-out infinite}
 
-/* --- LOADING SCREEN --- */
-.loading-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a1a 0%,#0f0f0f 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s}
-.loading-screen.fade-out{opacity:0;pointer-events:none}
-.loading-logo{font-size:64px;font-weight:bold;background:linear-gradient(135deg,#8B9A9C 0%,#9CB3B5 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+/* --- ШРИФТЫ И ЦВЕТА --- */
+:root {
+    --primary: #8B9A9C;
+    --accent: #9CB3B5;
+    --gold: #D4AF7A;
+    --rare: #a335ee;
+    --epic: #ff8000;
+    --legendary: #ffb400;
+}
 
 /* --- HEADER --- */
-.header{padding:20px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(15,15,15,.95) 0%,rgba(10,10,10,.95) 100%);backdrop-filter:blur(20px);border-bottom:1px solid #2a2a2a;position:sticky;top:0;z-index:50}
-.header-title{font-size:28px;font-weight:700;background:linear-gradient(135deg,#8B9A9C 0%,#9CB3B5 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header-stats{display:flex;gap:12px}
-.stat-badge{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:16px;font-weight:bold;font-size:16px;border:none;background:rgba(255,255,255,0.05);color:white}
-
-/* --- NAVIGATION --- */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:428px;margin:0 auto;background:rgba(15,15,15,.98);backdrop-filter:blur(20px);border-top:1px solid #2a2a2a;display:flex;justify-content:space-around;padding:12px 0 calc(12px + env(safe-area-inset-bottom));z-index:100}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px;cursor:pointer;background:none;border:none;color:#666;position:relative}
-.nav-item.active{color:#8B9A9C}
-.nav-item.active::before{content:'';position:absolute;top:-13px;width:30px;height:3px;background:#8B9A9C;border-radius:0 0 4px 4px}
+.header{padding:20px;display:flex;justify-content:space-between;align-items:center;background:rgba(20,20,20,0.8);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100;border-bottom:1px solid #222}
+.header-title{font-size:24px;font-weight:800;background:linear-gradient(90deg, var(--primary), #fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stats-row{display:flex;gap:10px}
+.stat-item{background:#1a1a1a;padding:6px 12px;border-radius:12px;display:flex;align-items:center;gap:6px;font-weight:bold;border:1px solid #333}
 
 /* --- CONTENT --- */
-.content{padding:20px}
-.section{background:linear-gradient(135deg,rgba(25,25,25,.6) 0%,rgba(10,10,10,.6) 100%);border:1px solid #2a2a2a;border-radius:20px;padding:20px;margin-bottom:20px;backdrop-filter:blur(10px)}
-.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+.content{padding:16px}
+.card{background:#161616;border-radius:24px;padding:20px;margin-bottom:16px;border:1px solid #222}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
-/* --- LIVI CHARACTER --- */
-.livi-character{display:flex;flex-direction:column;align-items:center;padding:20px 0}
-.livi-circle{border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;animation:gentleFloat 4s ease-in-out infinite;box-shadow:0 0 30px rgba(139,154,156,.1)}
-.livi-antenna{position:absolute;width:4px;height:30px;background:#8B9A9C;border-radius:2px}
-.livi-antenna::after{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#8B9A9C;border-radius:50%}
-.livi-antenna.left{top:-20px;left:30px;transform:rotate(-15deg)}
-.livi-antenna.right{top:-20px;right:30px;transform:rotate(15deg)}
-.livi-face{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
-.livi-eyes{position:absolute;top:40%;width:50%;display:flex;justify-content:space-between}
-.livi-eye{width:10px;height:10px;background:white;border-radius:50%;animation:blink 5s infinite}
-.livi-mouth{position:absolute;bottom:35%;width:20px;height:10px;border-bottom:3px solid white;border-radius:0 0 10px 10px}
+/* --- LIVI AVATAR --- */
+.livi-container{position:relative;width:150px;height:180px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.livi-body{width:100px;height:100px;background:var(--primary);border-radius:50%;position:relative;z-index:2;border:4px solid #333}
+.livi-eye{width:10px;height:10px;background:white;border-radius:50%;position:absolute;top:35%}
+.eye-left{left:25%}.eye-right{right:25%}
+.livi-mouth{width:20px;height:8px;border-bottom:3px solid white;border-radius:50%;position:absolute;bottom:30%;left:50%;transform:translateX(-50%)}
+/* Одежда */
+.item-cap{position:absolute;top:-10px;width:70px;height:30px;background:var(--gold);border-radius:20px 20px 5px 5px;z-index:5}
+.item-glasses{position:absolute;top:32%;width:75px;height:15px;background:rgba(0,0,0,0.8);border-radius:4px;z-index:6;border:1px solid #444}
+.item-shirt{position:absolute;bottom:-10px;width:110px;height:40px;background:#333;border-radius:10px;z-index:1}
 
-/* --- CARDS & BUTTONS --- */
-.stat-card{background:rgba(255,255,255,0.03);border:1px solid #2a2a2a;border-radius:20px;padding:16px;text-align:center}
-.stat-value{font-size:24px;font-weight:bold;margin:8px 0;background:linear-gradient(135deg,#8B9A9C,#9CB3B5);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.stat-label{font-size:12px;color:#888}
+/* --- КНОПКИ --- */
+.btn{width:100%;padding:16px;border-radius:16px;border:none;font-weight:bold;cursor:pointer;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:var(--primary);color:white}
+.btn-stars{background:linear-gradient(90deg, #FFD700, #FFA500);color:black;margin-top:10px}
 
-.task-item{display:flex;align-items:center;gap:12px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid #2a2a2a;border-radius:16px;margin-bottom:10px;transition:all .2s}
-.task-item.completed{opacity:0.6}
-.task-item.completed .task-title{text-decoration:line-through;color:#666}
-.checkbox{width:24px;height:24px;border:2px solid #8B9A9C;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.checkbox.checked{background:#8B9A9C}
+/* --- NAVIGATION --- */
+.nav{position:fixed;bottom:0;width:100%;max-width:428px;background:#111;display:flex;justify-content:space-around;padding:15px 0;border-top:1px solid #222;z-index:1000}
+.nav-item{color:#555;text-align:center;font-size:11px;cursor:pointer}
+.nav-item.active{color:var(--primary)}
 
-.shop-item{background:rgba(255,255,255,0.03);border:1px solid #2a2a2a;border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
-.shop-icon{font-size:32px;margin-bottom:8px}
-.shop-price{font-weight:bold;color:#D4AF7A;margin-top:8px;font-size:14px}
-.shop-btn{margin-top:12px;width:100%;padding:8px;border-radius:10px;border:none;font-weight:bold;cursor:pointer;font-size:12px}
-.shop-btn.buy{background:#8B9A9C;color:white}
-.shop-btn.owned{background:#2a2a2a;color:#666;cursor:default}
+/* --- CASE OPENING MODAL --- */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:2000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.roulette-container{width:100%;height:120px;background:#1a1a1a;border:2px solid var(--gold);overflow:hidden;position:relative;margin:20px 0;border-radius:12px}
+.roulette-line{position:absolute;left:50%;height:100%;width:2px;background:var(--gold);z-index:10;transform:translateX(-50%)}
+.roulette-track{display:flex;height:100%;align-items:center;width:max-content;padding-left:50%}
+.roulette-item{width:100px;height:100px;flex-shrink:0;margin:0 5px;background:#222;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:40px;border-bottom:4px solid #444}
 
-.btn{width:100%;padding:14px;border-radius:16px;font-weight:bold;font-size:16px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
-.btn-primary{background:linear-gradient(135deg,#8B9A9C 0%,#9CB3B5 100%);color:white;box-shadow:0 4px 12px rgba(139,154,156,.3)}
-.btn-secondary{background:transparent;border:1px solid #2a2a2a;color:#8B9A9C}
+/* --- SHOP --- */
+.chest-card{text-align:center;background:linear-gradient(180deg, #1a1a1a, #111);border:2px solid #333}
+.chest-price{color:var(--gold);font-size:20px;font-weight:800;margin:10px 0}
 
-.add-btn{position:fixed;bottom:90px;right:20px;width:56px;height:56px;border-radius:50%;background:#8B9A9C;color:white;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 4px 20px rgba(139,154,156,0.4);border:none;z-index:90}
+/* --- AI ANALYSIS --- */
+.ai-badge{display:inline-block;padding:4px 8px;background:rgba(156,179,181,0.2);border:1px solid var(--primary);border-radius:8px;font-size:10px;color:var(--primary);margin-bottom:10px}
+.ai-text{font-style:italic;color:#ccc;line-height:1.4}
 
-svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* --- CHART --- */
+.chart-container{height:150px;display:flex;align-items:flex-end;gap:8px;margin-top:20px}
+.chart-bar{flex:1;background:var(--primary);border-radius:4px 4px 0 0;position:relative;min-height:5px}
+.chart-label{position:absolute;bottom:-20px;font-size:10px;left:50%;transform:translateX(-50%)}
 </style>
 </head>
 <body>
 
-<div class="loading-screen" id="loadingScreen">
-    <div class="loading-logo">livi</div>
-</div>
+<div class="loading-screen" id="loadingScreen"><div class="loading-logo">livi</div></div>
 
 <div id="app"></div>
 
+<div class="modal" id="caseModal">
+    <h2 id="modalTitle">Открытие сундука...</h2>
+    <div class="roulette-container">
+        <div class="roulette-line"></div>
+        <div class="roulette-track" id="rouletteTrack"></div>
+    </div>
+    <div id="winDisplay" style="text-align:center; display:none;">
+        <div id="winIcon" style="font-size:80px; margin-bottom:10px;"></div>
+        <h3 id="winName"></h3>
+        <button class="btn btn-primary" style="margin-top:20px" onclick="closeModal()">Забрать</button>
+    </div>
+</div>
+
 <script>
-// --- TELEGRAM INIT ---
-const tg = window.Telegram?.WebApp;
-if(tg) {
-    tg.expand();
-    tg.ready();
-    // Настраиваем цвета Telegram
-    tg.setHeaderColor('#1a1a1a');
-    tg.setBackgroundColor('#1a1a1a');
-}
+// --- ИНИЦИАЛИЗАЦИЯ TG ---
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-// --- CONFIG ---
-const colors = { primary: '#8B9A9C', accent: '#9CB3B5', warning: '#D4AF7A', bg: '#1a1a1a' };
+// --- ДАННЫЕ ПРЕДМЕТОВ ---
+const LOOT_POOL = [
+    {id: 'cap_red', name: 'Красная кепка', icon: '🧢', type: 'head', rarity: 'common'},
+    {id: 'cap_gold', name: 'Золотая корона', icon: '👑', type: 'head', rarity: 'legendary'},
+    {id: 'glasses_dark', name: 'Черные очки', icon: '🕶️', type: 'glass', rarity: 'rare'},
+    {id: 'glasses_neon', name: 'Неоновый визор', icon: '🥽', type: 'glass', rarity: 'epic'},
+    {id: 'shirt_tux', name: 'Смокинг', icon: '👔', type: 'body', rarity: 'epic'},
+    {id: 'shirt_fire', name: 'Огненное худи', icon: '🔥', type: 'body', rarity: 'rare'},
+    {id: 'item_gem', name: 'Алмаз', icon: '💎', type: 'misc', rarity: 'legendary'}
+];
 
-// --- ICONS ---
-const icons = {
-    home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
-    target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/>',
-    check: '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
-    shop: '<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>',
-    chart: '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>',
-    flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
-    star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
-    trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>'
+const RARITY_COLORS = {
+    common: '#888',
+    rare: '#a335ee',
+    epic: '#ff8000',
+    legendary: '#ffb400'
 };
 
-function getIcon(name, color = 'currentColor') {
-    return `<svg style="color:${color}">${icons[name] || ''}</svg>`;
-}
-
-// --- STATE MANAGEMENT WITH LOCAL STORAGE ---
-// Это логика из "большого кода", адаптированная для сохранения
-
-const defaultState = {
-    activeTab: 'home',
+// --- СОСТОЯНИЕ ПРИЛОЖЕНИЯ ---
+let state = {
+    points: 500,
     streak: 1,
-    totalPoints: 50,
-    lastVisitDate: new Date().toDateString(),
-    weeklyStats: [10, 20, 0, 0, 0, 0, 0], // Статистика по дням
-    tasks: [
-        { id: 1, title: 'Забрать награду', completed: false, type: 'habit', points: 10 },
-        { id: 2, title: 'Запустить Livi', completed: true, type: 'task', points: 5 }
-    ],
-    shopItems: [
-        { id: 1, name: 'Наушники', icon: '🎧', price: 200, owned: false },
-        { id: 2, name: 'Очки', icon: '🕶️', price: 100, owned: false },
-        { id: 3, name: 'Кепка', icon: '🧢', price: 350, owned: false },
-        { id: 4, name: 'Кофе', icon: '☕', price: 50, owned: false }
-    ],
-    dailyChallenge: {
-        date: new Date().toDateString(),
-        title: 'Сделать 20 шагов',
-        target: 20,
-        completed: false,
-        reward: 50
-    }
+    activeTab: 'home',
+    inventory: [],
+    equipped: { head: null, glass: null, body: null },
+    stats: [15, 40, 25, 60, 30, 80, 45], // Активность за неделю
+    tasksDone: 0,
+    energy: 85
 };
 
-let state = { ...defaultState };
-
-// Функция сохранения (Вызывается при любом изменении)
-function saveState() {
-    try {
-        localStorage.setItem('livi_data_v2', JSON.stringify(state));
-    } catch (e) {
-        console.error("Saving error", e);
-    }
+// --- СОХРАНЕНИЕ ---
+function save() {
+    localStorage.setItem('livi_pro_data', JSON.stringify(state));
 }
 
-// Функция загрузки (Вызывается при старте)
-function loadState() {
-    try {
-        const saved = localStorage.getItem('livi_data_v2');
-        if (saved) {
-            state = JSON.parse(saved);
-            
-            // Логика проверки нового дня (как в большом коде)
-            const today = new Date().toDateString();
-            if (state.lastVisitDate !== today) {
-                // Сброс ежедневных данных
-                state.dailyChallenge = {
-                    date: today,
-                    title: 'Новый вызов!', 
-                    target: 10,
-                    completed: false,
-                    reward: 50
-                };
-                // Сброс привычек (habit)
-                state.tasks.forEach(t => {
-                    if(t.type === 'habit') t.completed = false;
-                });
-                
-                // Увеличиваем стрик, если зашли на след день
-                state.streak += 1;
-                state.lastVisitDate = today;
-                saveState();
-            }
-        }
-    } catch (e) {
-        console.log("No saved state found, using default");
-    }
+function load() {
+    const data = localStorage.getItem('livi_pro_data');
+    if(data) state = JSON.parse(data);
 }
 
-// --- ACTIONS ---
-const actions = {
-    // Переключение задачи
-    toggleTask: (id) => {
-        const task = state.tasks.find(t => t.id === id);
-        if (task) {
-            task.completed = !task.completed;
-            if(task.completed) {
-                state.totalPoints += task.points;
-                // Вибрация Taptic Engine в Telegram
-                tg?.HapticFeedback?.notificationOccurred('success');
-            } else {
-                state.totalPoints -= task.points;
-            }
-            saveState(); // Сохраняем!
-            render();
-        }
-    },
-    // Добавление задачи
-    addTask: () => {
-        tg?.showPopup({
-            title: 'Новая задача',
-            message: 'Введите название задачи',
-            buttons: [{id: 'ok', type: 'ok'}, {id: 'cancel', type: 'cancel'}]
-        }, (btn) => {
-            // В реальном TG Popup не возвращает текст, поэтому используем prompt как фоллбек для ввода
-            // Или простой prompt браузера, он работает в WebApp
-        });
+// --- ЛОГИКА РУЛЕТКИ ---
+function openChest(price) {
+    if(state.points < price) {
+        alert("Недостаточно очков!");
+        return;
+    }
+    state.points -= price;
+    save();
+    render();
+
+    const modal = document.getElementById('caseModal');
+    const track = document.getElementById('rouletteTrack');
+    const winDisplay = document.getElementById('winDisplay');
+    modal.style.display = 'flex';
+    winDisplay.style.display = 'none';
+    track.style.transform = 'translateX(0)';
+    track.innerHTML = '';
+
+    // Генерируем 50 предметов для ленты
+    const items = [];
+    for(let i=0; i<50; i++) {
+        const item = LOOT_POOL[Math.floor(Math.random() * LOOT_POOL.length)];
+        items.push(item);
+        const div = document.createElement('div');
+        div.className = 'roulette-item';
+        div.style.borderColor = RARITY_COLORS[item.rarity];
+        div.innerHTML = item.icon;
+        track.appendChild(div);
+    }
+
+    // Победный предмет (например, 45-й в списке)
+    const winIndex = 45;
+    const winningItem = items[winIndex];
+
+    setTimeout(() => {
+        track.style.transition = 'transform 4s cubic-bezier(0.15, 0, 0.15, 1)';
+        const shift = winIndex * 110 - (track.parentElement.offsetWidth / 2 - 55);
+        track.style.transform = `translateX(-${shift}px)`;
+    }, 100);
+
+    setTimeout(() => {
+        winDisplay.style.display = 'block';
+        document.getElementById('winIcon').innerHTML = winningItem.icon;
+        document.getElementById('winName').innerText = winningItem.name;
+        document.getElementById('winName').style.color = RARITY_COLORS[winningItem.rarity];
         
-        const title = prompt("Название задачи:");
-        if (title) {
-            state.tasks.push({
-                id: Date.now(),
-                title,
-                completed: false,
-                type: 'task',
-                points: 15
-            });
-            saveState(); // Сохраняем!
-            render();
+        // Добавляем в инвентарь
+        if(!state.inventory.find(i => i.id === winningItem.id)) {
+            state.inventory.push(winningItem);
         }
-    },
-    // Удаление задачи
-    deleteTask: (id) => {
-        if(confirm("Удалить?")) {
-            state.tasks = state.tasks.filter(t => t.id !== id);
-            saveState(); // Сохраняем!
-            render();
-        }
-    },
-    // Покупка в магазине
-    buyItem: (id) => {
-        const item = state.shopItems.find(i => i.id === id);
-        if (item && !item.owned) {
-            if (state.totalPoints >= item.price) {
-                state.totalPoints -= item.price;
-                item.owned = true;
-                tg?.HapticFeedback?.notificationOccurred('success');
-                alert(`Куплено: ${item.name}!`);
-                saveState(); // Сохраняем!
-                render();
-            } else {
-                tg?.HapticFeedback?.notificationOccurred('error');
-                alert("Не хватает очков!");
-            }
-        }
-    },
-    // Завершение челленджа
-    completeChallenge: () => {
-        if(!state.dailyChallenge.completed) {
-            state.dailyChallenge.completed = true;
-            state.totalPoints += state.dailyChallenge.reward;
-            tg?.HapticFeedback?.notificationOccurred('success');
-            saveState(); // Сохраняем!
-            render();
-        }
-    }
-};
-
-// --- RENDER FUNCTIONS ---
-
-function renderHeader() {
-    return `
-    <div class="header">
-        <div class="header-title">livi</div>
-        <div class="header-stats">
-            <div class="stat-badge" style="color:#D4AF7A">
-                ${getIcon('flame', '#D4AF7A')} ${state.streak}
-            </div>
-            <div class="stat-badge" style="color:#8B9A9C">
-                ${getIcon('star', '#8B9A9C')} ${state.totalPoints}
-            </div>
-        </div>
-    </div>`;
+        save();
+    }, 4500);
 }
 
-function renderLivi() {
-    // Проверка, куплены ли очки (id 2) или кепка (id 3) для отображения на Livi
-    const hasGlasses = state.shopItems.find(i => i.id === 2 && i.owned);
-    const hasCap = state.shopItems.find(i => i.id === 3 && i.owned);
+function closeModal() {
+    document.getElementById('caseModal').style.display = 'none';
+    render();
+}
+
+// --- КОМПОНЕНТЫ РЕНДЕРА ---
+function drawLivi() {
+    const head = state.inventory.find(i => i.id === state.equipped.head);
+    const glass = state.inventory.find(i => i.id === state.equipped.glass);
+    const body = state.inventory.find(i => i.id === state.equipped.body);
 
     return `
-    <div class="livi-character fade-in">
-        <div class="livi-circle" style="width:120px;height:120px;background:rgba(139,154,156,0.1);border:3px solid ${colors.primary}">
-            ${hasCap ? '<div style="position:absolute;top:-15px;width:60px;height:20px;background:#D4AF7A;border-radius:10px 10px 0 0;z-index:10"></div>' : ''}
-            <div class="livi-antenna left"></div>
-            <div class="livi-antenna right"></div>
-            <div class="livi-face">
-                <div class="livi-eyes">
-                    <div class="livi-eye"></div>
-                    <div class="livi-eye"></div>
-                    ${hasGlasses ? '<div style="position:absolute;width:70px;height:15px;background:black;opacity:0.7;border-radius:5px"></div>' : ''}
-                </div>
-                <div class="livi-mouth"></div>
-            </div>
+    <div class="livi-container float">
+        ${head ? `<div class="item-cap" style="background:${RARITY_COLORS[head.rarity]}">${head.icon}</div>` : ''}
+        <div class="livi-body">
+            <div class="livi-eye eye-left"></div>
+            <div class="livi-eye eye-right"></div>
+            <div class="livi-mouth"></div>
+            ${glass ? `<div class="item-glasses"></div>` : ''}
         </div>
-        <div style="margin-top:16px;font-weight:bold;color:${colors.primary}">Привет, Чемпион!</div>
+        ${body ? `<div class="item-shirt">${body.icon}</div>` : ''}
     </div>`;
 }
 
 function renderHome() {
-    const tasksTotal = state.tasks.length;
-    const tasksDone = state.tasks.filter(t => t.completed).length;
-    
     return `
     <div class="slide-up">
-        ${renderLivi()}
-        <div class="section">
-            <h3 style="margin-bottom:12px;font-size:18px">Статистика дня</h3>
-            <div class="grid-2" style="margin-bottom:0">
-                <div class="stat-card">
-                    ${getIcon('check', colors.primary)}
-                    <div class="stat-value">${tasksDone}/${tasksTotal}</div>
-                    <div class="stat-label">Задачи</div>
-                </div>
-                <div class="stat-card">
-                    ${getIcon('flame', colors.warning)}
-                    <div class="stat-value">${state.streak}</div>
-                    <div class="stat-label">Дней подряд</div>
-                </div>
+        ${drawLivi()}
+        <div class="grid-2">
+            <div class="card" style="text-align:center">
+                <div style="font-size:12px; color:#888">Энергия</div>
+                <div style="font-size:24px; font-weight:bold; color:#4cd137">${state.energy}%</div>
+            </div>
+            <div class="card" style="text-align:center">
+                <div style="font-size:12px; color:#888">Статус</div>
+                <div style="font-size:18px; font-weight:bold; color:var(--primary)">Профи</div>
             </div>
         </div>
-        <div class="section" onclick="state.activeTab='challenges';render()">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-                <div>
-                    <div style="font-weight:bold;margin-bottom:4px">Челлендж дня</div>
-                    <div style="font-size:12px;color:#999">${state.dailyChallenge.title}</div>
-                </div>
-                <div class="stat-badge" style="background:#D4AF7A;color:#1a1a1a;font-size:12px">
-                    +${state.dailyChallenge.reward}
-                </div>
+        <div class="card">
+            <h3>Активность сегодня</h3>
+            <p style="color:#888; font-size:14px; margin-top:5px">Выполнено задач: ${state.tasksDone}</p>
+            <div style="margin-top:15px; height:8px; background:#222; border-radius:4px">
+                <div style="width:40%; height:100%; background:var(--primary); border-radius:4px"></div>
             </div>
         </div>
-    </div>`;
-}
-
-function renderTasksPage() {
-    const tasksList = state.tasks.map(task => `
-        <div class="task-item ${task.completed ? 'completed' : ''}">
-            <div class="checkbox ${task.completed ? 'checked' : ''}" onclick="actions.toggleTask(${task.id})">
-                ${task.completed ? '<svg viewBox="0 0 24 24" width="16" height="16" stroke="white" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
-            </div>
-            <div style="flex:1">
-                <div class="task-title" style="font-weight:500">${task.title}</div>
-                <div style="font-size:11px;color:#666;margin-top:2px">${task.type === 'habit' ? 'Привычка' : 'Задача'} • ${task.points} очков</div>
-            </div>
-            <button onclick="actions.deleteTask(${task.id})" style="background:none;border:none;color:#666;padding:4px">
-                ${getIcon('trash')}
-            </button>
-        </div>
-    `).join('');
-
-    return `
-    <div class="slide-up">
-        <h2 style="margin-bottom:20px;font-size:24px;font-weight:bold">Твои задачи</h2>
-        ${tasksList.length ? tasksList : '<div style="text-align:center;color:#666;padding:40px">Нет активных задач</div>'}
-        <button class="add-btn" onclick="actions.addTask()">+</button>
+        <button class="btn btn-stars" onclick="alert('ЕЩЕ В РАЗРАБОТКЕ')">⭐ Поддержать проект</button>
     </div>`;
 }
 
 function renderShop() {
-    const items = state.shopItems.map(item => `
-        <div class="shop-item">
-            <div class="shop-icon">${item.icon}</div>
-            <div style="font-weight:bold;font-size:14px">${item.name}</div>
-            <div class="shop-price">${item.owned ? 'Куплено' : item.price + ' pts'}</div>
-            <button class="shop-btn ${item.owned ? 'owned' : 'buy'}" 
-                onclick="actions.buyItem(${item.id})">
-                ${item.owned ? 'Использовать' : 'Купить'}
-            </button>
-        </div>
-    `).join('');
-
     return `
     <div class="slide-up">
-        <div style="text-align:center;margin-bottom:20px">
-            <div style="color:#888;font-size:14px">Твой баланс</div>
-            <div style="font-size:32px;font-weight:bold;color:${colors.warning}">${state.totalPoints} <span style="font-size:16px">pts</span></div>
+        <h2 style="margin-bottom:20px">Магазин сундуков</h2>
+        <div class="card chest-card">
+            <div style="font-size:50px">📦</div>
+            <h3>Обычный сундук</h3>
+            <div class="chest-price">150 pts</div>
+            <button class="btn btn-primary" onclick="openChest(150)">Открыть</button>
         </div>
-        <h3 style="margin-bottom:16px;font-weight:bold">Аксессуары Livi</h3>
-        <div class="grid-2">
-            ${items}
+        <div class="card chest-card" style="border-color:var(--rare)">
+            <div style="font-size:50px">💼</div>
+            <h3>Редкий сундук</h3>
+            <div class="chest-price">300 pts</div>
+            <button class="btn btn-primary" onclick="openChest(300)">Открыть</button>
         </div>
-    </div>`;
-}
-
-function renderChallenges() {
-    const ch = state.dailyChallenge;
-    return `
-    <div class="slide-up">
-        <div class="section" style="text-align:center;padding:40px 20px;border-color:${colors.warning}">
-            <div style="font-size:48px;margin-bottom:16px">🎯</div>
-            <h2 style="margin-bottom:8px;font-size:24px;font-weight:bold">${ch.title}</h2>
-            <p style="color:#888;margin-bottom:24px">Выполни это задание до конца дня</p>
-            
-            <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:16px;margin-bottom:24px">
-                <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px">
-                    <span>Статус</span>
-                    <span>${ch.completed ? 'Выполнено' : 'В процессе'}</span>
-                </div>
-                <div style="height:6px;background:#333;border-radius:3px;overflow:hidden">
-                    <div style="height:100%;width:${ch.completed ? 100 : 0}%;background:${colors.warning};transition:width .5s"></div>
-                </div>
-            </div>
-
-            ${ch.completed 
-                ? `<div class="btn" style="background:${colors.accent};color:#1a1a1a">Завершено! 🎉</div>`
-                : `<button class="btn btn-primary" onclick="actions.completeChallenge()">Завершить (+${ch.reward})</button>`
-            }
+        <div class="card chest-card" style="border-color:var(--legendary)">
+            <div style="font-size:50px">👑</div>
+            <h3>Легендарный кейс</h3>
+            <div class="chest-price">1000 pts</div>
+            <button class="btn btn-primary" onclick="openChest(1000)">Открыть</button>
         </div>
     </div>`;
 }
 
 function renderAnalysis() {
-    const maxVal = Math.max(...state.weeklyStats, 10);
-    const bars = state.weeklyStats.map((val, idx) => {
-        const height = (val / maxVal) * 100;
-        const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-        return `
-            <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:8px">
-                <div style="width:100%;height:100px;display:flex;align-items:flex-end;justify-content:center;background:rgba(255,255,255,0.05);border-radius:4px">
-                    <div style="width:100%;height:${height}%;background:linear-gradient(to top, ${colors.primary}, ${colors.accent});border-radius:4px"></div>
-                </div>
-                <div style="font-size:10px;color:#666">${days[idx]}</div>
-            </div>
-        `;
-    }).join('');
+    const bars = state.stats.map((s, i) => `
+        <div class="chart-bar" style="height:${s}%">
+            <div class="chart-label">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][i]}</div>
+        </div>
+    `).join('');
 
     return `
     <div class="slide-up">
-        <h2 style="margin-bottom:20px;font-weight:bold">Твой прогресс</h2>
-        <div class="section">
-            <div style="margin-bottom:20px;color:#888;font-size:14px">Активность за неделю</div>
-            <div style="display:flex;justify-content:space-between;gap:6px">
+        <div class="card">
+            <span class="ai-badge">AI ANALYTICS</span>
+            <h3>Анализ поведения</h3>
+            <p class="ai-text" style="margin-top:10px">
+                "За последнюю неделю твоя продуктивность выросла на 12%. 
+                Твой пик активности приходится на <b>Среду</b>. 
+                Совет: старайся закрывать мелкие задачи до обеда, чтобы сохранить энергию к вечеру."
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Тенденция активности</h3>
+            <div class="chart-container">
                 ${bars}
             </div>
         </div>
+
+        <div class="card">
+            <h3>Прогноз на завтра</h3>
+            <p style="color:#888">Ожидаемый уровень фокуса: <b>Высокий</b></p>
+        </div>
     </div>`;
 }
 
-function renderNavigation() {
-    const tabs = [
-        { id: 'home', icon: 'home', label: 'Главная' },
-        { id: 'challenges', icon: 'target', label: 'Цели' },
-        { id: 'tasks', icon: 'check', label: 'Задачи' },
-        { id: 'shop', icon: 'shop', label: 'Шоп' },
-        { id: 'analysis', icon: 'chart', label: 'Анализ' }
-    ];
-
-    return `
-    <div class="bottom-nav">
-        ${tabs.map(tab => `
-            <button class="nav-item ${state.activeTab === tab.id ? 'active' : ''}" 
-                onclick="state.activeTab='${tab.id}';saveState();render()">
-                <div class="nav-icon">${getIcon(tab.icon)}</div>
-                <div class="nav-label" style="font-size:10px;margin-top:4px">${tab.label}</div>
+function renderInventory() {
+    const items = state.inventory.map(item => `
+        <div class="card" style="display:flex; align-items:center; gap:15px; border-left:4px solid ${RARITY_COLORS[item.rarity]}">
+            <div style="font-size:30px">${item.icon}</div>
+            <div style="flex:1">
+                <div style="font-weight:bold">${item.name}</div>
+                <div style="font-size:12px; color:#666">${item.rarity.toUpperCase()}</div>
+            </div>
+            <button class="btn" style="width:auto; padding:8px 15px; background:${state.equipped[item.type] === item.id ? '#333' : 'var(--primary)'}" 
+                onclick="equipItem('${item.id}', '${item.type}')">
+                ${state.equipped[item.type] === item.id ? 'Снять' : 'Надеть'}
             </button>
-        `).join('')}
-    </div>`;
+        </div>
+    `).join('');
+
+    return `<div class="slide-up"><h2>Гардероб</h2><br>${items.length ? items : 'Тут пока пусто...'}</div>`;
 }
 
+function equipItem(id, type) {
+    if(state.equipped[type] === id) state.equipped[type] = null;
+    else state.equipped[type] = id;
+    save();
+    render();
+}
+
+// --- ГЛАВНЫЙ ЦИКЛ ---
 function render() {
     const app = document.getElementById('app');
-    
-    let contentHtml = '';
-    switch(state.activeTab) {
-        case 'home': contentHtml = renderHome(); break;
-        case 'challenges': contentHtml = renderChallenges(); break;
-        case 'tasks': contentHtml = renderTasksPage(); break;
-        case 'shop': contentHtml = renderShop(); break;
-        case 'analysis': contentHtml = renderAnalysis(); break;
-    }
-
-    app.innerHTML = `
-        ${renderHeader()}
-        <div class="content">
-            ${contentHtml}
+    const header = `
+        <div class="header">
+            <div class="header-title">livi</div>
+            <div class="stats-row">
+                <div class="stat-item" style="color:var(--gold)">⭐ ${state.points}</div>
+                <div class="stat-item">🔥 ${state.streak}</div>
+            </div>
         </div>
-        ${renderNavigation()}
     `;
+
+    const nav = `
+        <div class="nav">
+            <div class="nav-item ${state.activeTab==='home'?'active':''}" onclick="state.activeTab='home';render()">🏠<br>Главная</div>
+            <div class="nav-item ${state.activeTab==='shop'?'active':''}" onclick="state.activeTab='shop';render()">📦<br>Магазин</div>
+            <div class="nav-item ${state.activeTab==='inventory'?'active':''}" onclick="state.activeTab='inventory';render()">👕<br>Вещи</div>
+            <div class="nav-item ${state.activeTab==='analysis'?'active':''}" onclick="state.activeTab='analysis';render()">📊<br>Анализ</div>
+        </div>
+    `;
+
+    let content = '';
+    if(state.activeTab === 'home') content = renderHome();
+    else if(state.activeTab === 'shop') content = renderShop();
+    else if(state.activeTab === 'analysis') content = renderAnalysis();
+    else if(state.activeTab === 'inventory') content = renderInventory();
+
+    app.innerHTML = header + `<div class="content">${content}</div>` + nav;
 }
 
-// --- INIT ---
 window.onload = () => {
-    loadState(); // ЗАГРУЖАЕМ ДАННЫЕ ПРИ СТАРТЕ
+    load();
     render();
     setTimeout(() => {
-        const screen = document.getElementById('loadingScreen');
-        screen.classList.add('fade-out');
-        setTimeout(() => screen.remove(), 500);
-    }, 800);
+        document.getElementById('loadingScreen').style.opacity = '0';
+        setTimeout(() => document.getElementById('loadingScreen').remove(), 500);
+    }, 1000);
 };
 
 </script>
