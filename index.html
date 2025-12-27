@@ -7,108 +7,157 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 /* --- BASE STYLES --- */
+:root {
+    --primary: #8B9A9C;
+    --accent: #9CB3B5;
+    --gold: #D4AF7A;
+    --epic: #D45D79;
+    --bg: #1a1a1a;
+    --glass: rgba(255,255,255,0.05);
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 100%);color:white;max-width:428px;margin:0 auto;overflow-x:hidden;-webkit-tap-highlight-color:transparent;padding-bottom:90px;min-height:100vh}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#1a1a1a 0%,#050505 100%);color:white;max-width:428px;margin:0 auto;overflow-x:hidden;-webkit-tap-highlight-color:transparent;padding-bottom:100px;min-height:100vh}
 
 /* --- ANIMATIONS --- */
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-@keyframes gentleFloat{0%,100%{transform:translateY(0px) rotate(0deg)}50%{transform:translateY(-8px) rotate(2deg)}}
-@keyframes blink{0%,90%,100%{opacity:1}95%{opacity:.3}}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 10px var(--epic)}50%{box-shadow:0 0 25px var(--epic)}}
 @keyframes shine{0%{background-position:-100%}100%{background-position:200%}}
+@keyframes blink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(0.1)}}
 
-/* --- UTILITIES --- */
-.fade-in{animation:fadeIn .3s ease-out}
-.slide-up{animation:slideUp .3s ease-out}
-.pulse{animation:pulse 2s infinite}
+.fade-in{animation:fadeIn .4s ease-out}
+.slide-up{animation:slideUp .4s ease-out}
 .hidden{display:none!important}
 
-/* --- LOADING SCREEN --- */
-.loading-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a1a 0%,#0f0f0f 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s}
+/* --- LOADING --- */
+.loading-screen{position:fixed;inset:0;background:#1a1a1a;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s}
 .loading-screen.fade-out{opacity:0;pointer-events:none}
-.loading-logo{font-size:64px;font-weight:bold;background:linear-gradient(135deg,#8B9A9C 0%,#9CB3B5 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.loading-logo{font-size:64px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px}
 
 /* --- HEADER --- */
-.header{padding:20px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(15,15,15,.95) 0%,rgba(10,10,10,.95) 100%);backdrop-filter:blur(20px);border-bottom:1px solid #2a2a2a;position:sticky;top:0;z-index:50}
-.header-title{font-size:28px;font-weight:700;background:linear-gradient(135deg,#8B9A9C 0%,#9CB3B5 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header-stats{display:flex;gap:12px}
-.stat-badge{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:16px;font-weight:bold;font-size:16px;border:none;background:rgba(255,255,255,0.05);color:white}
+.header{padding:20px;display:flex;align-items:center;justify-content:space-between;background:rgba(20,20,20,0.8);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05);position:sticky;top:0;z-index:50}
+.header-title{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-stats{display:flex;gap:10px}
+.stat-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-weight:700;font-size:14px;background:var(--glass);border:1px solid rgba(255,255,255,0.05)}
 
-/* --- NAVIGATION --- */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:428px;margin:0 auto;background:rgba(15,15,15,.98);backdrop-filter:blur(20px);border-top:1px solid #2a2a2a;display:flex;justify-content:space-around;padding:12px 0 calc(12px + env(safe-area-inset-bottom));z-index:100}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px;cursor:pointer;background:none;border:none;color:#666;position:relative}
-.nav-item.active{color:#8B9A9C}
-.nav-item.active::before{content:'';position:absolute;top:-13px;width:30px;height:3px;background:#8B9A9C;border-radius:0 0 4px 4px}
+/* --- LIVI & ITEMS V2 (HIGH DETAIL) --- */
+.livi-container{display:flex;flex-direction:column;align-items:center;padding:30px 0;position:relative}
+.livi-body{
+    width:130px;height:130px;
+    border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, #2a2a2a, #111);
+    border:3px solid var(--primary);
+    position:relative;
+    box-shadow:0 10px 40px rgba(0,0,0,0.5);
+    animation:float 6s ease-in-out infinite;
+    z-index:5;
+}
+.livi-antenna{position:absolute;width:4px;height:35px;background:var(--primary);border-radius:4px;z-index:1}
+.livi-antenna::after{content:'';position:absolute;top:-8px;left:-3px;width:10px;height:10px;background:var(--accent);border-radius:50%;box-shadow:0 0 10px var(--primary)}
+.ant-l{top:-25px;left:25px;transform:rotate(-20deg)}
+.ant-r{top:-25px;right:25px;transform:rotate(20deg)}
 
-/* --- CONTENT --- */
+.livi-face{position:absolute;inset:0;z-index:10}
+.eye{position:absolute;top:45%;width:14px;height:18px;background:white;border-radius:50%;animation:blink 4s infinite}
+.eye-l{left:35px} .eye-r{right:35px}
+.mouth{position:absolute;bottom:35px;left:50%;transform:translateX(-50%);width:24px;height:12px;border-bottom:3px solid white;border-radius:0 0 15px 15px}
+
+/* ITEMS CSS DRAWING */
+/* 1. Cap: Detailed stitching, fabric texture */
+.item-cap {position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:90px;height:35px;background:linear-gradient(to bottom, #D4AF7A, #C09555);border-radius:20px 20px 0 0;z-index:20;box-shadow:inset 0 2px 5px rgba(255,255,255,0.2)}
+.item-cap::before {content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:12px;height:6px;background:#C09555;border-radius:50%}
+.item-cap::after {content:'';position:absolute;bottom:0;right:-15px;width:40px;height:10px;background:#b08545;border-radius:0 50px 50px 0;transform:rotate(5deg)}
+
+/* 2. Crown: Gold gradient, gems */
+.item-crown {position:absolute;top:-45px;left:50%;transform:translateX(-50%);width:70px;height:50px;z-index:20;
+    background: linear-gradient(to bottom, #FFD700, #DAA520);
+    clip-path: polygon(0% 100%, 20% 40%, 40% 100%, 60% 20%, 80% 100%, 100% 40%, 100% 100%);
+    filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));
+}
+.item-crown::after {content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:radial-gradient(circle, #ff0000, #800000);border-radius:50%;box-shadow:20px 0 0 #800000, -20px 0 0 #800000}
+
+/* 3. Glasses: Gradient lens, reflection */
+.item-glasses {position:absolute;top:55px;left:50%;transform:translateX(-50%);width:80px;height:24px;z-index:30;display:flex;justify-content:space-between}
+.g-lens {width:36px;height:24px;background:rgba(0,0,0,0.85);border-radius:6px;border:2px solid #555;position:relative;overflow:hidden}
+.g-lens::after {content:'';position:absolute;top:0;left:0;width:150%;height:40%;background:rgba(255,255,255,0.15);transform:rotate(25deg) translateY(-5px)}
+.g-bridge {position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:3px;background:#555}
+
+/* 4. Scarf: Striped pattern */
+.item-scarf {position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);width:100px;height:35px;z-index:25;
+    background: repeating-linear-gradient(45deg, #D45D79, #D45D79 10px, #C04560 10px, #C04560 20px);
+    border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* 5. Monocle: Gold rim, chain */
+.item-monocle {position:absolute;top:55px;right:38px;width:28px;height:28px;border:2px solid #FFD700;border-radius:50%;background:rgba(255,255,255,0.1);z-index:30}
+.item-monocle::before {content:'';position:absolute;bottom:-30px;right:-10px;width:30px;height:30px;border-right:1px solid #FFD700;border-radius:50%}
+
+/* --- CHESTS (VISUALS) --- */
+.chest-wrapper {display:grid;gap:15px;margin-bottom:30px}
+.chest-card {position:relative;border-radius:16px;padding:20px;overflow:hidden;cursor:pointer;transition:transform .2s}
+.chest-card:active {transform:scale(0.98)}
+
+/* Common: Wood & Iron */
+.chest-common {background:linear-gradient(135deg, #5D4037, #3E2723);border:2px solid #8D6E63}
+.chest-common::before {content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(0,0,0,0.2) 20px);opacity:0.3}
+
+/* Rare: Tech Case */
+.chest-rare {background:linear-gradient(135deg, #1e2424, #0f1212);border:2px solid var(--gold);box-shadow:inset 0 0 20px rgba(212,175,122,0.1)}
+.chest-rare::after {content:'';position:absolute;top:0;right:0;width:60px;height:60px;background:linear-gradient(135deg, transparent 50%, var(--gold) 50%);opacity:0.2}
+
+/* Legendary: Magic Cube */
+.chest-legendary {background:linear-gradient(135deg, #2b0a16, #1a050d);border:2px solid var(--epic);animation:pulse-glow 3s infinite}
+.chest-legendary::before {content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, rgba(212,93,121,0.2), transparent);z-index:1}
+
+/* --- ROULETTE --- */
+.roulette-modal {position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.roulette-window {width:100%;height:140px;background:#050505;border-block:2px solid #333;position:relative;overflow:hidden;margin:30px 0}
+.roulette-strip {display:flex;height:100%;align-items:center;position:absolute;left:0;will-change:transform}
+.r-item {width:120px;height:110px;margin:0 4px;background:#151515;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #333;flex-shrink:0;position:relative}
+.r-item.legendary {border-color:var(--epic);box-shadow:inset 0 0 15px rgba(212,93,121,0.2)}
+.r-item.rare {border-color:var(--gold)}
+.r-marker {position:absolute;top:0;bottom:0;left:50%;width:4px;background:white;z-index:10;transform:translateX(-50%);box-shadow:0 0 10px white}
+
+/* --- UI ELEMENTS --- */
 .content{padding:20px}
-.section{background:linear-gradient(135deg,rgba(25,25,25,.6) 0%,rgba(10,10,10,.6) 100%);border:1px solid #2a2a2a;border-radius:20px;padding:20px;margin-bottom:20px;backdrop-filter:blur(10px)}
-.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+.section{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:20px;padding:20px;margin-bottom:15px;backdrop-filter:blur(10px)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
-/* --- LIVI CHARACTER --- */
-.livi-character{display:flex;flex-direction:column;align-items:center;padding:20px 0;position:relative}
-.livi-circle{border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;animation:gentleFloat 4s ease-in-out infinite;box-shadow:0 0 30px rgba(139,154,156,.1);background:rgba(139,154,156,0.05);border:3px solid #8B9A9C;width:120px;height:120px}
-.livi-antenna{position:absolute;width:4px;height:30px;background:#8B9A9C;border-radius:2px;z-index:1}
-.livi-antenna::after{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#8B9A9C;border-radius:50%}
-.livi-antenna.left{top:-20px;left:30px;transform:rotate(-15deg)}
-.livi-antenna.right{top:-20px;right:30px;transform:rotate(15deg)}
-.livi-face{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;z-index:5}
-.livi-eyes{position:absolute;top:40%;width:50%;display:flex;justify-content:space-between}
-.livi-eye{width:10px;height:10px;background:white;border-radius:50%;animation:blink 5s infinite}
-.livi-mouth{position:absolute;bottom:35%;width:20px;height:10px;border-bottom:3px solid white;border-radius:0 0 10px 10px}
+.btn{width:100%;padding:16px;border-radius:16px;font-weight:700;font-size:16px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;position:relative;overflow:hidden}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:white}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888}
 
-/* --- ITEM STYLES ON LIVI (CSS DRAWING) --- */
-.item-cap {position:absolute;top:-15px;width:70px;height:25px;background:#D4AF7A;border-radius:15px 15px 0 0;z-index:10;left:50%;transform:translateX(-50%)}
-.item-cap::after{content:'';position:absolute;bottom:0;right:-10px;width:30px;height:8px;background:#D4AF7A;border-radius:0 5px 5px 0}
-.item-crown {position:absolute;top:-35px;width:60px;height:40px;background:none;z-index:10;left:50%;transform:translateX(-50%);border-bottom:4px solid gold}
-.item-crown::before{content:'';position:absolute;width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:25px solid gold;left:0}
-.item-crown::after{content:'';position:absolute;width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:25px solid gold;right:0}
-.item-crown span {position:absolute;width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:35px solid gold;left:50%;transform:translateX(-50%);top:-5px}
+/* Fixed Add Button - Improved Position */
+.add-btn {
+    position: fixed;
+    bottom: 90px; /* Выше навбара */
+    right: 20px;
+    width: 60px; height: 60px;
+    border-radius: 30px;
+    background: var(--primary);
+    color: white;
+    font-size: 32px;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    z-index: 90; /* Ниже модалок, выше контента */
+    display: flex; align-items: center; justify-content: center;
+    transform: translateZ(0); /* Force hardware accel */
+}
 
-.item-glasses {position:absolute;top:38%;width:70px;height:18px;background:rgba(0,0,0,0.8);z-index:20;left:50%;transform:translateX(-50%);border-radius:4px;border:1px solid #444}
-.item-monocle {position:absolute;top:36%;right:28%;width:24px;height:24px;border:2px solid gold;border-radius:50%;z-index:20}
-.item-monocle::after {content:'';position:absolute;bottom:-20px;right:-10px;width:2px;height:20px;background:gold;transform:rotate(-45deg)}
+/* Nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:428px;margin:0 auto;background:rgba(15,15,15,0.98);backdrop-filter:blur(20px);border-top:1px solid #2a2a2a;display:flex;justify-content:space-around;padding:12px 0 calc(12px + env(safe-area-inset-bottom));z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:none;color:#555;transition:color .2s}
+.nav-item.active{color:var(--primary)}
 
-.item-scarf {position:absolute;bottom:-10px;width:90px;height:25px;background:#D45D79;border-radius:10px;z-index:15;left:50%;transform:translateX(-50%)}
-.item-bowtie {position:absolute;bottom:5px;width:40px;height:20px;background:white;z-index:15;left:50%;transform:translateX(-50%);clip-path: polygon(0% 0%, 100% 0%, 80% 50%, 100% 100%, 0% 100%, 20% 50%);}
-.item-goldchain {position:absolute;bottom:10px;width:80px;height:40px;border-radius:50%;border:4px solid gold;border-top:none;z-index:14;left:50%;transform:translateX(-50%)}
-
-/* --- CARDS & BUTTONS --- */
-.stat-card{background:rgba(255,255,255,0.03);border:1px solid #2a2a2a;border-radius:20px;padding:16px;text-align:center}
-.stat-value{font-size:24px;font-weight:bold;margin:8px 0;background:linear-gradient(135deg,#8B9A9C,#9CB3B5);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.stat-label{font-size:12px;color:#888}
-
-.task-item{display:flex;align-items:center;gap:12px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid #2a2a2a;border-radius:16px;margin-bottom:10px;transition:all .2s}
-.task-item.completed{opacity:0.6}
-.task-item.completed .task-title{text-decoration:line-through;color:#666}
-.checkbox{width:24px;height:24px;border:2px solid #8B9A9C;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.checkbox.checked{background:#8B9A9C}
-
-/* --- CHESTS & ROULETTE --- */
-.chest-card {background:linear-gradient(135deg, rgba(40,40,40,0.8), rgba(20,20,20,0.9)); border:1px solid #333; border-radius:16px; padding:15px; display:flex; flex-direction:column; align-items:center; position:relative; overflow:hidden}
-.chest-card.common {border-color:#8B9A9C}
-.chest-card.rare {border-color:#D4AF7A; box-shadow:0 0 15px rgba(212,175,122,0.1)}
-.chest-card.legendary {border-color:#D45D79; box-shadow:0 0 20px rgba(212,93,121,0.2)}
-.chest-icon {font-size:40px; margin-bottom:10px; animation: gentleFloat 3s infinite}
-
-.roulette-modal {position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:2000; display:flex; flex-direction:column; align-items:center; justify-content:center}
-.roulette-window {width:100%; height:120px; background:#111; border-top:2px solid #333; border-bottom:2px solid #333; position:relative; overflow:hidden; margin-bottom:20px}
-.roulette-strip {display:flex; height:100%; align-items:center; position:absolute; left:0; will-change:transform}
-.roulette-item {width:100px; height:90px; margin:0 5px; background:#222; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid #333; flex-shrink:0}
-.roulette-item.legendary {border-color:#D45D79; box-shadow:inset 0 0 10px rgba(212,93,121,0.3)}
-.roulette-item.rare {border-color:#D4AF7A}
-.roulette-marker {position:absolute; top:0; bottom:0; left:50%; width:4px; background:#D45D79; z-index:10; transform:translateX(-50%)}
-
-.inv-grid {display:grid; grid-template-columns:repeat(3, 1fr); gap:10px}
-.inv-item {background:rgba(255,255,255,0.05); border-radius:12px; padding:10px; text-align:center; position:relative; border:1px solid transparent; cursor:pointer}
-.inv-item.equipped {border-color:#8B9A9C; background:rgba(139,154,156,0.1)}
-.inv-icon {font-size:24px}
-
-.btn{width:100%;padding:14px;border-radius:16px;font-weight:bold;font-size:16px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
-.btn-primary{background:linear-gradient(135deg,#8B9A9C 0%,#9CB3B5 100%);color:white;box-shadow:0 4px 12px rgba(139,154,156,.3)}
-.btn-secondary{background:transparent;border:1px solid #2a2a2a;color:#8B9A9C}
-.add-btn{position:fixed;bottom:90px;right:20px;width:56px;height:56px;border-radius:50%;background:#8B9A9C;color:white;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 4px 20px rgba(139,154,156,0.4);border:none;z-index:90}
+/* Chart & Analysis */
+.chart-container {width:100%;height:180px;position:relative;margin-top:20px}
+.chart-tooltip {position:absolute;top:0;right:0;background:#333;padding:4px 8px;border-radius:4px;font-size:10px;display:none}
+.period-switch {display:flex;background:#111;padding:4px;border-radius:12px;margin-bottom:15px}
+.p-btn {flex:1;padding:8px;text-align:center;font-size:12px;border-radius:8px;color:#666;cursor:pointer}
+.p-btn.active {background:#333;color:white;font-weight:bold}
+.heatmap {display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+.heat-cell {width:10px;height:10px;border-radius:2px;background:#333}
 
 svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
@@ -120,117 +169,116 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 </div>
 
 <div id="rouletteModal" class="hidden roulette-modal">
-    <h2 style="margin-bottom:20px; color:#fff">Открываем...</h2>
+    <h2 style="margin-bottom:10px; color:#fff; font-weight:800; letter-spacing:1px">ОТКРЫТИЕ...</h2>
     <div class="roulette-window">
         <div class="roulette-marker"></div>
         <div class="roulette-strip" id="rouletteStrip"></div>
     </div>
-    <div id="winMessage" style="opacity:0; text-align:center">
-        <div style="font-size:18px; color:#888">Ты получил:</div>
-        <div id="winItemName" style="font-size:28px; font-weight:bold; color:#D4AF7A; margin:10px 0">Предмет</div>
-        <button class="btn btn-primary" onclick="closeRoulette()">Забрать</button>
+    <div id="winMessage" style="opacity:0; text-align:center; transition:opacity .5s">
+        <div style="font-size:14px; color:#888; text-transform:uppercase; letter-spacing:1px">Вы получили</div>
+        <div id="winItemName" style="font-size:32px; font-weight:800; color:var(--gold); margin:10px 0; text-shadow:0 0 20px rgba(212,175,122,0.3)">Предмет</div>
+        <button class="btn btn-primary" style="width:200px; margin:0 auto" onclick="closeRoulette()">ЗАБРАТЬ</button>
     </div>
 </div>
 
 <div id="app"></div>
 
 <script>
-// --- TELEGRAM INIT ---
+// --- CORE CONFIG ---
 const tg = window.Telegram?.WebApp;
-if(tg) {
-    tg.expand();
-    tg.ready();
-    tg.setHeaderColor('#1a1a1a');
-    tg.setBackgroundColor('#1a1a1a');
-}
+if(tg) { tg.expand(); tg.ready(); tg.setHeaderColor('#141414'); tg.setBackgroundColor('#141414'); }
 
-// --- CONFIG ---
-const colors = { primary: '#8B9A9C', accent: '#9CB3B5', warning: '#D4AF7A', danger: '#D45D79', bg: '#1a1a1a' };
-
-// --- ICONS ---
+// --- ICONS & ASSETS ---
 const icons = {
     home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
     target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/>',
     check: '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
     shop: '<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>',
-    chart: '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>',
-    flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+    chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
     star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
-    trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
-    gift: '<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>'
+    trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>'
 };
+const getIcon = (n) => `<svg>${icons[n]}</svg>`;
 
-function getIcon(name, color = 'currentColor') {
-    return `<svg style="color:${color}">${icons[name] || ''}</svg>`;
-}
-
-// --- ITEM DATABASE ---
-const ITEM_DB = [
-    // COMMON
+// --- DATABASE ---
+const ITEMS = [
     { id: 'c_cap', name: 'Кепка', type: 'head', rarity: 'common', icon: '🧢', css: 'item-cap' },
     { id: 'c_beanie', name: 'Шапка', type: 'head', rarity: 'common', icon: '🧶', css: 'item-cap', style: 'background:#555' },
     { id: 'c_bowtie', name: 'Бабочка', type: 'body', rarity: 'common', icon: '🎀', css: 'item-bowtie' },
-    // RARE
-    { id: 'r_glasses', name: 'Очки', type: 'face', rarity: 'rare', icon: '🕶️', css: 'item-glasses' },
+    { id: 'r_glasses', name: 'Рейбаны', type: 'face', rarity: 'rare', icon: '🕶️', css: 'item-glasses' },
     { id: 'r_scarf', name: 'Шарф', type: 'body', rarity: 'rare', icon: '🧣', css: 'item-scarf' },
-    { id: 'r_goldchain', name: 'Цепь', type: 'body', rarity: 'rare', icon: '⛓️', css: 'item-goldchain' },
-    // LEGENDARY
     { id: 'l_crown', name: 'Корона', type: 'head', rarity: 'legendary', icon: '👑', css: 'item-crown' },
     { id: 'l_monocle', name: 'Монокль', type: 'face', rarity: 'legendary', icon: '🧐', css: 'item-monocle' }
 ];
 
-// --- STATE ---
+// --- STATE MANAGEMENT ---
+// Добавлена полноценная история statsHistory для аналитики
 const defaultState = {
     activeTab: 'home',
     streak: 1,
-    totalPoints: 500, // Дал больше старта для тестов
-    lastVisitDate: new Date().toDateString(),
-    weeklyStats: [15, 25, 10, 30, 45, 20, 10], 
+    totalPoints: 200, 
+    lastVisitDate: new Date().toISOString().split('T')[0],
+    
+    // Stats History: Массив объектов {date: '2023-10-01', points: 50, tasks: 2}
+    statsHistory: [], 
+    
     tasks: [
         { id: 1, title: 'Забрать награду', completed: false, type: 'habit', points: 10 },
         { id: 2, title: 'Запустить Livi', completed: true, type: 'task', points: 5 }
     ],
-    inventory: [], // Список ID предметов
-    equipped: { head: null, face: null, body: null }, // Надетые предметы
+    inventory: [],
+    equipped: { head: null, face: null, body: null },
     dailyChallenge: {
-        date: new Date().toDateString(),
-        title: 'Сделать 20 шагов',
-        target: 20,
-        completed: false,
-        reward: 50
-    }
+        date: new Date().toISOString().split('T')[0],
+        title: 'Сделать 20 шагов', target: 20, completed: false, reward: 50
+    },
+    analysisPeriod: 'week' // 'week', 'month', 'year'
 };
 
 let state = { ...defaultState };
 
+// Helper для записи истории
+function updateHistory(pointsDelta, taskDelta = 0) {
+    const today = new Date().toISOString().split('T')[0];
+    let entry = state.statsHistory.find(e => e.date === today);
+    if (!entry) {
+        entry = { date: today, points: 0, tasks: 0 };
+        state.statsHistory.push(entry);
+    }
+    entry.points += pointsDelta;
+    entry.tasks += taskDelta;
+    saveState();
+}
+
 function saveState() {
-    try { localStorage.setItem('livi_data_v3', JSON.stringify(state)); } catch (e) {}
+    try { localStorage.setItem('livi_v4_pro', JSON.stringify(state)); } catch (e) {}
 }
 
 function loadState() {
     try {
-        const saved = localStorage.getItem('livi_data_v3');
+        const saved = localStorage.getItem('livi_v4_pro');
         if (saved) {
-            state = JSON.parse(saved);
-            const today = new Date().toDateString();
+            state = { ...defaultState, ...JSON.parse(saved) };
+            
+            // New Day Logic
+            const today = new Date().toISOString().split('T')[0];
             if (state.lastVisitDate !== today) {
-                state.dailyChallenge = {
-                    date: today,
-                    title: 'Новый вызов!', 
-                    target: 10,
-                    completed: false,
-                    reward: 50
-                };
-                state.tasks.forEach(t => { if(t.type === 'habit') t.completed = false; });
                 state.streak += 1;
                 state.lastVisitDate = today;
-                
-                // Shift weekly stats
-                state.weeklyStats.shift();
-                state.weeklyStats.push(0);
-                
+                state.dailyChallenge = {
+                    date: today, title: 'Новая цель!', target: 15, completed: false, reward: 50
+                };
+                state.tasks.forEach(t => { if(t.type === 'habit') t.completed = false; });
                 saveState();
             }
+            // Ensure today exists in history
+            if(!state.statsHistory.find(e => e.date === today)) {
+                state.statsHistory.push({ date: today, points: 0, tasks: 0 });
+            }
+        } else {
+            // First Launch Init
+            const today = new Date().toISOString().split('T')[0];
+            state.statsHistory.push({ date: today, points: 0, tasks: 0 });
         }
     } catch (e) {}
 }
@@ -241,20 +289,15 @@ const actions = {
         const task = state.tasks.find(t => t.id === id);
         if (task) {
             task.completed = !task.completed;
-            if(task.completed) {
-                state.totalPoints += task.points;
-                state.weeklyStats[6] += task.points; // Add to today's stats
-                tg?.HapticFeedback?.notificationOccurred('success');
-            } else {
-                state.totalPoints -= task.points;
-                state.weeklyStats[6] -= task.points;
-            }
-            saveState();
-            render();
+            const multiplier = task.completed ? 1 : -1;
+            state.totalPoints += (task.points * multiplier);
+            updateHistory(task.points * multiplier, 1 * multiplier);
+            if(task.completed) tg?.HapticFeedback?.notificationOccurred('success');
+            saveState(); render();
         }
     },
     addTask: () => {
-        const title = prompt("Название задачи:");
+        const title = prompt("Что нужно сделать?");
         if (title) {
             state.tasks.push({ id: Date.now(), title, completed: false, type: 'task', points: 15 });
             saveState(); render();
@@ -270,261 +313,250 @@ const actions = {
         if(!state.dailyChallenge.completed) {
             state.dailyChallenge.completed = true;
             state.totalPoints += state.dailyChallenge.reward;
-            state.weeklyStats[6] += state.dailyChallenge.reward;
+            updateHistory(state.dailyChallenge.reward);
             tg?.HapticFeedback?.notificationOccurred('success');
             saveState(); render();
         }
     },
+    equip: (id) => {
+        const item = ITEMS.find(i => i.id === id);
+        if(!item) return;
+        state.equipped[item.type] = state.equipped[item.type] === id ? null : id;
+        saveState(); render();
+    },
     openChest: (type, cost) => {
-        if (state.totalPoints < cost) {
-            alert("Не хватает очков!");
-            tg?.HapticFeedback?.notificationOccurred('error');
-            return;
-        }
+        if (state.totalPoints < cost) return alert("Не хватает очков!");
         state.totalPoints -= cost;
-        saveState();
+        updateHistory(0); // просто сохраняем очки
         startRoulette(type);
     },
-    equipItem: (itemId) => {
-        const item = ITEM_DB.find(i => i.id === itemId);
-        if (!item) return;
-        
-        // Если уже надето - снимаем
-        if (state.equipped[item.type] === itemId) {
-            state.equipped[item.type] = null;
-        } else {
-            state.equipped[item.type] = itemId;
-        }
-        saveState();
+    setPeriod: (p) => {
+        state.analysisPeriod = p;
         render();
     },
     sendStars: () => {
         tg?.HapticFeedback?.notificationOccurred('warning');
-        tg?.showPopup({
-            title: 'Упс!',
-            message: 'Эта функция ЕЩЕ В РАЗРАБОТКЕ 🚧\nМы работаем над этим!',
-            buttons: [{type: 'ok'}]
-        });
+        tg?.showPopup({ title: 'Разработка', message: 'Эта функция скоро появится!', buttons: [{type:'ok'}] });
     }
 };
 
 // --- ROULETTE LOGIC ---
-let isSpinning = false;
-
-function startRoulette(chestType) {
-    if(isSpinning) return;
-    isSpinning = true;
-    
+function startRoulette(type) {
     const modal = document.getElementById('rouletteModal');
     const strip = document.getElementById('rouletteStrip');
     const winMsg = document.getElementById('winMessage');
     
     modal.classList.remove('hidden');
     winMsg.style.opacity = '0';
+    strip.innerHTML = '';
     strip.style.transition = 'none';
     strip.style.transform = 'translateX(0)';
-    strip.innerHTML = '';
 
-    // 1. Determine Winner based on chest type
-    let pool = [];
-    if (chestType === 'common') pool = ITEM_DB.filter(i => i.rarity === 'common');
-    else if (chestType === 'rare') pool = ITEM_DB.filter(i => i.rarity !== 'legendary'); // common + rare
-    else pool = ITEM_DB; // all
+    // Logic
+    let pool = type === 'common' ? ITEMS.filter(i=>i.rarity!=='legendary') : ITEMS;
+    // Simple weight logic
+    let winner = pool[Math.floor(Math.random() * pool.length)];
+    if(type === 'legendary' && Math.random() > 0.5) winner = ITEMS.find(i => i.rarity === 'legendary') || winner;
 
-    // Weighting logic (simplified)
-    // Common chest: 90% common, 10% rare
-    // Rare chest: 40% common, 55% rare, 5% leg
-    // Leg chest: 10% common, 40% rare, 50% leg
+    // Build Strip (Longer for suspense)
+    const count = 60; 
+    const winIdx = 50;
+    const itemW = 128; // 120 + 8 margin
     
-    let winner;
-    const rand = Math.random();
-    
-    if (chestType === 'common') {
-        winner = (rand > 0.9) ? getRandomItem('rare') : getRandomItem('common');
-    } else if (chestType === 'rare') {
-        if (rand > 0.95) winner = getRandomItem('legendary');
-        else if (rand > 0.40) winner = getRandomItem('rare');
-        else winner = getRandomItem('common');
-    } else {
-        if (rand > 0.5) winner = getRandomItem('legendary');
-        else if (rand > 0.1) winner = getRandomItem('rare');
-        else winner = getRandomItem('common');
-    }
-    
-    // Fallback if null
-    if(!winner) winner = ITEM_DB[0];
-
-    // 2. Build Strip (Winner at index 30)
-    const itemsCount = 40;
-    const winnerIndex = 30;
-    const itemWidth = 110; // 100 + 10 margin
-    
-    for(let i=0; i<itemsCount; i++) {
-        let item;
-        if (i === winnerIndex) item = winner;
-        else item = ITEM_DB[Math.floor(Math.random() * ITEM_DB.length)];
-        
+    for(let i=0; i<count; i++) {
+        const item = i === winIdx ? winner : pool[Math.floor(Math.random()*pool.length)];
         const el = document.createElement('div');
-        el.className = `roulette-item ${item.rarity}`;
-        el.innerHTML = `<div style="font-size:32px">${item.icon}</div><div style="font-size:10px;margin-top:4px">${item.rarity}</div>`;
+        el.className = `r-item ${item.rarity}`;
+        el.innerHTML = `<div style="font-size:40px">${item.icon}</div>`;
         strip.appendChild(el);
     }
 
-    // 3. Animate
     setTimeout(() => {
-        // Center offset: Window Width / 2 - Item Width / 2
-        const centerOffset = (window.innerWidth / 2) - (100 / 2); 
-        const targetPos = -(winnerIndex * itemWidth) + centerOffset - 20; // -20 correction
-        
-        strip.style.transition = 'transform 4s cubic-bezier(0.1, 0.9, 0.2, 1)';
-        strip.style.transform = `translateX(${targetPos}px)`;
-        
-        tg?.HapticFeedback?.selectionChanged(); // Start vibration
+        const offset = (window.innerWidth/2) - (120/2);
+        const pos = -(winIdx * itemW) + offset;
+        strip.style.transition = 'transform 6s cubic-bezier(0.1, 0.9, 0.2, 1)'; // 6 sec spin
+        strip.style.transform = `translateX(${pos}px)`;
+        tg?.HapticFeedback?.selectionChanged();
         
         setTimeout(() => {
-            // FINISH
             tg?.HapticFeedback?.notificationOccurred('success');
             document.getElementById('winItemName').innerText = winner.name;
-            document.getElementById('winItemName').style.color = 
-                winner.rarity === 'legendary' ? '#D45D79' : 
-                winner.rarity === 'rare' ? '#D4AF7A' : '#fff';
-            
-            winMsg.style.transition = 'opacity 0.5s';
+            document.getElementById('winItemName').style.color = winner.rarity === 'legendary' ? '#D45D79' : '#fff';
             winMsg.style.opacity = '1';
-            
-            // Add to inventory if not exists (or ignore duplicate logic for now)
-            if(!state.inventory.includes(winner.id)) {
-                state.inventory.push(winner.id);
-                saveState();
-            } else {
-                // Refund for duplicate? Let's just say "Already Owned" in UI later
-            }
-        }, 4000);
+            if(!state.inventory.includes(winner.id)) state.inventory.push(winner.id);
+            saveState();
+        }, 6000);
     }, 100);
-}
-
-function getRandomItem(rarity) {
-    const list = ITEM_DB.filter(i => i.rarity === rarity);
-    if(list.length === 0) return ITEM_DB[0];
-    return list[Math.floor(Math.random() * list.length)];
 }
 
 function closeRoulette() {
     document.getElementById('rouletteModal').classList.add('hidden');
-    isSpinning = false;
     render();
 }
 
-// --- AI ANALYSIS LOGIC ---
-function getAIAnalysis() {
-    const avg = state.weeklyStats.reduce((a,b)=>a+b,0) / 7;
-    const today = state.weeklyStats[6];
-    let trend = "stable";
-    if (today > avg * 1.5) trend = "up";
-    if (today < avg * 0.5) trend = "down";
-
-    let text = "";
-    if (trend === "up") {
-        text = "Вау! Твоя продуктивность сегодня зашкаливает. ИИ фиксирует значительный рост активности по сравнению со средней недельной. Так держать, ты в зоне потока! 🚀";
-    } else if (trend === "down") {
-        text = "Я заметил небольшой спад. Это нормально — всем нужен отдых. Попробуй выполнить хотя бы одну маленькую задачу, чтобы вернуться в ритм. 🤖";
-    } else {
-        text = "Твои показатели стабильны. Ты поддерживаешь хороший темп. Постоянство — ключ к успеху, и мои алгоритмы это подтверждают. 👍";
-    }
+// --- ANALYTICS ENGINE ---
+function getChartData(period) {
+    const days = period === 'week' ? 7 : period === 'month' ? 30 : 365;
+    const now = new Date();
+    const data = [];
     
-    return { text, trend, avg: Math.round(avg) };
+    for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const entry = state.statsHistory.find(e => e.date === dateStr);
+        data.push({
+            date: dateStr,
+            val: entry ? entry.points : 0,
+            tasks: entry ? entry.tasks : 0
+        });
+    }
+    return data;
 }
 
-// --- RENDER FUNCTIONS ---
+function renderChart(data) {
+    if (data.length === 0) return '<div style="text-align:center;padding:40px;color:#555">Нет данных</div>';
+    
+    const w = 100; const h = 50;
+    const max = Math.max(...data.map(d => d.val), 10);
+    const step = w / (data.length - 1 || 1);
+    
+    const points = data.map((d, i) => {
+        const x = i * step;
+        const y = h - ((d.val / max) * h);
+        return `${x},${y}`;
+    }).join(' ');
 
-function renderHeader() {
+    const fillPath = `0,${h} ${points} ${w},${h}`;
+
     return `
-    <div class="header">
-        <div class="header-title">livi</div>
-        <div class="header-stats">
-            <div class="stat-badge" style="color:#D4AF7A">
-                ${getIcon('flame', '#D4AF7A')} ${state.streak}
-            </div>
-            <div class="stat-badge" style="color:#8B9A9C">
-                ${getIcon('star', '#8B9A9C')} ${state.totalPoints}
-            </div>
-        </div>
-    </div>`;
+    <svg viewBox="0 0 100 50" style="width:100%;height:100%;overflow:visible">
+        <defs>
+            <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#8B9A9C" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#8B9A9C" stop-opacity="0"/>
+            </linearGradient>
+        </defs>
+        <path d="M${points}" fill="none" stroke="#8B9A9C" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+        <polygon points="${fillPath}" fill="url(#grad)" opacity="0.5"/>
+        <circle cx="${w}" cy="${h - ((data[data.length-1].val/max)*h)}" r="2" fill="white"/>
+    </svg>`;
 }
 
-function renderLivi() {
-    // Get Equipped Items CSS
-    const headItem = ITEM_DB.find(i => i.id === state.equipped.head);
-    const faceItem = ITEM_DB.find(i => i.id === state.equipped.face);
-    const bodyItem = ITEM_DB.find(i => i.id === state.equipped.body);
-
-    return `
-    <div class="livi-character fade-in">
-        <div class="livi-circle">
-            ${headItem ? `<div class="${headItem.css}" style="${headItem.style||''}"><span></span></div>` : ''}
-            <div class="livi-antenna left"></div>
-            <div class="livi-antenna right"></div>
-            <div class="livi-face">
-                <div class="livi-eyes">
-                    <div class="livi-eye"></div>
-                    <div class="livi-eye"></div>
-                </div>
-                ${faceItem ? `<div class="${faceItem.css}"></div>` : ''}
-                <div class="livi-mouth"></div>
-            </div>
-        </div>
-        ${bodyItem ? `<div style="position:relative;width:0;height:0;top:-15px"><div class="${bodyItem.css}"></div></div>` : ''}
-        <div style="margin-top:24px;font-weight:bold;color:${colors.primary}">Привет, Чемпион!</div>
-    </div>`;
+function getAIAdvice(data) {
+    const total = data.reduce((a,b) => a + b.val, 0);
+    const avg = Math.round(total / data.length);
+    const last = data[data.length-1].val;
+    
+    if (total === 0) return "Данных пока мало. Выполни пару задач, чтобы я мог построить стратегию! 🤖";
+    if (last > avg * 1.5) return "Феноменально! Сегодня ты превзошел средние показатели. Главное не выгореть, сделай перерыв. 🚀";
+    if (last < avg * 0.5) return "Активность ниже обычного. Может, стоит начать с маленькой задачи на 5 минут? 👀";
+    return `Ты держишь стабильный темп (${avg} pts/день). Постоянство — признак мастерства.`;
 }
+
+// --- RENDERERS ---
 
 function renderHome() {
-    const tasksTotal = state.tasks.length;
-    const tasksDone = state.tasks.filter(t => t.completed).length;
+    const done = state.tasks.filter(t=>t.completed).length;
+    const all = state.tasks.length;
     
+    // Аксессуары для Livi
+    const h = ITEMS.find(i=>i.id===state.equipped.head);
+    const f = ITEMS.find(i=>i.id===state.equipped.face);
+    const b = ITEMS.find(i=>i.id===state.equipped.body);
+
     return `
     <div class="slide-up">
-        ${renderLivi()}
-        
-        <div class="grid-2" style="margin-top:10px">
-             <div class="stat-card" style="background:rgba(139,154,156,0.1)">
-                <div style="font-size:20px;font-weight:bold;color:#fff">${Math.round(tasksDone/Math.max(tasksTotal,1)*100)}%</div>
-                <div style="font-size:10px;color:#8B9A9C">КПД сегодня</div>
-             </div>
-             <div class="stat-card" style="background:rgba(212,175,122,0.1)">
-                <div style="font-size:20px;font-weight:bold;color:#fff">${state.inventory.length}</div>
-                <div style="font-size:10px;color:#D4AF7A">Предметов</div>
-             </div>
-        </div>
-
-        <div class="section">
-            <h3 style="margin-bottom:12px;font-size:18px">Статистика дня</h3>
-            <div class="grid-2" style="margin-bottom:0">
-                <div class="stat-card">
-                    ${getIcon('check', colors.primary)}
-                    <div class="stat-value">${tasksDone}/${tasksTotal}</div>
-                    <div class="stat-label">Задачи</div>
+        ${renderHeader()}
+        <div class="content">
+            <div class="livi-container">
+                <div class="livi-body">
+                    ${h ? `<div class="${h.css}" style="${h.style||''}"></div>` : ''}
+                    <div class="livi-antenna ant-l"></div>
+                    <div class="livi-antenna ant-r"></div>
+                    <div class="livi-face">
+                        <div class="eye eye-l"></div>
+                        <div class="eye eye-r"></div>
+                        ${f ? `<div class="${f.css}"></div>` : ''}
+                        <div class="mouth"></div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    ${getIcon('flame', colors.warning)}
-                    <div class="stat-value">${state.streak}</div>
-                    <div class="stat-label">Дней подряд</div>
+                ${b ? `<div style="position:relative;width:0;height:0;top:-10px"><div class="${b.css}"></div></div>` : ''}
+                <div style="margin-top:20px;font-weight:700;letter-spacing:0.5px">Привет, User!</div>
+            </div>
+
+            <div class="grid-2">
+                <div class="section" style="margin:0;text-align:center">
+                    <div style="font-size:24px;font-weight:800;color:var(--primary)">${done}/${all}</div>
+                    <div style="font-size:12px;color:#888">Задачи</div>
+                </div>
+                <div class="section" style="margin:0;text-align:center">
+                    <div style="font-size:24px;font-weight:800;color:var(--gold)">${state.streak}</div>
+                    <div style="font-size:12px;color:#888">Стрик</div>
                 </div>
             </div>
-        </div>
-        
-        <button class="btn btn-secondary" style="margin-bottom:20px; border-color:#D4AF7A; color:#D4AF7A" onclick="actions.sendStars()">
-            ${getIcon('star')} Отправить Stars разработчикам
-        </button>
 
-        <div class="section" onclick="state.activeTab='challenges';render()">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-                <div>
-                    <div style="font-weight:bold;margin-bottom:4px">Челлендж дня</div>
-                    <div style="font-size:12px;color:#999">${state.dailyChallenge.title}</div>
+            <div class="section" style="margin-top:15px; border-color:var(--gold)" onclick="actions.setPeriod('week');state.activeTab='analysis';render()">
+                 <div style="display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                        <div style="font-weight:bold;margin-bottom:4px">Цель дня</div>
+                        <div style="font-size:12px;color:#aaa">${state.dailyChallenge.title}</div>
+                    </div>
+                    <div class="stat-badge" style="background:rgba(212,175,122,0.2);color:var(--gold)">+${state.dailyChallenge.reward}</div>
+                 </div>
+            </div>
+
+            <button class="btn btn-ghost" style="margin-top:30px" onclick="actions.sendStars()">
+                ${getIcon('star')} Поддержать (Stars)
+            </button>
+        </div>
+    </div>`;
+}
+
+function renderAnalysis() {
+    const p = state.analysisPeriod;
+    const data = getChartData(p);
+    const totalPts = data.reduce((a,b)=>a+b.val,0);
+    const advice = getAIAdvice(data);
+    
+    // Heatmap dots
+    const heatMap = data.map(d => {
+        const op = Math.min(d.val / 50, 1); // 50 pts = full bright
+        return `<div class="heat-cell" style="background:rgba(139,154,156,${op || 0.1})"></div>`;
+    }).join('');
+
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
+            <h2 style="margin-bottom:15px;font-weight:800">АНАЛИТИКА</h2>
+            
+            <div class="period-switch">
+                <div class="p-btn ${p==='week'?'active':''}" onclick="actions.setPeriod('week')">Неделя</div>
+                <div class="p-btn ${p==='month'?'active':''}" onclick="actions.setPeriod('month')">Месяц</div>
+                <div class="p-btn ${p==='year'?'active':''}" onclick="actions.setPeriod('year')">Год</div>
+            </div>
+
+            <div class="section">
+                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">Активность (Очки)</div>
+                <div style="font-size:28px;font-weight:800;margin-bottom:10px">${totalPts} <span style="font-size:14px;font-weight:400;color:#666">за период</span></div>
+                <div class="chart-container">
+                    ${renderChart(data)}
                 </div>
-                <div class="stat-badge" style="background:#D4AF7A;color:#1a1a1a;font-size:12px">
-                    +${state.dailyChallenge.reward}
+            </div>
+
+            <div class="section">
+                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">Интенсивность</div>
+                <div class="heatmap">${heatMap}</div>
+            </div>
+
+            <div class="section" style="background:linear-gradient(135deg, rgba(40,40,40,0.5), rgba(20,20,20,0.5)); border-color:var(--accent)">
+                <div style="display:flex;gap:10px">
+                    <div style="font-size:24px">🧠</div>
+                    <div>
+                        <div style="font-weight:bold;color:white;margin-bottom:5px">Livi AI Report</div>
+                        <div style="font-size:13px;line-height:1.5;color:#ccc">${advice}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -532,224 +564,133 @@ function renderHome() {
 }
 
 function renderShop() {
-    const invItems = state.inventory.map(id => {
-        const item = ITEM_DB.find(i => i.id === id);
-        const isEquipped = Object.values(state.equipped).includes(id);
-        return `
-            <div class="inv-item ${isEquipped ? 'equipped' : ''}" onclick="actions.equipItem('${id}')">
-                <div class="inv-icon">${item.icon}</div>
-                <div style="font-size:10px;margin-top:4px">${item.name}</div>
-                ${isEquipped ? '<div style="position:absolute;top:2px;right:2px;width:6px;height:6px;background:#8B9A9C;border-radius:50%"></div>' : ''}
-            </div>
-        `;
+    const inv = state.inventory.map(id => {
+        const i = ITEMS.find(x=>x.id===id);
+        const eq = Object.values(state.equipped).includes(id);
+        return `<div class="section" style="padding:10px;margin:0;display:flex;flex-direction:column;align-items:center;border-color:${eq?'var(--primary)':'transparent'}" onclick="actions.equip('${id}')">
+            <div style="font-size:30px;margin-bottom:5px">${i.icon}</div>
+            <div style="font-size:10px;color:#888">${i.name}</div>
+            ${eq?'<div style="width:6px;height:6px;background:var(--primary);border-radius:50%;margin-top:4px"></div>':''}
+        </div>`;
     }).join('');
 
     return `
     <div class="slide-up">
-        <div style="text-align:center;margin-bottom:20px">
-            <div style="color:#888;font-size:14px">Твой баланс</div>
-            <div style="font-size:32px;font-weight:bold;color:${colors.warning}">${state.totalPoints} <span style="font-size:16px">pts</span></div>
-        </div>
-
-        <h3 style="margin-bottom:16px;font-weight:bold">Магазин Сундуков</h3>
-        <div style="display:grid; gap:16px; margin-bottom:30px">
-            
-            <div class="chest-card common" onclick="actions.openChest('common', 150)">
-                <div class="chest-icon">📦</div>
-                <div style="font-weight:bold">Обычный сундук</div>
-                <div style="font-size:12px;color:#888;margin:5px 0">Кепки, шапки, бабочки</div>
-                <div style="background:#333; padding:4px 12px; border-radius:12px; font-weight:bold; font-size:14px; margin-top:5px">150 pts</div>
+        ${renderHeader()}
+        <div class="content">
+            <div style="text-align:center;margin-bottom:20px">
+                <div style="font-size:12px;color:#888">БАЛАНС</div>
+                <div style="font-size:36px;font-weight:900;color:var(--gold);text-shadow:0 0 20px rgba(212,175,122,0.2)">${state.totalPoints}</div>
             </div>
 
-            <div class="chest-card rare" onclick="actions.openChest('rare', 300)">
-                <div class="chest-icon">💼</div>
-                <div style="font-weight:bold;color:#D4AF7A">Редкий кейс</div>
-                <div style="font-size:12px;color:#888;margin:5px 0">Очки, шарфы, цепи</div>
-                <div style="background:rgba(212,175,122,0.2); color:#D4AF7A; padding:4px 12px; border-radius:12px; font-weight:bold; font-size:14px; margin-top:5px">300 pts</div>
-            </div>
-
-            <div class="chest-card legendary" onclick="actions.openChest('legendary', 1000)">
-                <div class="chest-icon">💎</div>
-                <div style="font-weight:bold;color:#D45D79">Легендарный</div>
-                <div style="font-size:12px;color:#888;margin:5px 0">Короны, монокли и эксклюзив</div>
-                <div style="background:rgba(212,93,121,0.2); color:#D45D79; padding:4px 12px; border-radius:12px; font-weight:bold; font-size:14px; margin-top:5px">1000 pts</div>
-            </div>
-
-        </div>
-
-        <h3 style="margin-bottom:16px;font-weight:bold">Твой Инвентарь</h3>
-        ${invItems ? `<div class="inv-grid">${invItems}</div>` : '<div style="text-align:center;color:#666;padding:20px">Пусто. Открой сундук!</div>'}
-    </div>`;
-}
-
-function renderAnalysis() {
-    const ai = getAIAnalysis();
-    
-    // Simple SVG Line Chart Logic
-    const points = state.weeklyStats;
-    const max = Math.max(...points, 10);
-    const width = 100; // viewbox units
-    const height = 50;
-    const step = width / (points.length - 1);
-    
-    let polylinePoints = points.map((val, i) => {
-        const x = i * step;
-        const y = height - ((val / max) * height);
-        return `${x},${y}`;
-    }).join(' ');
-
-    return `
-    <div class="slide-up">
-        <h2 style="margin-bottom:20px;font-weight:bold">AI Аналитика 🧠</h2>
-        
-        <div class="section" style="border-color:${ai.trend === 'up' ? colors.primary : '#333'}">
-            <div style="display:flex; gap:12px; align-items:flex-start">
-                <div style="font-size:32px">${ai.trend === 'up' ? '📈' : ai.trend === 'down' ? '📉' : '📊'}</div>
-                <div>
-                    <div style="font-weight:bold; margin-bottom:6px">Отчет Livi AI</div>
-                    <div style="font-size:14px; line-height:1.4; color:#ccc">${ai.text}</div>
+            <div class="chest-wrapper">
+                <div class="chest-card chest-common" onclick="actions.openChest('common', 150)">
+                    <div style="font-weight:800;font-size:18px;margin-bottom:4px">Базовый Набор</div>
+                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">Кепки и бабочки</div>
+                    <div style="background:rgba(0,0,0,0.3);display:inline-block;padding:4px 10px;border-radius:8px;font-weight:bold">150 pts</div>
+                </div>
+                <div class="chest-card chest-rare" onclick="actions.openChest('rare', 300)">
+                    <div style="font-weight:800;font-size:18px;margin-bottom:4px;color:var(--gold)">Кейс Агента</div>
+                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">Очки, цепи, стиль</div>
+                    <div style="background:rgba(212,175,122,0.2);color:var(--gold);display:inline-block;padding:4px 10px;border-radius:8px;font-weight:bold">300 pts</div>
+                </div>
+                <div class="chest-card chest-legendary" onclick="actions.openChest('legendary', 1000)">
+                    <div style="font-weight:800;font-size:18px;margin-bottom:4px;color:var(--epic)">Мистический Куб</div>
+                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">Короны и реликвии</div>
+                    <div style="background:rgba(212,93,121,0.2);color:var(--epic);display:inline-block;padding:4px 10px;border-radius:8px;font-weight:bold">1000 pts</div>
                 </div>
             </div>
-        </div>
 
-        <div class="section">
-            <div style="display:flex;justify-content:space-between;margin-bottom:15px">
-                <span style="color:#888">Тренд активности</span>
-                <span style="font-weight:bold">Ср: ${ai.avg} pts</span>
-            </div>
-            <svg viewBox="0 0 100 50" style="width:100%; height:120px; overflow:visible">
-                <line x1="0" y1="0" x2="100" y2="0" stroke="#333" stroke-width="0.5" stroke-dasharray="2"/>
-                <line x1="0" y1="25" x2="100" y2="25" stroke="#333" stroke-width="0.5" stroke-dasharray="2"/>
-                <line x1="0" y1="50" x2="100" y2="50" stroke="#333" stroke-width="0.5" stroke-dasharray="2"/>
-                
-                <polyline points="${polylinePoints}" fill="none" stroke="${colors.primary}" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
-                
-                ${points.map((val, i) => {
-                    const x = i * step;
-                    const y = height - ((val / max) * height);
-                    return `<circle cx="${x}" cy="${y}" r="2" fill="${colors.accent}"/>`;
-                }).join('')}
-            </svg>
-            <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:10px;color:#666">
-                <span>6 дней назад</span>
-                <span>Сегодня</span>
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <div style="color:#888;font-size:12px;margin-bottom:5px">Рекомендация</div>
-            <div style="font-weight:500;font-size:14px">
-                ${ai.trend === 'down' 
-                  ? 'Попробуй выполнить легкую задачу "Запустить Livi" чтобы не потерять стрик!' 
-                  : 'Попробуй купить Редкий кейс, ты заслужил награду!'}
+            <h3 style="margin-bottom:10px;font-weight:700">ИНВЕНТАРЬ</h3>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+                ${inv || '<div style="grid-column:1/-1;text-align:center;color:#444;padding:20px">Пусто</div>'}
             </div>
         </div>
     </div>`;
 }
 
-function renderTasksPage() {
-    const tasksList = state.tasks.map(task => `
-        <div class="task-item ${task.completed ? 'completed' : ''}">
-            <div class="checkbox ${task.completed ? 'checked' : ''}" onclick="actions.toggleTask(${task.id})">
-                ${task.completed ? '<svg viewBox="0 0 24 24" width="16" height="16" stroke="white" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+function renderTasks() {
+    const list = state.tasks.map(t => `
+        <div class="section" style="display:flex;align-items:center;padding:15px;margin-bottom:10px;opacity:${t.completed?.5:1}">
+            <div style="width:24px;height:24px;border:2px solid var(--primary);border-radius:6px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:${t.completed?'var(--primary)':'transparent'}" onclick="actions.toggleTask(${t.id})">
+                ${t.completed?'<svg width="14" height="14" stroke="white"><polyline points="20 6 9 17 4 12"/></svg>':''}
             </div>
             <div style="flex:1">
-                <div class="task-title" style="font-weight:500">${task.title}</div>
-                <div style="font-size:11px;color:#666;margin-top:2px">${task.type === 'habit' ? 'Привычка' : 'Задача'} • ${task.points} очков</div>
+                <div style="font-weight:500;text-decoration:${t.completed?'line-through':''}">${t.title}</div>
+                <div style="font-size:11px;color:#666">${t.points} pts</div>
             </div>
-            <button onclick="actions.deleteTask(${task.id})" style="background:none;border:none;color:#666;padding:4px">
-                ${getIcon('trash')}
-            </button>
+            <div onclick="actions.deleteTask(${t.id})" style="color:#666">${getIcon('trash')}</div>
         </div>
     `).join('');
 
     return `
     <div class="slide-up">
-        <h2 style="margin-bottom:20px;font-size:24px;font-weight:bold">Твои задачи</h2>
-        ${tasksList.length ? tasksList : '<div style="text-align:center;color:#666;padding:40px">Нет активных задач</div>'}
+        ${renderHeader()}
+        <div class="content">
+            <h2 style="margin-bottom:20px;font-weight:800">ЗАДАЧИ</h2>
+            ${list}
+        </div>
         <button class="add-btn" onclick="actions.addTask()">+</button>
     </div>`;
 }
 
 function renderChallenges() {
-    const ch = state.dailyChallenge;
+    const c = state.dailyChallenge;
     return `
     <div class="slide-up">
-        <div class="section" style="text-align:center;padding:40px 20px;border-color:${colors.warning}">
-            <div style="font-size:48px;margin-bottom:16px">🎯</div>
-            <h2 style="margin-bottom:8px;font-size:24px;font-weight:bold">${ch.title}</h2>
-            <p style="color:#888;margin-bottom:24px">Выполни это задание до конца дня</p>
-            
-            <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:16px;margin-bottom:24px">
-                <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px">
-                    <span>Статус</span>
-                    <span>${ch.completed ? 'Выполнено' : 'В процессе'}</span>
-                </div>
-                <div style="height:6px;background:#333;border-radius:3px;overflow:hidden">
-                    <div style="height:100%;width:${ch.completed ? 100 : 0}%;background:${colors.warning};transition:width .5s"></div>
-                </div>
+        ${renderHeader()}
+        <div class="content">
+            <div class="section" style="text-align:center;padding:40px 20px;border:2px solid var(--gold);box-shadow:0 0 20px rgba(212,175,122,0.1)">
+                <div style="font-size:50px;margin-bottom:15px">🎯</div>
+                <h2 style="font-weight:900;font-size:26px;margin-bottom:10px">${c.title}</h2>
+                <div style="color:#888;margin-bottom:25px">Цель обновляется ежедневно</div>
+                
+                ${c.completed 
+                ? '<div class="btn" style="background:var(--glass);color:var(--accent)">ВЫПОЛНЕНО</div>' 
+                : `<button class="btn btn-primary" onclick="actions.completeChallenge()">ЗАВЕРШИТЬ (+${c.reward})</button>`}
             </div>
-
-            ${ch.completed 
-                ? `<div class="btn" style="background:${colors.accent};color:#1a1a1a">Завершено! 🎉</div>`
-                : `<button class="btn btn-primary" onclick="actions.completeChallenge()">Завершить (+${ch.reward})</button>`
-            }
         </div>
     </div>`;
 }
 
-function renderNavigation() {
-    const tabs = [
-        { id: 'home', icon: 'home', label: 'Главная' },
-        { id: 'challenges', icon: 'target', label: 'Цели' },
-        { id: 'tasks', icon: 'check', label: 'Задачи' },
-        { id: 'shop', icon: 'shop', label: 'Шоп' },
-        { id: 'analysis', icon: 'chart', label: 'Анализ' }
-    ];
-
-    return `
-    <div class="bottom-nav">
-        ${tabs.map(tab => `
-            <button class="nav-item ${state.activeTab === tab.id ? 'active' : ''}" 
-                onclick="state.activeTab='${tab.id}';saveState();render()">
-                <div class="nav-icon">${getIcon(tab.icon)}</div>
-                <div class="nav-label" style="font-size:10px;margin-top:4px">${tab.label}</div>
-            </button>
-        `).join('')}
+function renderHeader() {
+    return `<div class="header">
+        <div class="header-title">livi</div>
+        <div class="header-stats">
+            <div class="stat-badge" style="color:var(--gold)">${getIcon('star')} ${state.totalPoints}</div>
+        </div>
     </div>`;
 }
 
 function render() {
     const app = document.getElementById('app');
-    let contentHtml = '';
-    switch(state.activeTab) {
-        case 'home': contentHtml = renderHome(); break;
-        case 'challenges': contentHtml = renderChallenges(); break;
-        case 'tasks': contentHtml = renderTasksPage(); break;
-        case 'shop': contentHtml = renderShop(); break;
-        case 'analysis': contentHtml = renderAnalysis(); break;
-    }
+    const nav = [
+        {id:'home',icon:'home',l:'Home'},
+        {id:'challenges',icon:'target',l:'Goals'},
+        {id:'tasks',icon:'check',l:'Tasks'},
+        {id:'shop',icon:'shop',l:'Shop'},
+        {id:'analysis',icon:'chart',l:'Data'}
+    ];
+    
+    let html = '';
+    if(state.activeTab === 'home') html = renderHome();
+    else if(state.activeTab === 'challenges') html = renderChallenges();
+    else if(state.activeTab === 'tasks') html = renderTasks();
+    else if(state.activeTab === 'shop') html = renderShop();
+    else if(state.activeTab === 'analysis') html = renderAnalysis();
 
-    app.innerHTML = `
-        ${renderHeader()}
-        <div class="content">
-            ${contentHtml}
-        </div>
-        ${renderNavigation()}
-    `;
+    app.innerHTML = html + `
+    <div class="bottom-nav">
+        ${nav.map(n=>`<button class="nav-item ${state.activeTab===n.id?'active':''}" onclick="state.activeTab='${n.id}';render()">${getIcon(n.icon)}<span style="font-size:10px">${n.l}</span></button>`).join('')}
+    </div>`;
 }
 
 // --- INIT ---
 window.onload = () => {
     loadState();
     render();
-    setTimeout(() => {
-        const screen = document.getElementById('loadingScreen');
-        screen.classList.add('fade-out');
-        setTimeout(() => screen.remove(), 500);
-    }, 800);
+    setTimeout(() => document.getElementById('loadingScreen').classList.add('fade-out'), 1000);
 };
-
 </script>
 </body>
 </html>
