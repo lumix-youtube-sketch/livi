@@ -90,6 +90,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 .item-bowtie {position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:40px;height:20px;z-index:25;background:#D45D79;clip-path:polygon(0 50%, 40% 0, 50% 50%, 40% 100%, 0 50%, 50% 50%, 60% 0, 100% 50%, 60% 100%, 50% 50%)}
 
+/* Новый предмет — Страховка стриков */
+.item-insurance {
+    position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:60px;height:60px;z-index:20;
+    background:radial-gradient(circle, #FFD700, #B8860B);border-radius:50%;border:3px solid #FFA500;
+    box-shadow:0 0 20px rgba(255,215,0,0.6);display:flex;align-items:center;justify-content:center;font-size:28px;
+}
+
 /* --- CHESTS (VISUALS) --- */
 .chest-wrapper {display:grid;gap:15px;margin-bottom:30px}
 .chest-card {position:relative;border-radius:16px;padding:20px;overflow:hidden;cursor:pointer;transition:transform .2s}
@@ -163,6 +170,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .progress-bar {width:100%;height:8px;background:#222;border-radius:4px;overflow:hidden;margin-top:10px}
 .progress-fill {height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width 0.3s}
 
+/* Новые стили для групповых испытаний */
+.group-progress {height:12px;background:#222;border-radius:6px;overflow:hidden;margin-top:10px}
+.group-fill {height:100%;background:linear-gradient(90deg,var(--gold),var(--epic));transition:width .6s}
+.leaderboard-item {display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.rank-num {font-weight:800;color:var(--gold);width:30px}
+
 svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
@@ -192,7 +205,10 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 const tg = window.Telegram?.WebApp;
 if(tg) { tg.expand(); tg.ready(); tg.setHeaderColor('#141414'); tg.setBackgroundColor('#141414'); }
 
-// Cloud Storage API для синхронизации
+// Привязка к аккаунту Telegram
+const userId = tg?.initDataUnsafe?.user?.id || 'local';
+
+// Cloud Storage с префиксом по userId
 const CloudStorage = tg?.CloudStorage || {
     setItem: (key, value) => Promise.resolve(),
     getItem: (key) => Promise.resolve(''),
@@ -205,12 +221,14 @@ const icons = {
     home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
     target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/>',
     check: '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+    users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><circle cx="16" cy="7" r="4"/>',
     shop: '<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>',
     chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
     star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
     trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
     trendUp: '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
-    clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'
+    clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'
 };
 const getIcon = (n) => `<svg>${icons[n]}</svg>`;
 
@@ -222,7 +240,8 @@ const ITEMS = [
     { id: 'r_glasses', name: 'Рейбаны', type: 'face', rarity: 'rare', icon: '🕶️', css: 'item-glasses' },
     { id: 'r_scarf', name: 'Шарф', type: 'body', rarity: 'rare', icon: '🧣', css: 'item-scarf' },
     { id: 'l_crown', name: 'Корона', type: 'head', rarity: 'legendary', icon: '👑', css: 'item-crown' },
-    { id: 'l_monocle', name: 'Монокль', type: 'face', rarity: 'legendary', icon: '🧐', css: 'item-monocle' }
+    { id: 'l_monocle', name: 'Монокль', type: 'face', rarity: 'legendary', icon: '🧐', css: 'item-monocle' },
+    { id: 'insurance', name: 'Страховка стриков', type: 'special', rarity: 'rare', icon: '🛡️', css: 'item-insurance', special: true }
 ];
 
 // --- STATE MANAGEMENT ---
@@ -237,12 +256,20 @@ const defaultState = {
         { id: 2, title: 'Запустить Livi', completed: true, type: 'task', points: 5 }
     ],
     inventory: [],
-    equipped: { head: null, face: null, body: null },
+    equipped: { head: null, face: null, body: null, special: null },
     dailyChallenge: {
         date: new Date().toISOString().split('T')[0],
         title: 'Сделать 20 шагов', target: 20, completed: false, reward: 50
     },
-    analysisPeriod: 'week'
+    analysisPeriod: 'week',
+    groupChallenge: {
+        date: new Date().toISOString().split('T')[0],
+        title: 'Все вместе: 1000 задач за день',
+        current: 0,
+        target: 1000,
+        personalContributed: false
+    },
+    hasStreakInsurance: false
 };
 
 let state = { ...defaultState };
@@ -253,7 +280,16 @@ async function saveToCloud() {
     if (isSyncing) return;
     isSyncing = true;
     try {
-        await CloudStorage.setItem('livi_state', JSON.stringify(state));
+        await CloudStorage.setItem(`livi_state_${userId}`, JSON.stringify(state));
+        const today = new Date().toISOString().split('T')[0];
+        const currentGroup = state.groupChallenge.personalContributed && state.dailyChallenge.completed ? 1 : 0;
+        const existing = await CloudStorage.getItem(`livi_group_progress_${today}`);
+        let total = 0;
+        if (existing) {
+            total = parseInt(JSON.parse(existing).current || 0);
+        }
+        if (currentGroup) total += 1;
+        await CloudStorage.setItem(`livi_group_progress_${today}`, JSON.stringify({current: total}));
         console.log('✅ Synced to cloud');
     } catch (e) {
         console.error('Cloud sync error:', e);
@@ -263,17 +299,24 @@ async function saveToCloud() {
 
 async function loadFromCloud() {
     try {
-        const cloudData = await CloudStorage.getItem('livi_state');
+        const cloudData = await CloudStorage.getItem(`livi_state_${userId}`);
         if (cloudData) {
             const parsed = JSON.parse(cloudData);
             state = { ...defaultState, ...parsed };
-            console.log('✅ Loaded from cloud');
-            return true;
+            console.log('✅ Loaded personal from cloud');
         }
+
+        const today = new Date().toISOString().split('T')[0];
+        const groupData = await CloudStorage.getItem(`livi_group_progress_${today}`);
+        if (groupData) {
+            const prog = JSON.parse(groupData);
+            state.groupChallenge.current = prog.current || 0;
+        }
+        return true;
     } catch (e) {
         console.error('Cloud load error:', e);
+        return false;
     }
-    return false;
 }
 
 // Helper для записи истории
@@ -289,17 +332,15 @@ function updateHistory(pointsDelta = 0, completedTask = false) {
     entry.points += pointsDelta;
     if (completedTask) entry.completedTasks += 1;
 
-    // ограничиваем историю (≈1 год)
     state.statsHistory = state.statsHistory.slice(-400);
 
     saveState();
 }
 
-
 function saveState() {
     try {
         localStorage.setItem('livi_v4_pro', JSON.stringify(state));
-        saveToCloud(); // Синхронизация с облаком
+        saveToCloud();
     } catch (e) {}
 }
 
@@ -311,11 +352,9 @@ function hadActivityYesterday() {
     return entry && (entry.points > 0 || entry.completedTasks > 0);
 }
 
-
 async function loadState() {
     const today = new Date().toISOString().split('T')[0];
 
-    // Сначала пробуем загрузить из облака
     const cloudLoaded = await loadFromCloud();
 
     if (!cloudLoaded) {
@@ -327,17 +366,38 @@ async function loadState() {
         } catch (e) {}
     }
 
-    // New Day Logic
+    // New Day Logic с учётом страховки
     if (state.lastVisitDate !== today) {
-        state.streak = hadActivityYesterday() ? state.streak + 1 : 1;
+        const yesterdayActive = hadActivityYesterday();
+        if (!yesterdayActive && state.hasStreakInsurance) {
+            state.hasStreakInsurance = false;
+            if (state.equipped.special === 'insurance') state.equipped.special = null;
+            tg?.showPopup({title: '🛡️ Страховка сработала!', message: 'Твой стрик сохранён благодаря страховке!', buttons: [{type:'ok'}]});
+        } else if (!yesterdayActive) {
+            state.streak = 1;
+        } else {
+            state.streak += 1;
+        }
+
         state.lastVisitDate = today;
 
+        // Обновление ежедневной цели
+        const challenges = ['Сделать 20 шагов', 'Выполнить 3 задачи', 'Набрать 100 очков', 'Пройти 5 км'];
         state.dailyChallenge = {
             date: today,
-            title: 'Новая цель!',
-            target: 15,
+            title: challenges[Math.floor(Math.random() * challenges.length)],
+            target: 20,
             completed: false,
             reward: 50
+        };
+
+        // Сброс группового вклада
+        state.groupChallenge = {
+            date: today,
+            title: 'Все вместе: 1000 задач за день',
+            current: state.groupChallenge.current,
+            target: 1000,
+            personalContributed: false
         };
 
         state.tasks.forEach(t => {
@@ -355,22 +415,22 @@ async function loadState() {
 // --- ACTIONS ---
 const actions = {
     toggleTask: (id) => {
-    const task = state.tasks.find(t => t.id === id);
-    if (!task) return;
+        const task = state.tasks.find(t => t.id === id);
+        if (!task) return;
 
-    if (!task.completed) {
-        task.completed = true;
-        state.totalPoints += task.points;
-        updateHistory(task.points, true);
-        tg?.HapticFeedback?.notificationOccurred('success');
-    } else {
-        task.completed = false;
-        state.totalPoints -= task.points;
-        updateHistory(-task.points, false); // задачи НЕ уменьшаем
-    }
+        if (!task.completed) {
+            task.completed = true;
+            state.totalPoints += task.points;
+            updateHistory(task.points, true);
+            tg?.HapticFeedback?.notificationOccurred('success');
+        } else {
+            task.completed = false;
+            state.totalPoints -= task.points;
+            updateHistory(-task.points, false);
+        }
 
-    saveState();
-    render();
+        saveState();
+        render();
     },
     addTask: () => {
         const title = prompt("Что нужно сделать?");
@@ -390,6 +450,14 @@ const actions = {
             state.dailyChallenge.completed = true;
             state.totalPoints += state.dailyChallenge.reward;
             updateHistory(state.dailyChallenge.reward);
+
+            // Вклад в групповое испытание
+            if (!state.groupChallenge.personalContributed) {
+                state.groupChallenge.personalContributed = true;
+                state.groupChallenge.current += 1;
+                saveToCloud();
+            }
+
             tg?.HapticFeedback?.notificationOccurred('success');
             saveState(); render();
         }
@@ -398,12 +466,20 @@ const actions = {
         const item = ITEMS.find(i => i.id === id);
         if(!item) return;
 
-        // Если предмет уже надет - снимаем
-        if (state.equipped[item.type] === id) {
-            state.equipped[item.type] = null;
+        if (item.special) {
+            if (state.equipped.special === id) {
+                state.equipped.special = null;
+                state.hasStreakInsurance = false;
+            } else {
+                state.equipped.special = id;
+                state.hasStreakInsurance = true;
+            }
         } else {
-            // Иначе надеваем (автоматически заменяя старый в этом слоте)
-            state.equipped[item.type] = id;
+            if (state.equipped[item.type] === id) {
+                state.equipped[item.type] = null;
+            } else {
+                state.equipped[item.type] = id;
+            }
         }
 
         saveState();
@@ -437,9 +513,15 @@ function startRoulette(type) {
     strip.style.transition = 'none';
     strip.style.transform = 'translateX(0)';
 
-    let pool = type === 'common' ? ITEMS.filter(i=>i.rarity!=='legendary') : ITEMS;
+    let pool = type === 'common' ? ITEMS.filter(i=>i.rarity!=='legendary' && i.id !== 'insurance') : ITEMS;
     let winner = pool[Math.floor(Math.random() * pool.length)];
-    if(type === 'legendary' && Math.random() > 0.5) winner = ITEMS.find(i => i.rarity === 'legendary') || winner;
+
+    // Повышенный шанс на страховку (25% в любом боксе)
+    if (Math.random() < 0.25) {
+        winner = ITEMS.find(i => i.id === 'insurance');
+    } else if(type === 'legendary' && Math.random() > 0.5) {
+        winner = ITEMS.find(i => i.rarity === 'legendary') || winner;
+    }
 
     const count = 60;
     const winIdx = 50;
@@ -449,7 +531,7 @@ function startRoulette(type) {
         const item = i === winIdx ? winner : pool[Math.floor(Math.random()*pool.length)];
         const el = document.createElement('div');
         el.className = `r-item ${item.rarity}`;
-        el.innerHTML = `<div style="font-size:40px">${item.icon}</div>`;
+        el.innerHTML = `<div style="font-size:40px">${item.icon}</div><div style="font-size:10px;margin-top:4px">${item.rarity === 'rare' && item.special ? 'SPECIAL' : ''}</div>`;
         strip.appendChild(el);
     }
 
@@ -459,12 +541,11 @@ function startRoulette(type) {
         const pos = -(winIdx * itemW) + offset;
         strip.style.transition = 'transform 6s cubic-bezier(0.1, 0.9, 0.2, 1)';
         strip.style.transform = `translateX(${pos}px)`;
-        tg?.HapticFeedback?.selectionChanged();
 
         setTimeout(() => {
             tg?.HapticFeedback?.notificationOccurred('success');
             document.getElementById('winItemName').innerText = winner.name;
-            document.getElementById('winItemName').style.color = winner.rarity === 'legendary' ? '#D45D79' : '#fff';
+            document.getElementById('winItemName').style.color = winner.special ? '#FFA500' : (winner.rarity === 'legendary' ? '#D45D79' : '#D4AF7A');
             winMsg.style.opacity = '1';
             if(!state.inventory.includes(winner.id)) {
                 state.inventory.push(winner.id);
@@ -574,6 +655,7 @@ function renderHome() {
     const h = ITEMS.find(i=>i.id===state.equipped.head);
     const f = ITEMS.find(i=>i.id===state.equipped.face);
     const b = ITEMS.find(i=>i.id===state.equipped.body);
+    const s = ITEMS.find(i=>i.id===state.equipped.special);
 
     return `
     <div class="slide-up">
@@ -590,6 +672,7 @@ function renderHome() {
                         ${f ? `<div class="${f.css}"><div class="g-lens"></div><div class="g-lens"></div><div class="g-bridge"></div></div>` : ''}
                         <div class="mouth"></div>
                     </div>
+                    ${s ? `<div class="${s.css}">${s.icon}</div>` : ''}
                 </div>
                 ${b ? `<div style="position:relative;width:0;height:0;top:-10px"><div class="${b.css}"></div></div>` : ''}
                 <div style="margin-top:20px;font-weight:700;letter-spacing:0.5px">Привет, User!</div>
@@ -606,19 +689,155 @@ function renderHome() {
                 </div>
             </div>
 
-            <div class="section" style="margin-top:15px; border-color:var(--gold)" onclick="actions.completeChallenge()">
-                 <div style="display:flex;justify-content:space-between;align-items:center">
-                    <div>
-                        <div style="font-weight:bold;margin-bottom:4px">Цель дня</div>
-                        <div style="font-size:12px;color:#aaa">${state.dailyChallenge.title}</div>
-                    </div>
-                    <div class="stat-badge" style="background:rgba(212,175,122,0.2);color:var(--gold)">+${state.dailyChallenge.reward}</div>
-                 </div>
-            </div>
-
             <button class="btn btn-ghost" style="margin-top:30px" onclick="actions.sendStars()">
                 ${getIcon('star')} Поддержать (Stars)
             </button>
+        </div>
+    </div>`;
+}
+
+function renderTasks() {
+    const c = state.dailyChallenge;
+    const list = state.tasks.map(t => `
+        <div class="section" style="display:flex;align-items:center;padding:15px;margin-bottom:10px;opacity:${t.completed?0.5:1}">
+            <div style="width:24px;height:24px;border:2px solid var(--primary);border-radius:6px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:${t.completed?'var(--primary)':'transparent'}" onclick="actions.toggleTask(${t.id})">
+                ${t.completed?'<svg width="14" height="14" stroke="white"><polyline points="20 6 9 17 4 12"/></svg>':''}
+            </div>
+            <div style="flex:1">
+                <div style="font-weight:500;text-decoration:${t.completed?'line-through':''}">${t.title}</div>
+                <div style="font-size:11px;color:#666">${t.points} pts</div>
+            </div>
+            <div onclick="actions.deleteTask(${t.id})" style="color:#666">${getIcon('trash')}</div>
+        </div>
+    `).join('');
+
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
+            <h2 style="margin-bottom:20px;font-weight:800">ЗАДАЧИ И ЦЕЛЬ ДНЯ</h2>
+
+            <div class="section" style="border:2px solid var(--gold);box-shadow:0 0 20px rgba(212,175,122,0.1);padding:25px;text-align:center" onclick="actions.completeChallenge()">
+                <div style="font-size:50px;margin-bottom:15px">🎯</div>
+                <h3 style="font-weight:900;font-size:22px;margin-bottom:8px">${c.title}</h3>
+                <div style="color:#aaa;margin-bottom:20px">+${c.reward} очков за выполнение</div>
+                ${c.completed 
+                    ? '<div class="btn" style="background:var(--glass);color:var(--accent);width:220px;margin:0 auto">ВЫПОЛНЕНО ✅</div>'
+                    : '<button class="btn btn-primary" style="width:220px">ЗАВЕРШИТЬ ЦЕЛЬ</button>'}
+            </div>
+
+            <h3 style="margin:20px 0 10px;font-weight:700">Обычные задачи</h3>
+            ${list || '<div class="section" style="text-align:center;color:#666;padding:40px">Задач пока нет. Нажми + чтобы добавить</div>'}
+        </div>
+        <button class="add-btn" onclick="actions.addTask()">+</button>
+    </div>`;
+}
+
+function renderGroupChallenges() {
+    const g = state.groupChallenge;
+    const progressPercent = Math.min((g.current / g.target) * 100, 100);
+
+    // Примерные лидерборды (в реальном приложении можно расширить)
+    const personalLeaderboard = [
+        {rank: 1, name: "Алексей", points: 8420},
+        {rank: 2, name: "Марина", points: 8190},
+        {rank: 3, name: "Ты", points: state.totalPoints},
+        {rank: 4, name: "Дмитрий", points: 7650}
+    ];
+
+    const groupProgressLeaderboard = [
+        {rank: 1, name: "Команда Огня", progress: 984},
+        {rank: 2, name: "Ночные Волки", progress: 912},
+        {rank: 3, name: "Все вместе", progress: g.current},
+        {rank: 4, name: "Звёздные Стрелки", progress: 789}
+    ];
+
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
+            <h2 style="margin-bottom:20px;font-weight:800">ГРУППОВЫЕ ИСПЫТАНИЯ</h2>
+
+            <div class="section" style="padding:25px;text-align:center;border:2px solid var(--epic);background:rgba(212,93,121,0.05)">
+                <div style="font-size:44px;margin-bottom:12px">🔥</div>
+                <div style="font-weight:900;font-size:20px;margin-bottom:12px">${g.title}</div>
+                <div style="font-size:32px;font-weight:800;color:var(--gold);margin-bottom:8px">${g.current} / ${g.target}</div>
+                <div class="group-progress"><div class="group-fill" style="width:${progressPercent}%"></div></div>
+                <div style="margin-top:12px;color:#aaa;font-size:14px">
+                    Твой вклад сегодня: ${state.dailyChallenge.completed ? '✅ Да' : '❌ Пока нет'}
+                </div>
+            </div>
+
+            <h3 style="margin:25px 0 12px;font-weight:700">Лидерборды</h3>
+
+            <div class="section" style="padding:15px">
+                <div style="font-weight:bold;margin-bottom:12px;color:var(--primary)">🏆 Личный зачёт (очки)</div>
+                ${personalLeaderboard.map(p => `
+                    <div class="leaderboard-item">
+                        <div class="rank-num">${p.rank}.</div>
+                        <div style="flex:1">${p.name}${p.name === "Ты" ? ' (ты)' : ''}</div>
+                        <div style="color:var(--gold);font-weight:bold">${p.points} pts</div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="section" style="padding:15px">
+                <div style="font-weight:bold;margin-bottom:12px;color:var(--epic)">👥 Групповой прогресс сегодня</div>
+                ${groupProgressLeaderboard.map(g => `
+                    <div class="leaderboard-item">
+                        <div class="rank-num">${g.rank}.</div>
+                        <div style="flex:1">${g.name}</div>
+                        <div style="color:var(--epic);font-weight:bold">${g.progress}</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderShop() {
+    const inv = state.inventory.map(id => {
+        const i = ITEMS.find(x=>x.id===id);
+        const eq = Object.values(state.equipped).includes(id);
+        const color = i.special ? '#FFA500' : (i.rarity === 'legendary' ? 'var(--epic)' : i.rarity === 'rare' ? 'var(--gold)' : 'var(--primary)');
+        return `<div class="section" style="padding:10px;margin:0;display:flex;flex-direction:column;align-items:center;border-color:${eq?color:'transparent'}" onclick="actions.equip('${id}')">
+            <div style="font-size:36px;margin-bottom:6px">${i.icon}</div>
+            <div style="font-size:11px;color:#888;text-align:center">${i.name}</div>
+            ${eq?'<div style="width:8px;height:8px;background:${color};border-radius:50%;margin-top:6px"></div>':''}
+        </div>`;
+    }).join('');
+
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
+            <div style="text-align:center;margin-bottom:20px">
+                <div style="font-size:12px;color:#888">БАЛАНС</div>
+                <div style="font-size:36px;font-weight:900;color:var(--gold);text-shadow:0 0 20px rgba(212,175,122,0.2)">${state.totalPoints}</div>
+            </div>
+
+            <div class="chest-wrapper grid-2">
+                <div class="chest-card chest-common" onclick="actions.openChest('common', 150)">
+                    <div style="font-weight:800;font-size:18px;margin-bottom:4px">Базовый Набор</div>
+                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">Кепки и бабочки</div>
+                    <div style="background:rgba(0,0,0,0.3);display:inline-block;padding:4px 10px;border-radius:8px;font-weight:bold">150 pts</div>
+                </div>
+                <div class="chest-card chest-rare" onclick="actions.openChest('rare', 300)">
+                    <div style="font-weight:800;font-size:18px;margin-bottom:4px;color:var(--gold)">Кейс Агента</div>
+                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">Очки, шарфы + шанс на страховку</div>
+                    <div style="background:rgba(212,175,122,0.2);color:var(--gold);display:inline-block;padding:4px 10px;border-radius:8px;font-weight:bold">300 pts</div>
+                </div>
+                <div class="chest-card chest-legendary" onclick="actions.openChest('legendary', 1000)">
+                    <div style="font-weight:800;font-size:18px;margin-bottom:4px;color:var(--epic)">Мистический Куб</div>
+                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">Короны и реликвии</div>
+                    <div style="background:rgba(212,93,121,0.2);color:var(--epic);display:inline-block;padding:4px 10px;border-radius:8px;font-weight:bold">1000 pts</div>
+                </div>
+            </div>
+
+            <h3 style="margin:25px 0 10px;font-weight:700">ИНВЕНТАРЬ</h3>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+                ${inv || '<div style="grid-column:1/-1;text-align:center;color:#444;padding:30px">Инвентарь пуст</div>'}
+            </div>
         </div>
     </div>`;
 }
@@ -629,13 +848,10 @@ function renderAnalysis() {
     const totalPts = data.reduce((a,b)=>a+b.val,0);
     const totalTasks = data.reduce((a,b)=>a+b.tasks,0);
     const activeDays = data.filter(d => d.val > 0);
-    const avgPts = activeDays.length
-        ? Math.round(totalPts / activeDays.length)
-        : 0;
+    const avgPts = activeDays.length ? Math.round(totalPts / activeDays.length) : 0;
 
     const completionRate = state.tasks.length > 0 ? Math.round((state.tasks.filter(t=>t.completed).length / state.tasks.length) * 100) : 0;
     const advice = getAIAdvice(data);
-
     const heatMap = renderStreakCalendar(data);
 
     return `
@@ -697,101 +913,12 @@ function renderAnalysis() {
     </div>`;
 }
 
-function renderShop() {
-    const inv = state.inventory.map(id => {
-        const i = ITEMS.find(x=>x.id===id);
-        const eq = Object.values(state.equipped).includes(id);
-        return `<div class="section" style="padding:10px;margin:0;display:flex;flex-direction:column;align-items:center;border-color:${eq?'var(--primary)':'transparent'}" onclick="actions.equip('${id}')">
-            <div style="font-size:30px;margin-bottom:5px">${i.icon}</div>
-            <div style="font-size:10px;color:#888">${i.name}</div>
-            ${eq?'<div style="width:6px;height:6px;background:var(--primary);border-radius:50%;margin-top:4px"></div>':''}
-        </div>`;
-    }).join('');
-
-    return `
-    <div class="slide-up">
-        ${renderHeader()}
-        <div class="content">
-            <div style="text-align:center;margin-bottom:20px">
-                <div style="font-size:12px;color:#888">БАЛАНС</div>
-                <div style="font-size:36px;font-weight:900;color:var(--gold);text-shadow:0 0 20px rgba(212,175,122,0.2)">${state.totalPoints}</div>
-            </div>
-
-            <div class="chest-wrapper">
-                <div class="chest-card chest-common" onclick="actions.openChest('common', 150)">
-                    <div style="font-weight:800;font-size:18px;margin-bottom:4px">Базовый Набор</div>
-                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">Кепки и бабочки</div>
-                    <div style="background:rgba(0,0,0,0.3);display:inline-block;padding:4px 10px;border-radius:8px;font-weight:bold">150 pts</div>
-                </div>
-                <div class="chest-card chest-rare" onclick="actions.openChest('rare', 300)">
-                    <div style="font-weight:800;font-size:18px;margin-bottom:4px;color:var(--gold)">Кейс Агента</div>
-                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">Очки, цепи, стиль</div>
-                    <div style="background:rgba(212,175,122,0.2);color:var(--gold);display:inline-block;padding:4px 10px;border-radius:8px;font-weight:bold">300 pts</div>
-                </div>
-                <div class="chest-card chest-legendary" onclick="actions.openChest('legendary', 1000)">
-                    <div style="font-weight:800;font-size:18px;margin-bottom:4px;color:var(--epic)">Мистический Куб</div>
-                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">Короны и реликвии</div>
-                    <div style="background:rgba(212,93,121,0.2);color:var(--epic);display:inline-block;padding:4px 10px;border-radius:8px;font-weight:bold">1000 pts</div>
-                </div>
-            </div>
-
-            <h3 style="margin-bottom:10px;font-weight:700">ИНВЕНТАРЬ</h3>
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-                ${inv || '<div style="grid-column:1/-1;text-align:center;color:#444;padding:20px">Пусто</div>'}
-            </div>
-        </div>
-    </div>`;
-}
-
-function renderTasks() {
-    const list = state.tasks.map(t => `
-        <div class="section" style="display:flex;align-items:center;padding:15px;margin-bottom:10px;opacity:${t.completed?0.5:1}">
-            <div style="width:24px;height:24px;border:2px solid var(--primary);border-radius:6px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:${t.completed?'var(--primary)':'transparent'}" onclick="actions.toggleTask(${t.id})">
-                ${t.completed?'<svg width="14" height="14" stroke="white"><polyline points="20 6 9 17 4 12"/></svg>':''}
-            </div>
-            <div style="flex:1">
-                <div style="font-weight:500;text-decoration:${t.completed?'line-through':''}">${t.title}</div>
-                <div style="font-size:11px;color:#666">${t.points} pts</div>
-            </div>
-            <div onclick="actions.deleteTask(${t.id})" style="color:#666">${getIcon('trash')}</div>
-        </div>
-    `).join('');
-
-    return `
-    <div class="slide-up">
-        ${renderHeader()}
-        <div class="content">
-            <h2 style="margin-bottom:20px;font-weight:800">ЗАДАЧИ</h2>
-            ${list}
-        </div>
-        <button class="add-btn" onclick="actions.addTask()">+</button>
-    </div>`;
-}
-
-function renderChallenges() {
-    const c = state.dailyChallenge;
-    return `
-    <div class="slide-up">
-        ${renderHeader()}
-        <div class="content">
-            <div class="section" style="text-align:center;padding:40px 20px;border:2px solid var(--gold);box-shadow:0 0 20px rgba(212,175,122,0.1)">
-                <div style="font-size:50px;margin-bottom:15px">🎯</div>
-                <h2 style="font-weight:900;font-size:26px;margin-bottom:10px">${c.title}</h2>
-                <div style="color:#888;margin-bottom:25px">Цель обновляется ежедневно</div>
-
-                ${c.completed
-                ? '<div class="btn" style="background:var(--glass);color:var(--accent)">ВЫПОЛНЕНО</div>'
-                : `<button class="btn btn-primary" onclick="actions.completeChallenge()">ЗАВЕРШИТЬ (+${c.reward})</button>`}
-            </div>
-        </div>
-    </div>`;
-}
-
 function renderHeader() {
     return `<div class="header">
         <div class="header-title">livi</div>
         <div class="header-stats">
             <div class="stat-badge" style="color:var(--gold)">${getIcon('star')} ${state.totalPoints}</div>
+            ${state.hasStreakInsurance ? `<div class="stat-badge" style="color:#FFA500">${getIcon('shield')} Защищён</div>` : ''}
         </div>
     </div>`;
 }
@@ -800,22 +927,22 @@ function render() {
     const app = document.getElementById('app');
     const nav = [
         {id:'home',icon:'home',l:'Home'},
-        {id:'challenges',icon:'target',l:'Goals'},
         {id:'tasks',icon:'check',l:'Tasks'},
+        {id:'group',icon:'users',l:'Group'},
         {id:'shop',icon:'shop',l:'Shop'},
         {id:'analysis',icon:'chart',l:'Data'}
     ];
 
     let html = '';
     if(state.activeTab === 'home') html = renderHome();
-    else if(state.activeTab === 'challenges') html = renderChallenges();
     else if(state.activeTab === 'tasks') html = renderTasks();
+    else if(state.activeTab === 'group') html = renderGroupChallenges();
     else if(state.activeTab === 'shop') html = renderShop();
     else if(state.activeTab === 'analysis') html = renderAnalysis();
 
     app.innerHTML = html + `
     <div class="bottom-nav">
-        ${nav.map(n=>`<button class="nav-item ${state.activeTab===n.id?'active':''}" onclick="state.activeTab='${n.id}';render()">${getIcon(n.icon)}<span style="font-size:10px">${n.l}</span></button>`).join('')}
+        ${nav.map(n=>`<button class="nav-item ${state.activeTab===n.id?'active':''}" onclick="state.activeTab='${n.id}';saveState();render()">${getIcon(n.icon)}<span style="font-size:10px">${n.l}</span></button>`).join('')}
     </div>`;
 }
 
