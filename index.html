@@ -6,125 +6,104 @@
     <title>livi</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); color: white; max-width: 428px; margin: 0 auto; overflow-x: hidden; -webkit-tap-highlight-color: transparent; padding-bottom: 80px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #1a1a1a; color: white; max-width: 428px; margin: 0 auto; overflow-x: hidden; -webkit-tap-highlight-color: transparent; padding-bottom: 80px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes gentleFloat { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-8px) rotate(2deg); } }
-        @keyframes blink { 0%, 90%, 100% { opacity: 1; } 95% { opacity: 0.3; } }
+        @keyframes gentleFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+        @keyframes blink { 0%, 90%, 100% { opacity: 1; } 95% { opacity: 0; } }
+        @keyframes fadeOut { to { opacity: 0; pointer-events: none; visibility: hidden; } }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        @keyframes shine { 0% { background-position: -100% 0; } 100% { background-position: 200% 0; } }
         .fade-in { animation: fadeIn 0.3s ease-out; }
         .slide-up { animation: slideUp 0.3s ease-out; }
         .pulse { animation: pulse 2s infinite; }
-        .card-hover { cursor: pointer; transition: all 0.2s; }
-        .card-hover:active { transform: scale(0.97); }
+        .card-hover { cursor: pointer; transition: transform 0.15s ease; }
+        .card-hover:active { transform: scale(0.98); }
         .hidden { display: none !important; }
         .loading-screen { position: fixed; inset: 0; background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
-        .loading-screen.fade-out { animation: fadeIn 0.5s ease-out reverse forwards; }
-        .loading-logo { font-size: 64px; font-weight: bold; background: linear-gradient(135deg, #8B9A9C 0%, #9CB3B5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .loading-screen.fade-out { animation: fadeOut 0.5s ease-out forwards; }
+        .loading-logo { font-size: 64px; font-weight: bold; color: #8B9A9C; margin-bottom: 24px; }
         .onboarding-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
         .onboarding-box { width: 100%; max-width: 400px; }
         .logo-section { text-align: center; margin-bottom: 48px; }
-        .logo-title { font-size: 48px; font-weight: bold; background: linear-gradient(135deg, #8B9A9C 0%, #9CB3B5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px; }
+        .logo-title { font-size: 48px; font-weight: bold; color: #8B9A9C; margin-bottom: 12px; }
         .logo-subtitle { font-size: 18px; color: #999; }
-        .card { background: linear-gradient(135deg, rgba(15, 15, 15, 0.9) 0%, rgba(10, 10, 10, 0.9) 100%); border: 1px solid #2a2a2a; border-radius: 24px; padding: 32px; backdrop-filter: blur(10px); }
-        input, textarea { width: 100%; padding: 16px; background-color: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 16px; color: white; font-size: 16px; outline: none; transition: all 0.2s; }
-        input:focus, textarea:focus { border-color: #8B9A9C; box-shadow: 0 0 0 3px rgba(139, 154, 156, 0.1); }
+        .card { background-color: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 24px; padding: 32px; }
+        input, textarea { width: 100%; padding: 16px; background-color: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 16px; color: white; font-size: 16px; outline: none; transition: border-color 0.2s; }
+        input:focus, textarea:focus { border-color: #8B9A9C; }
         textarea { min-height: 128px; resize: vertical; }
-        .btn { width: 100%; padding: 16px; border-radius: 16px; font-weight: bold; font-size: 18px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
-        .btn:active { transform: scale(0.98); }
-        .btn-primary { background: linear-gradient(135deg, #8B9A9C 0%, #9CB3B5 100%); color: white; box-shadow: 0 4px 12px rgba(139, 154, 156, 0.3); }
+        .btn { width: 100%; padding: 16px; border-radius: 16px; font-weight: bold; font-size: 18px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s; }
+        .btn:active { opacity: 0.8; }
+        .btn-primary { background: linear-gradient(135deg, #8B9A9C 0%, #9CB3B5 100%); color: white; }
         .btn-secondary { background-color: #0a0a0a; color: #8B9A9C; border: 1px solid #2a2a2a; }
-        .btn:disabled { background-color: #2a2a2a; color: #666; cursor: not-allowed; box-shadow: none; }
+        .btn:disabled { background-color: #2a2a2a; color: #666; cursor: not-allowed; }
         .progress-bar-container { display: flex; gap: 8px; margin-bottom: 32px; }
-        .progress-bar { height: 4px; flex: 1; border-radius: 2px; background-color: #2a2a2a; transition: all 0.3s; }
-        .progress-bar.active { background: linear-gradient(90deg, #8B9A9C 0%, #9CB3B5 100%); }
+        .progress-bar { height: 4px; flex: 1; border-radius: 2px; background-color: #2a2a2a; }
+        .progress-bar.active { background-color: #8B9A9C; }
         .goal-button { width: 100%; padding: 20px; border-radius: 16px; border: 1px solid #2a2a2a; background-color: #0a0a0a; text-align: left; display: flex; align-items: center; gap: 16px; cursor: pointer; margin-bottom: 12px; transition: all 0.2s; }
-        .goal-button.selected { background: linear-gradient(135deg, rgba(139, 154, 156, 0.2) 0%, rgba(156, 179, 181, 0.1) 100%); border-color: rgba(139, 154, 156, 0.4); }
-        .goal-icon { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, rgba(139, 154, 156, 0.3), rgba(156, 179, 181, 0.2)); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .goal-button.selected { background-color: rgba(139, 154, 156, 0.2); border-color: rgba(139, 154, 156, 0.4); }
+        .goal-icon { width: 48px; height: 48px; border-radius: 12px; background-color: rgba(139, 154, 156, 0.3); display: flex; align-items: center; justify-content: center; font-size: 24px; }
         .goal-content { flex: 1; }
         .goal-title { font-weight: bold; margin-bottom: 4px; color: white; }
         .goal-desc { font-size: 14px; color: #666; }
-        .header { padding: 20px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, rgba(15, 15, 15, 0.95) 0%, rgba(10, 10, 10, 0.95) 100%); backdrop-filter: blur(20px); border-bottom: 1px solid #2a2a2a; }
-        .header-title { font-size: 28px; font-weight: 700; background: linear-gradient(135deg, #8B9A9C 0%, #9CB3B5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2a2a2a; }
+        .header-title { font-size: 24px; font-weight: 600; }
         .header-stats { display: flex; gap: 12px; }
-        .stat-badge { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 16px; font-weight: bold; font-size: 18px; cursor: pointer; transition: all 0.2s; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .stat-badge { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; transition: transform 0.15s; border: none; }
         .stat-badge:active { transform: scale(0.95); }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 428px; margin: 0 auto; background: linear-gradient(135deg, rgba(15, 15, 15, 0.98) 0%, rgba(10, 10, 10, 0.98) 100%); backdrop-filter: blur(20px); border-top: 1px solid #2a2a2a; display: flex; justify-content: space-around; padding: 8px 0 calc(8px + env(safe-area-inset-bottom)); z-index: 100; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; cursor: pointer; transition: all 0.2s; border: none; background: none; color: #666; position: relative; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 428px; margin: 0 auto; background-color: rgba(15, 15, 15, 0.95); backdrop-filter: blur(20px); border-top: 1px solid #2a2a2a; display: flex; justify-content: space-around; padding: 8px 0 calc(8px + env(safe-area-inset-bottom)); z-index: 100; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; cursor: pointer; transition: all 0.2s; border: none; background: none; color: #666; }
         .nav-item.active { color: #8B9A9C; }
-        .nav-item.active::before { content: ''; position: absolute; top: -1px; left: 50%; transform: translateX(-50%); width: 40px; height: 3px; background: linear-gradient(90deg, #8B9A9C, #9CB3B5); border-radius: 0 0 3px 3px; }
         .nav-item:active { transform: scale(0.95); }
         .nav-icon { width: 24px; height: 24px; }
         .nav-label { font-size: 10px; font-weight: 500; }
         .content { padding: 24px 20px; }
         .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-        .stat-card { background: linear-gradient(135deg, rgba(15, 15, 15, 0.9) 0%, rgba(10, 10, 10, 0.9) 100%); border: 1px solid #2a2a2a; border-radius: 20px; padding: 24px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
-        .stat-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(139, 154, 156, 0.1), transparent); transition: left 0.5s; }
-        .stat-card:hover::before { left: 100%; }
+        .stat-card { background-color: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 16px; padding: 20px; cursor: pointer; transition: transform 0.15s; }
         .stat-card:active { transform: scale(0.98); }
-        .stat-value { font-size: 28px; font-weight: bold; margin-bottom: 8px; background: linear-gradient(135deg, #8B9A9C 0%, #9CB3B5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .stat-label { font-size: 13px; font-weight: 500; color: #999; }
-        .section { background: linear-gradient(135deg, rgba(15, 15, 15, 0.9) 0%, rgba(10, 10, 10, 0.9) 100%); border: 1px solid #2a2a2a; border-radius: 20px; padding: 24px; margin-top: 24px; backdrop-filter: blur(10px); }
+        .stat-value { font-size: 24px; font-weight: bold; margin-bottom: 4px; }
+        .stat-label { font-size: 12px; font-weight: 500; color: #666; }
+        .section { background-color: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 16px; padding: 24px; margin-top: 24px; }
         .section-title { font-size: 20px; font-weight: bold; margin-bottom: 16px; }
         .habit-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .habit-card { padding: 20px; border-radius: 16px; border: 1px solid #2a2a2a; background: linear-gradient(135deg, rgba(10, 10, 10, 0.9), rgba(5, 5, 5, 0.9)); text-align: center; cursor: pointer; transition: all 0.2s; }
+        .habit-card { padding: 16px; border-radius: 12px; border: 1px solid #2a2a2a; background-color: #0a0a0a; text-align: center; cursor: pointer; transition: all 0.2s; }
         .habit-card:active { transform: scale(0.95); }
-        .habit-icon { width: 56px; height: 56px; border-radius: 16px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; transition: all 0.3s; }
-        .task-item { display: flex; align-items: center; gap: 12px; padding: 16px; background: linear-gradient(135deg, rgba(10, 10, 10, 0.9), rgba(5, 5, 5, 0.9)); border-radius: 16px; margin-bottom: 12px; border: 1px solid #2a2a2a; transition: all 0.2s; }
-        .task-item:active { transform: scale(0.99); }
-        .checkbox { width: 28px; height: 28px; border: 2px solid #3a3a3a; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: all 0.2s; }
-        .checkbox.checked { background: linear-gradient(135deg, #8B9A9C 0%, #9CB3B5 100%); border-color: #8B9A9C; }
-        .task-title { flex: 1; font-size: 15px; font-weight: 500; cursor: pointer; }
-        .task-points { font-size: 13px; font-weight: bold; padding: 6px 12px; border-radius: 12px; background: linear-gradient(135deg, rgba(139, 154, 156, 0.25), rgba(156, 179, 181, 0.15)); color: #8B9A9C; }
-        .modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-end; background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(4px); }
-        .modal-content { width: 100%; max-width: 428px; background: linear-gradient(135deg, rgba(15, 15, 15, 0.98) 0%, rgba(10, 10, 10, 0.98) 100%); border-top: 1px solid #2a2a2a; border-radius: 24px 24px 0 0; padding: 32px; max-height: 85vh; overflow-y: auto; }
-        .modal-handle { width: 48px; height: 4px; background-color: #3a3a3a; border-radius: 2px; margin: 0 auto 24px; }
-        .livi-character { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 0; }
-        .livi-circle { border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; animation: gentleFloat 4s ease-in-out infinite; box-shadow: 0 8px 32px rgba(139, 154, 156, 0.3); }
-        .livi-antenna { position: absolute; width: 4px; height: 30px; background: linear-gradient(180deg, #8B9A9C, transparent); border-radius: 2px; }
-        .livi-antenna::after { content: ''; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 12px; height: 12px; background: #8B9A9C; border-radius: 50%; box-shadow: 0 0 12px rgba(139, 154, 156, 0.6); }
-        .livi-antenna.left { top: -25px; left: 25%; }
-        .livi-antenna.right { top: -25px; right: 25%; }
-        .livi-headphone { position: absolute; width: 20px; height: 30px; background: linear-gradient(135deg, #8B9A9C, #9CB3B5); border-radius: 10px; }
-        .livi-headphone.left { left: -15px; top: 30%; }
-        .livi-headphone.right { right: -15px; top: 30%; }
+        .habit-icon { width: 48px; height: 48px; border-radius: 12px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .task-item { display: flex; align-items: center; gap: 12px; padding: 12px; background-color: #0a0a0a; border-radius: 12px; margin-bottom: 12px; }
+        .checkbox { width: 24px; height: 24px; border: 2px solid #3a3a3a; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: all 0.2s; }
+        .checkbox.checked { background-color: #8B9A9C; border-color: #8B9A9C; }
+        .task-title { flex: 1; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .task-points { font-size: 12px; font-weight: bold; padding: 4px 8px; border-radius: 8px; background-color: rgba(139, 154, 156, 0.25); color: #8B9A9C; }
+        .modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-end; background-color: rgba(0, 0, 0, 0.8); }
+        .modal-content { width: 100%; max-width: 428px; background-color: #0f0f0f; border-top: 1px solid #2a2a2a; border-radius: 24px 24px 0 0; padding: 32px; max-height: 85vh; overflow-y: auto; }
+        .modal-handle { width: 48px; height: 4px; background-color: #2a2a2a; border-radius: 2px; margin: 0 auto 24px; }
+        .livi-character { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 0; }
+        .livi-circle { border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; animation: gentleFloat 4s ease-in-out infinite; }
         .livi-face { position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .livi-eyes { position: absolute; top: 38%; width: 60%; display: flex; justify-content: space-around; }
-        .livi-eye { width: 12px; height: 12px; background-color: white; border-radius: 50%; animation: blink 5s infinite; box-shadow: 0 0 8px rgba(255, 255, 255, 0.5); }
-        .livi-mouth { position: absolute; bottom: 35%; width: 35%; height: 4px; background-color: white; border-radius: 2px; transition: all 0.3s; }
-        .livi-mouth.happy { border-radius: 0 0 25px 25px; height: 18px; background: transparent; border: 3px solid white; border-top: none; }
-        .livi-mouth.sad { border-radius: 25px 25px 0 0; height: 18px; background: transparent; border: 3px solid white; border-bottom: none; }
-        .livi-speech { margin-top: 24px; padding: 16px 24px; background: linear-gradient(135deg, rgba(139, 154, 156, 0.2), rgba(156, 179, 181, 0.1)); border: 1px solid rgba(139, 154, 156, 0.3); border-radius: 20px; font-size: 15px; text-align: center; max-width: 300px; animation: fadeIn 0.5s ease-out; }
-        .chart-container { background: linear-gradient(135deg, rgba(10, 10, 10, 0.9), rgba(5, 5, 5, 0.9)); border-radius: 16px; padding: 20px; margin-bottom: 16px; border: 1px solid #2a2a2a; }
-        .chart-title { font-size: 15px; font-weight: 600; color: #999; margin-bottom: 16px; }
-        .bar-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 140px; gap: 8px; position: relative; }
-        .bar { flex: 1; background: linear-gradient(180deg, #8B9A9C 0%, #9CB3B5 100%); border-radius: 8px 8px 0 0; position: relative; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 -2px 8px rgba(139, 154, 156, 0.3); }
-        .bar:hover { transform: translateY(-4px); }
-        .bar-label { position: absolute; bottom: -24px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #666; white-space: nowrap; font-weight: 500; }
-        .challenge-card { border-radius: 20px; padding: 24px; margin-bottom: 16px; position: relative; overflow: hidden; border: 2px solid; transition: all 0.3s; }
-        .challenge-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-        .challenge-title { font-size: 18px; font-weight: bold; }
-        .challenge-badge { padding: 6px 16px; background: linear-gradient(135deg, rgba(212, 175, 122, 0.3), rgba(255, 215, 0, 0.2)); border-radius: 16px; font-size: 13px; font-weight: bold; color: #D4AF7A; box-shadow: 0 2px 8px rgba(212, 175, 122, 0.2); }
-        .challenge-description { font-size: 14px; color: #999; margin-bottom: 20px; line-height: 1.5; }
-        .progress-label { display: flex; justify-content: space-between; font-size: 13px; color: #999; margin-bottom: 10px; font-weight: 500; }
-        .progress-track { height: 10px; background-color: #2a2a2a; border-radius: 5px; overflow: hidden; position: relative; }
-        .progress-fill { height: 100%; border-radius: 5px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
-        .progress-fill::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent); animation: shine 2s infinite; }
-        .empty-state { text-align: center; padding: 60px 20px; color: #666; }
-        .empty-state-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
-        .delete-btn { padding: 10px; background: linear-gradient(135deg, rgba(255, 68, 68, 0.2), rgba(255, 68, 68, 0.1)); border-radius: 12px; cursor: pointer; border: none; transition: all 0.2s; }
-        .delete-btn:active { opacity: 0.7; transform: scale(0.95); }
-        .star-button { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); border-radius: 16px; font-weight: bold; color: #1a1a1a; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3); transition: all 0.2s; }
+        .livi-eyes { position: absolute; top: 35%; width: 60%; display: flex; justify-content: space-around; }
+        .livi-eye { width: 10px; height: 10px; background-color: white; border-radius: 50%; animation: blink 5s infinite; }
+        .livi-mouth { position: absolute; bottom: 35%; width: 30%; height: 3px; background-color: white; border-radius: 2px; }
+        .livi-mouth.happy { border-radius: 0 0 20px 20px; height: 15px; background: transparent; border: 3px solid white; border-top: none; }
+        .livi-mouth.sad { border-radius: 20px 20px 0 0; height: 15px; background: transparent; border: 3px solid white; border-bottom: none; }
+        .livi-speech { margin-top: 16px; padding: 12px 20px; background-color: #0a0a0a; border-radius: 16px; font-size: 14px; text-align: center; max-width: 280px; animation: fadeIn 0.5s ease-out; }
+        .chart-container { background-color: #0a0a0a; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+        .chart-title { font-size: 14px; font-weight: 500; color: #999; margin-bottom: 12px; }
+        .bar-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 120px; gap: 8px; position: relative; }
+        .bar { flex: 1; background: linear-gradient(180deg, #8B9A9C 0%, #9CB3B5 100%); border-radius: 4px 4px 0 0; position: relative; transition: all 0.3s ease; }
+        .bar-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #666; white-space: nowrap; }
+        .challenge-card { border-radius: 16px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; }
+        .challenge-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .challenge-title { font-size: 16px; font-weight: bold; }
+        .challenge-badge { padding: 4px 12px; background-color: rgba(212, 175, 122, 0.3); border-radius: 12px; font-size: 12px; font-weight: bold; color: #D4AF7A; }
+        .challenge-description { font-size: 14px; color: #999; margin-bottom: 16px; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: #999; margin-bottom: 8px; }
+        .progress-track { height: 8px; background-color: #2a2a2a; border-radius: 4px; overflow: hidden; position: relative; }
+        .progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #666; }
+        .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+        .delete-btn { padding: 8px; background-color: rgba(255, 68, 68, 0.2); border-radius: 8px; cursor: pointer; border: none; transition: opacity 0.2s; }
+        .delete-btn:active { opacity: 0.7; }
+        .star-button { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); border-radius: 16px; font-weight: bold; color: #1a1a1a; border: none; cursor: pointer; }
         .star-button:active { transform: scale(0.95); }
-        .shop-item { background: linear-gradient(135deg, rgba(15, 15, 15, 0.9), rgba(10, 10, 10, 0.9)); border: 1px solid #2a2a2a; border-radius: 16px; padding: 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px; transition: all 0.2s; cursor: pointer; }
-        .shop-item:active { transform: scale(0.98); }
-        .shop-item.owned { border-color: #8B9A9C; background: linear-gradient(135deg, rgba(139, 154, 156, 0.2), rgba(156, 179, 181, 0.1)); }
-        .shop-item-icon { width: 64px; height: 64px; border-radius: 12px; background: linear-gradient(135deg, rgba(139, 154, 156, 0.3), rgba(156, 179, 181, 0.2)); display: flex; align-items: center; justify-content: center; font-size: 36px; }
-        .shop-item-content { flex: 1; }
-        .shop-item-name { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
-        .shop-item-desc { font-size: 13px; color: #999; }
-        .shop-item-price { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.1)); border-radius: 12px; font-weight: bold; color: #FFD700; }
         svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     </style>
 </head>
@@ -133,37 +112,1010 @@
     <div id="app"></div>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        const colors={primary:'#8B9A9C',secondary:'#B8A8C7',accent1:'#9CB3B5',accent2:'#A8B5C7',accent3:'#A5BDA1',warning:'#D4AF7A'};
-        const dailyChallenges=[{title:'10 отжиманий',description:'Сделай 10 отжиманий с правильной техникой',target:10,unit:'раз',category:'Спорт',icon:'💪'},{title:'20 приседаний',description:'Выполни 20 глубоких приседаний',target:20,unit:'раз',category:'Спорт',icon:'🦵'},{title:'Планка 60 секунд',description:'Держи планку ровно минуту',target:60,unit:'сек',category:'Спорт',icon:'⏱️'},{title:'Выпить 8 стаканов воды',description:'Поддержи водный баланс организма',target:8,unit:'стаканов',category:'Здоровье',icon:'💧'},{title:'Прочитать 10 страниц',description:'Уделите время чтению книги',target:10,unit:'страниц',category:'Обучение',icon:'📚'},{title:'Медитация 10 минут',description:'Практика осознанности и релакса',target:10,unit:'минут',category:'Осознанность',icon:'🧘'},{title:'30 минут прогулки',description:'Пройдись на свежем воздухе',target:30,unit:'минут',category:'Спорт',icon:'🚶'},{title:'Написать 3 благодарности',description:'За что ты благодарен сегодня?',target:3,unit:'записи',category:'Осознанность',icon:'✨'},{title:'50 прыжков на скакалке',description:'Отличное кардио упражнение',target:50,unit:'раз',category:'Спорт',icon:'🪢'},{title:'Растяжка 15 минут',description:'Улучши гибкость тела',target:15,unit:'минут',category:'Спорт',icon:'🤸'}];
-        const shopItems=[{id:'hat',name:'Шляпа',desc:'Стильная шляпа для Livi',price:100,icon:'🎩',type:'hat'},{id:'glasses',name:'Очки',desc:'Крутые солнечные очки',price:150,icon:'🕶️',type:'glasses'},{id:'bow',name:'Бантик',desc:'Милый бантик',price:80,icon:'🎀',type:'bow'},{id:'crown',name:'Корона',desc:'Королевская корона',price:300,icon:'👑',type:'crown'},{id:'party',name:'Праздничная шляпа',desc:'Для особых случаев',price:120,icon:'🎉',type:'hat'},{id:'flower',name:'Цветок',desc:'Красивый цветок',price:90,icon:'🌸',type:'bow'}];
-        const getInitialState=()=>({hasCompletedOnboarding:false,onboardingStep:0,activeTab:'home',showRankModal:false,userGoals:{health:false,learning:false,productivity:false,mindfulness:false,sleep:false,social:false},userInfo:{name:'',wakeUpTime:'07:00',sleepTime:'23:00',mainGoal:''},tasks:[],habits:[],streak:0,totalPoints:0,lastActiveDate:new Date().toDateString(),dailyChallenge:null,challengeProgress:0,weeklyStats:[0,0,0,0,0,0,0],completedChallenges:[],categoryStats:{sport:0,health:0,learning:0,mindfulness:0,productivity:0,social:0},ownedItems:[],equippedItems:{hat:null,glasses:null,bow:null}});
-        let state=getInitialState();
-        const tg=window.Telegram?.WebApp||{expand:()=>{},ready:()=>{},CloudStorage:null};
-        tg.expand();tg.ready();
-        async function loadState(){try{if(tg.CloudStorage){return new Promise((resolve)=>{tg.CloudStorage.getItem('livi_state',(error,value)=>{if(!error&&value){try{state={...getInitialState(),...JSON.parse(value)};}catch(e){}}resolve();});});}}catch(e){}}
-        async function saveState(){try{if(tg.CloudStorage){return new Promise((resolve)=>{tg.CloudStorage.setItem('livi_state',JSON.stringify(state),()=>resolve());});}}catch(e){}}
-        function checkMidnight(){const now=new Date();const lastCheck=new Date(state.lastActiveDate);if(now.toDateString()!==lastCheck.toDateString()){state.weeklyStats.shift();state.weeklyStats.push(0);state.habits.forEach(h=>{h.completed=false;h.lastCompletedDate=null;});getDailyChallenge();state.lastActiveDate=now.toDateString();saveState();}}
-        setInterval(checkMidnight,60000);
-        function getDailyChallenge(){const today=new Date().toDateString();if(!state.dailyChallenge||state.dailyChallenge.date!==today){const dayIndex=Math.floor(Date.now()/86400000)%dailyChallenges.length;state.dailyChallenge={...dailyChallenges[dayIndex],date:today,completed:false};state.challengeProgress=0;saveState();}return state.dailyChallenge;}
-        function updateStreak(){const today=new Date().toDateString();if(state.lastActiveDate!==today){const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);state.streak=state.lastActiveDate===yesterday.toDateString()?state.streak+1:1;state.lastActiveDate=today;saveState();}}
-        function createSvg(name,color='currentColor'){const icons={home:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',checkSquare:'<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',barChart:'<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>',star:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',flame:'<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',check:'<polyline points="20 6 9 17 4 12"/>',plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',arrowRight:'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',heart:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',brain:'<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>',moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',coffee:'<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>',sunrise:'<path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/>',sparkles:'<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>',clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',zap:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',award:'<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>',trendingUp:'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',gift:'<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>',shoppingBag:'<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>'};return `<svg width="24" height="24" viewBox="0 0 24 24" style="color: ${color}">${icons[name]}</svg>`;}
-        function getLiviState(energy,completion,habits){const avgScore=(energy+completion+(habits/4*100))/3;if(avgScore>=85)return{size:130,color:colors.primary,innerSize:90,label:'Процветающий',mood:'happy',phrase:'Отличная работа! Ты на высоте! 🌟'};if(avgScore>=70)return{size:120,color:colors.primary,innerSize:80,label:'Стабильный',mood:'happy',phrase:'Хороший прогресс! Продолжай! 💪'};if(avgScore>=50)return{size:110,color:colors.primary,innerSize:75,label:'Формирующийся',mood:'neutral',phrase:'Ты на правильном пути! 🌱'};return{size:100,color:'#666',innerSize:65,label:'Зарождающийся',mood:'sad',phrase:'Начни с малого, все получится! 🌟'};}
-        function getRank(streakDays){if(streakDays>=100)return{title:'Легенда',icon:'👑',level:6,color:'#FFD700',min:100};if(streakDays>=50)return{title:'Мастер',icon:'⭐',level:5,color:colors.warning,min:50};if(streakDays>=30)return{title:'Профи',icon:'🔥',level:4,color:colors.accent3,min:30};if(streakDays>=14)return{title:'Энтузиаст',icon:'💪',level:3,color:colors.primary,min:14};if(streakDays>=7)return{title:'Стартер',icon:'🌱',level:2,color:colors.accent2,min:7};return{title:'Новичок',icon:'🌟',level:1,color:colors.secondary,min:0};}
-        function generateAIAnalysis(){const completedTasks=state.tasks.filter(t=>t.completed).length;const totalTasks=state.tasks.length||1;const completionRate=(completedTasks/totalTasks)*100;const activeHabits=state.habits.filter(h=>h.completed).length;const totalHabits=state.habits.length||1;const habitRate=(activeHabits/totalHabits)*100;const avgEnergy=(completionRate+habitRate)/2;let insights=[],recommendations=[],patterns=[];const weekAvg=state.weeklyStats.reduce((a,b)=>a+b,0)/7;const trend=state.weeklyStats[6]-state.weeklyStats[0];if(trend>10)patterns.push('📈 Восходящий тренд: ты становишься продуктивнее');else if(trend<-10)patterns.push('📉 Снижение активности');else patterns.push('➡️ Стабильная активность');if(completionRate>=80){insights.push('Превосходная продуктивность! Ты выполняешь более 80% задач.');recommendations.push('Попробуй добавить более амбициозные цели');}else if(completionRate>=60){insights.push('Хорошая продуктивность с резервом для роста.');recommendations.push('Анализируй, что мешает выполнять оставшиеся задачи');}else{insights.push('Есть потенциал для улучшения.');recommendations.push('Разбивай большие задачи на маленькие подзадачи');}if(habitRate>=75)insights.push(`Отличное формирование привычек! ${activeHabits} из ${state.habits.length} активны.`);else recommendations.push('Выбери одну привычку и сфокусируйся на ней неделю');if(state.streak>=7)insights.push(`Отличный стрик! Первая неделя - самая сложная.`);else recommendations.push('Сфокусируйся на создании стрика в 7 дней подряд');return{insights,recommendations:recommendations.slice(0,4),patterns,completionRate:Math.round(completionRate),avgEnergy:Math.round(avgEnergy),activeHabits,habitRate:Math.round(habitRate),weekAvg:Math.round(weekAvg)};}
-        function renderWeeklyChart(stats){const days=['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'];const maxValue=Math.max(...stats,1);return`<div class="chart-container"><div class="chart-title">Продуктивность за неделю</div><div class="bar-chart">${stats.map((value,i)=>`<div class="bar" style="height: ${value===0?4:(value/maxValue)*120}px;${i===6?`background: linear-gradient(180deg, ${colors.primary} 0%, ${colors.accent1} 100%);`:''} opacity: ${value===0?0.3:1};"><div class="bar-label">${days[i]}</div></div>`).join('')}</div></div>`;}
-        function renderDailyChallenge(){const challenge=getDailyChallenge();const progress=Math.min((state.challengeProgress/challenge.target)*100,100);const isCompleted=challenge.completed;return`<div class="challenge-card" style="background: linear-gradient(135deg, ${isCompleted?'rgba(165, 189, 161, 0.3)':'rgba(139, 154, 156, 0.2)'} 0%, ${isCompleted?'rgba(165, 189, 161, 0.1)':'rgba(156, 179, 181, 0.1)'} 100%); border-color: ${isCompleted?colors.accent3:'rgba(139, 154, 156, 0.4)'}; box-shadow: 0 4px 16px ${isCompleted?'rgba(165, 189, 161, 0.2)':'rgba(139, 154, 156, 0.1)'};">${isCompleted?'<div style="position: absolute; top: 10px; right: 10px; font-size: 72px; opacity: 0.1;">✓</div>':''}<div class="challenge-header"><div style="display: flex; align-items: center; gap: 12px;"><div style="width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, ${colors.warning}40, ${colors.warning}20); display: flex; align-items: center; justify-content: center; font-size: 36px; box-shadow: 0 4px 12px ${colors.warning}20;">${challenge.icon}</div><div><div class="challenge-title">${challenge.title}</div><div style="font-size: 12px; color: ${colors.warning}; font-weight: bold; margin-top: 4px;">📁 ${challenge.category}</div></div></div><div class="challenge-badge pulse">+50 ⭐</div></div><div class="challenge-description">${challenge.description}</div><div style="margin-bottom: 16px;"><div class="progress-label"><span>Прогресс</span><span><strong style="color: ${progress>=100?colors.accent3:colors.primary};">${state.challengeProgress}</strong> / ${challenge.target} ${challenge.unit}</span></div><div class="progress-track"><div class="progress-fill" style="width: ${progress}%; background: linear-gradient(90deg, ${colors.warning} 0%, ${progress>=100?colors.accent3:'#FFD700'} 100%);"></div></div></div>${!isCompleted?`<button class="btn ${progress>=100?'btn-primary':'btn-secondary'}" id="toggleChallenge" style="padding: 14px;">${createSvg('check',progress>=100?'white':colors.primary)}<span>${progress>=100?'Завершить!':'Отметить выполненным'}</span></button>`:`<div style="text-align: center; padding: 16px; background: linear-gradient(135deg, rgba(165, 189, 161, 0.3), rgba(165, 189, 161, 0.1)); border-radius: 16px; border: 2px solid ${colors.accent3};"><div style="font-size: 28px; margin-bottom: 8px;">🎉</div><strong style="color: ${colors.accent3}; font-size: 16px;">Челлендж выполнен!</strong></div>`}</div>`;}
-        function renderLiviWithFace(liviState){const mouthClass=liviState.mood==='happy'?'happy':liviState.mood==='sad'?'sad':'';const equipped=state.equippedItems;return`<div class="livi-character"><div class="livi-circle" style="width: ${liviState.size}px; height: ${liviState.size}px; background: linear-gradient(135deg, ${liviState.color}30, ${liviState.color}10); border: 3px solid ${liviState.color};"><div class="livi-antenna left"></div><div class="livi-antenna right"></div><div class="livi-headphone left"></div><div class="livi-headphone right"></div><div style="width: ${liviState.innerSize}px; height: ${liviState.innerSize}px; background: linear-gradient(135deg, ${liviState.color}50, ${liviState.color}20); border: 2px solid ${liviState.color}; border-radius: 50%;"></div><div class="livi-face"><div class="livi-eyes"><div class="livi-eye"></div><div class="livi-eye"></div></div><div class="livi-mouth ${mouthClass}"></div></div>${equipped.hat?`<div style="position: absolute; top: -40px; font-size: 48px;">${shopItems.find(i=>i.id===equipped.hat)?.icon}</div>`:''}${equipped.glasses?`<div style="position: absolute; top: 35%; font-size: 32px;">${shopItems.find(i=>i.id===equipped.glasses)?.icon}</div>`:''}${equipped.bow?`<div style="position: absolute; top: -20px; right: -10px; font-size: 32px;">${shopItems.find(i=>i.id===equipped.bow)?.icon}</div>`:''}</div><div style="margin-top: 20px; font-size: 20px; font-weight: bold; background: linear-gradient(135deg, ${liviState.color}, ${colors.accent1}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${liviState.label}</div><div class="livi-speech">${liviState.phrase}</div></div>`;}
-        function renderOnboarding(){const steps=[{title:'Добро пожаловать в livi! 👋',subtitle:'Давайте настроим приложение под ваши цели',content:`<div style="text-align: center;"><p style="font-size: 18px; color: #999; margin-bottom: 24px; line-height: 1.6;">Ответьте на несколько вопросов, чтобы мы могли персонализировать ваш опыт</p><button class="btn btn-primary" id="startOnboarding">Начать ${createSvg('arrowRight','white')}</button></div>`},{title:'Как вас зовут?',subtitle:'Давайте познакомимся',content:`<div><input type="text" id="userName" placeholder="Ваше имя" value="${state.userInfo.name}" style="margin-bottom: 24px;"><button class="btn btn-primary" id="nextStep">Далее</button></div>`},{title:'Ваши цели',subtitle:'Выберите, над чем хотите работать',content:`<div>${[{key:'health',icon:'heart',label:'Здоровье',desc:'Спорт, питание, сон'},{key:'learning',icon:'book',label:'Обучение',desc:'Чтение, курсы, навыки'},{key:'productivity',icon:'target',label:'Продуктивность',desc:'Задачи, проекты, работа'},{key:'mindfulness',icon:'brain',label:'Осознанность',desc:'Медитация, дыхание'},{key:'sleep',icon:'moon',label:'Сон',desc:'Режим, качество сна'},{key:'social',icon:'coffee',label:'Социальная жизнь',desc:'Друзья, хобби'}].map(goal=>`<button class="goal-button ${state.userGoals[goal.key]?'selected':''}" data-goal="${goal.key}"><div class="goal-icon">${createSvg(goal.icon,colors.primary)}</div><div class="goal-content"><div class="goal-title">${goal.label}</div><div class="goal-desc">${goal.desc}</div></div>${state.userGoals[goal.key]?createSvg('check',colors.primary):''}</button>`).join('')}<button class="btn btn-primary" id="nextStep" style="margin-top: 24px;" ${!Object.values(state.userGoals).some(v=>v)?'disabled':''}>Далее</button></div>`},{title:'Ваш режим',subtitle:'Когда вы обычно просыпаетесь и ложитесь спать?',content:`<div><div style="margin-bottom: 24px;"><label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 14px; color: #999;">${createSvg('sunrise',colors.warning)} Время пробуждения</label><input type="time" id="wakeUpTime" value="${state.userInfo.wakeUpTime}"></div><div style="margin-bottom: 24px;"><label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 14px; color: #999;">${createSvg('moon',colors.secondary)} Время сна</label><input type="time" id="sleepTime" value="${state.userInfo.sleepTime}"></div><button class="btn btn-primary" id="nextStep">Далее</button></div>`},{title:'Последний шаг!',subtitle:'Какая ваша главная цель на ближайший месяц?',content:`<div><textarea id="mainGoal" placeholder="Например: Читать 30 минут каждый день, пробежать 5км...">${state.userInfo.mainGoal}</textarea><button class="btn btn-primary" id="completeOnboarding" style="margin-top: 24px;">Начать путешествие ${createSvg('sparkles','white')}</button></div>`}];const currentStep=steps[state.onboardingStep];return`<div class="onboarding-container slide-up"><div class="onboarding-box">${state.onboardingStep===0?`<div class="logo-section"><h1 class="logo-title">livi</h1><p class="logo-subtitle">Ваш путь к лучшей версии себя</p></div>`:`<div class="progress-bar-container">${steps.slice(1).map((_,i)=>`<div class="progress-bar ${i<state.onboardingStep?'active':''}"></div>`).join('')}</div>`}<div class="card"><h2 style="font-size: 28px; font-weight: bold; margin-bottom: 8px; color: white;">${currentStep.title}</h2><p style="font-size: 16px; color: #999; margin-bottom: 32px;">${currentStep.subtitle}</p>${currentStep.content}</div>${state.onboardingStep>0?`<button id="prevStep" style="margin-top: 16px; width: 100%; padding: 12px; background: none; border: none; color: #666; cursor: pointer; font-weight: 500;">Назад</button>`:''}</div></div>`;}
-        function renderMain(){const completedTasks=state.tasks.filter(t=>t.completed).length;const currentRank=getRank(state.streak);const aiAnalysis=generateAIAnalysis();return`<div class="header"><div class="header-title">livi</div><div class="header-stats"><button class="stat-badge" style="background: linear-gradient(135deg, rgba(212, 175, 122, 0.3), rgba(255, 215, 0, 0.2));" id="showRank">${createSvg('flame',colors.warning)}<span>${state.streak}</span></button><button class="stat-badge" style="background: linear-gradient(135deg, rgba(139, 154, 156, 0.3), rgba(156, 179, 181, 0.2));">${createSvg('star',colors.primary)}<span>${state.totalPoints}</span></button></div></div><div class="content"><div id="tabContent">${renderTabContent(completedTasks,currentRank,aiAnalysis)}</div></div><div class="bottom-nav">${[{tab:'home',icon:'home',label:'Главная'},{tab:'challenges',icon:'target',label:'Челленджи'},{tab:'tasks',icon:'checkSquare',label:'Задачи'},{tab:'shop',icon:'shoppingBag',label:'Магазин'},{tab:'analysis',icon:'barChart',label:'Анализ'}].map(nav=>`<button class="nav-item ${state.activeTab===nav.tab?'active':''}" data-tab="${nav.tab}"><div class="nav-icon">${createSvg(nav.icon,state.activeTab===nav.tab?colors.primary:'#666')}</div><div class="nav-label">${nav.label}</div></button>`).join('')}</div>${state.showRankModal?renderRankModal(currentRank):''}`;}
-        function renderRankModal(currentRank){const nextRank=getRank(currentRank.min+1);const progressToNext=currentRank.min===100?100:((state.streak-currentRank.min)/(nextRank.min-currentRank.min))*100;return`<div class="modal fade-in" id="rankModal"><div class="modal-content slide-up" onclick="event.stopPropagation();"><div class="modal-handle"></div><div style="text-align: center; margin-bottom: 24px;"><div style="font-size: 64px; margin-bottom: 16px;">${currentRank.icon}</div><h2 style="font-size: 32px; font-weight: bold; margin-bottom: 8px;">${currentRank.title}</h2><p style="font-size: 16px; color: #999; margin-bottom: 4px;">Уровень ${currentRank.level}</p></div><div style="margin-bottom: 24px;"><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="font-size: 14px; font-weight: 500;">Прогресс</span><span style="font-size: 14px; font-weight: bold; color: ${colors.primary};">${currentRank.min===100?'Максимум':Math.round(progressToNext)+'%'}</span></div><div style="height: 12px; border-radius: 6px; background-color: #2a2a2a;"><div style="height: 100%; border-radius: 6px; background: linear-gradient(90deg, ${colors.primary}, ${colors.accent1}); width: ${progressToNext}%; transition: width 0.5s;"></div></div>${currentRank.min!==100?`<p style="font-size: 12px; color: #666; text-align: center; margin-top: 8px;">Ещё ${nextRank.min-state.streak} дней до "${nextRank.title}"</p>`:''}</div>${[{title:'Новичок',icon:'🌟',level:1,days:'0-6'},{title:'Стартер',icon:'🌱',level:2,days:'7-13'},{title:'Энтузиаст',icon:'💪',level:3,days:'14-29'},{title:'Профи',icon:'🔥',level:4,days:'30-49'},{title:'Мастер',icon:'⭐',level:5,days:'50-99'},{title:'Легенда',icon:'👑',level:6,days:'100+'}].map(rank=>`<div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border-radius: 16px; background: ${rank.title===currentRank.title?'linear-gradient(135deg, rgba(139, 154, 156, 0.2), rgba(156, 179, 181, 0.1))':'linear-gradient(135deg, rgba(10, 10, 10, 0.9), rgba(5, 5, 5, 0.9))'}; border: 1px solid ${rank.title===currentRank.title?colors.primary:'#2a2a2a'}; margin-bottom: 8px;"><div style="display: flex; align-items: center; gap: 12px;"><div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, ${rank.title===currentRank.title?'rgba(139, 154, 156, 0.4)':'rgba(139, 154, 156, 0.2)'}, transparent); display: flex; align-items: center; justify-content: center; font-size: 24px;">${rank.icon}</div><div><div style="font-size: 15px; font-weight: bold;">${rank.title}</div><div style="font-size: 12px; color: #666;">Уровень ${rank.level} • ${rank.days} дней</div></div></div>${rank.title===currentRank.title?createSvg('check',colors.primary):''}</div>`).join('')}</div></div>`;}
-        function renderTabContent(completedTasks,currentRank,aiAnalysis){if(state.activeTab==='home'){const liviState=getLiviState(aiAnalysis.avgEnergy,aiAnalysis.completionRate,aiAnalysis.activeHabits);return`<div class="section" style="background: linear-gradient(135deg, rgba(139, 154, 156, 0.1), transparent); border: 2px solid rgba(139, 154, 156, 0.2);">${renderLiviWithFace(liviState)}</div><div class="grid-2">${[{icon:'target',color:colors.primary,value:`${completedTasks}/${state.tasks.length}`,label:'Задачи'},{icon:'clock',color:colors.accent3,value:`${state.habits.filter(h=>h.completed).length}/${state.habits.length}`,label:'Привычки'},{icon:'zap',color:colors.warning,value:`${aiAnalysis.avgEnergy}%`,label:'Энергия'},{icon:'award',color:colors.warning,value:state.completedChallenges.length,label:'Челленджей'}].map((stat,i)=>`<div class="stat-card card-hover" ${i===3?'id="goToChallenges"':''}>${createSvg(stat.icon,stat.color)}<div class="stat-value">${stat.value}</div><div class="stat-label">${stat.label}</div></div>`).join('')}</div><div class="section">${renderWeeklyChart(state.weeklyStats)}</div>${state.habits.length>0?`<div class="section"><h2 class="section-title">Привычки</h2><div class="habit-grid">${state.habits.map(habit=>`<div class="habit-card card-hover" data-habit="${habit.id}" style="background: ${habit.completed?`linear-gradient(135deg, ${habit.color}20, ${habit.color}10)`:'linear-gradient(135deg, rgba(10, 10, 10, 0.9), rgba(5, 5, 5, 0.9))'}; border-color: ${habit.completed?habit.color+'40':'#2a2a2a'};"><div class="habit-icon" style="background: linear-gradient(135deg, ${habit.color}40, ${habit.color}20);"><div style="font-size: 28px;">${habit.completed?'✓':'○'}</div></div><div style="font-size: 15px; font-weight: bold; margin-bottom: 8px;">${habit.name}</div><div style="display: flex; align-items: center; justify-content: center; gap: 6px;">${createSvg('flame',colors.warning)}<span style="font-size: 18px; font-weight: bold;">${habit.streak}</span></div></div>`).join('')}</div></div>`:''}${state.tasks.length>0?`<div class="section"><h2 class="section-title">Сегодня</h2>${state.tasks.slice(0,4).map(task=>`<div class="task-item"><div class="checkbox ${task.completed?'checked':''}" data-task-check="${task.id}">${task.completed?createSvg('check','white'):''}</div><div class="task-title" style="color: ${task.completed?'#666':'white'}; text-decoration: ${task.completed?'line-through':'none'};">${task.title}</div><div class="task-points">+${task.points}</div></div>`).join('')}${state.tasks.length>4?`<button class="btn btn-secondary" id="goToTasks" style="margin-top: 16px;">Все задачи →</button>`:''}</div>`:''}`;}else if(state.activeTab==='challenges'){return`<div style="text-align: center; padding: 32px 0;"><div style="font-size: 80px; margin-bottom: 16px;">🎯</div><h2 style="font-size: 32px; font-weight: bold; margin-bottom: 12px; background: linear-gradient(135deg, ${colors.primary}, ${colors.accent1}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Ежедневные Челленджи</h2><p style="font-size: 15px; color: #999; line-height: 1.6;">Выполняй челленджи и получай бонусные очки</p></div><div class="section" style="border: 2px solid ${colors.warning}; background: linear-gradient(135deg, rgba(212, 175, 122, 0.15), transparent); box-shadow: 0 8px 24px rgba(212, 175, 122, 0.1);"><div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;"><div style="width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, ${colors.warning}, ${colors.accent3}); display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 16px rgba(212, 175, 122, 0.3);">🏆</div><div><h3 style="font-size: 20px; font-weight: bold; margin-bottom: 4px;">Челлендж Дня</h3><p style="font-size: 13px; color: #999;">Обновляется каждый день в 00:00</p></div></div>${renderDailyChallenge()}</div>${state.completedChallenges.length>0?`<div class="section"><h2 class="section-title">История выполненных (${state.completedChallenges.length})</h2><div style="max-height: 400px; overflow-y: auto;">${state.completedChallenges.slice(-10).reverse().map(ch=>`<div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: linear-gradient(135deg, rgba(10, 10, 10, 0.9), rgba(5, 5, 5, 0.9)); border-radius: 16px; margin-bottom: 12px; border: 1px solid ${colors.accent3}40;"><div style="font-size: 40px;">${ch.icon}</div><div style="flex: 1;"><div style="font-size: 15px; font-weight: bold; margin-bottom: 4px;">${ch.title}</div><div style="font-size: 12px; color: #666;">${new Date(ch.completedDate).toLocaleDateString('ru-RU')}</div></div><div style="font-size: 14px; font-weight: bold; color: ${colors.warning};">+50 ⭐</div></div>`).join('')}</div></div>`:''}`;}else if(state.activeTab==='tasks'){return`<div class="section"><h2 class="section-title">Новая задача</h2><div style="display: flex; gap: 12px;"><input type="text" id="newTaskInput" placeholder="Что нужно сделать?" style="flex: 1; padding: 14px 16px;"><button class="btn btn-primary" id="addTask" style="width: auto; padding: 14px 20px;">${createSvg('plus','white')}</button></div></div><div class="section"><h2 class="section-title">Все задачи (${state.tasks.length})</h2>${state.tasks.length>0?`${state.tasks.map(task=>`<div class="task-item"><div class="checkbox ${task.completed?'checked':''}" data-task-check="${task.id}">${task.completed?createSvg('check','white'):''}</div><div class="task-title" style="color: ${task.completed?'#666':'white'}; text-decoration: ${task.completed?'line-through':'none'};">${task.title}</div><div class="task-points">${task.category||'Общее'}</div><button class="delete-btn" data-delete="${task.id}">${createSvg('trash','#ff4444')}</button></div>`).join('')}`:`<div class="empty-state"><div class="empty-state-icon">📝</div><p>Здесь пока нет задач</p></div>`}</div>`;}else if(state.activeTab==='shop'){return`<div style="text-align: center; padding: 32px 0;"><div style="font-size: 80px; margin-bottom: 16px;">🛍️</div><h2 style="font-size: 32px; font-weight: bold; margin-bottom: 12px; background: linear-gradient(135deg, ${colors.primary}, ${colors.accent1}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Магазин Livi</h2><p style="font-size: 15px; color: #999; line-height: 1.6;">Укрась своего Livi за заработанные очки!</p></div><div class="section" style="background: linear-gradient(135deg, rgba(139, 154, 156, 0.1), transparent); border: 2px solid rgba(139, 154, 156, 0.2);"><div style="text-align: center; padding: 20px; background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.1)); border-radius: 16px; margin-bottom: 24px;"><div style="font-size: 48px; font-weight: bold; background: linear-gradient(135deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;">${state.totalPoints}</div><div style="font-size: 14px; color: #999;">Доступно очков</div></div>${shopItems.map(item=>{const owned=state.ownedItems.includes(item.id);const equipped=state.equippedItems[item.type]===item.id;return`<div class="shop-item ${owned?'owned':''}" data-shop-item="${item.id}"><div class="shop-item-icon">${item.icon}</div><div class="shop-item-content"><div class="shop-item-name">${item.name}</div><div class="shop-item-desc">${item.desc}</div></div>${owned?equipped?`<div style="padding: 8px 16px; background: linear-gradient(135deg, rgba(139, 154, 156, 0.3), rgba(156, 179, 181, 0.2)); border-radius: 12px; font-weight: bold; color: ${colors.primary};">Надето</div>`:`<button class="btn btn-secondary" data-equip="${item.id}" style="width: auto; padding: 8px 16px; font-size: 14px;">Надеть</button>`:`<div class="shop-item-price">${createSvg('star','#FFD700')}<span>${item.price}</span></div>`}</div>`;}).join('')}</div>`;}else if(state.activeTab==='analysis'){return`<div class="section" style="background: linear-gradient(135deg, rgba(139, 154, 156, 0.1), transparent); border: 2px solid rgba(139, 154, 156, 0.2);"><div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">${createSvg('barChart',colors.primary)}<div><h2 style="font-size: 28px; font-weight: bold; margin-bottom: 4px; background: linear-gradient(135deg, ${colors.primary}, ${colors.accent1}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Умный Анализ</h2><p style="font-size: 14px; color: #999;">Персональные инсайты и рекомендации</p></div></div><div class="grid-2" style="margin-bottom: 24px;">${[{value:`${aiAnalysis.completionRate}%`,label:'Выполнение задач',color:colors.primary},{value:`${aiAnalysis.habitRate}%`,label:'Активность привычек',color:colors.accent3}].map(stat=>`<div style="padding: 24px; border-radius: 16px; background: linear-gradient(135deg, ${stat.color}20, ${stat.color}10); text-align: center; border: 1px solid ${stat.color}40;"><div style="font-size: 40px; font-weight: bold; margin-bottom: 8px; background: linear-gradient(135deg, ${stat.color}, ${colors.accent1}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${stat.value}</div><div style="font-size: 13px; font-weight: 500; color: #999;">${stat.label}</div></div>`).join('')}</div>${renderWeeklyChart(state.weeklyStats)}<div style="margin: 24px 0;"><h3 style="font-size: 18px; font-weight: bold; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">${createSvg('trendingUp',colors.accent3)}Паттерны активности</h3>${aiAnalysis.patterns.map(pattern=>`<div style="padding: 16px; border-radius: 16px; background: linear-gradient(135deg, rgba(10, 10, 10, 0.9), rgba(5, 5, 5, 0.9)); margin-bottom: 12px; border: 1px solid #2a2a2a;"><p style="font-size: 15px; line-height: 1.6;">${pattern}</p></div>`).join('')}</div><div style="margin: 24px 0;"><h3 style="font-size: 18px; font-weight: bold; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">${createSvg('sparkles',colors.primary)}Инсайты</h3>${aiAnalysis.insights.map(insight=>`<div style="padding: 16px; border-radius: 16px; background: linear-gradient(135deg, rgba(10, 10, 10, 0.9), rgba(5, 5, 5, 0.9)); margin-bottom: 12px; border: 1px solid #2a2a2a;"><p style="font-size: 15px; line-height: 1.6;">${insight}</p></div>`).join('')}</div><div style="margin: 24px 0;"><h3 style="font-size: 18px; font-weight: bold; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">${createSvg('target',colors.accent3)}Персональные рекомендации</h3>${aiAnalysis.recommendations.map((rec,i)=>`<div style="padding: 16px; border-radius: 16px; background: linear-gradient(135deg, rgba(165, 189, 161, 0.2), rgba(165, 189, 161, 0.05)); margin-bottom: 12px; display: flex; align-items: start; gap: 12px; border: 1px solid ${colors.accent3}40;"><div style="min-width: 28px; height: 28px; background: linear-gradient(135deg, ${colors.accent3}, ${colors.accent1}); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: bold;">${i+1}</div><p style="font-size: 15px; flex: 1; line-height: 1.6;">${rec}</p></div>`).join('')}</div>${state.userInfo.mainGoal?`<div style="padding: 20px; border-radius: 16px; background: linear-gradient(135deg, rgba(212, 175, 122, 0.2), rgba(255, 215, 0, 0.1)); border: 2px solid rgba(212, 175, 122, 0.4);"><p style="font-size: 13px; font-weight: bold; color: ${colors.warning}; margin-bottom: 12px;">🎯 ВАША ГЛАВНАЯ ЦЕЛЬ</p><p style="font-size: 15px; line-height: 1.6;">${state.userInfo.mainGoal}</p></div>`:''}</div>`;}}
-        function attachOnboardingListeners(){const startBtn=document.getElementById('startOnboarding');const nextBtn=document.getElementById('nextStep');const prevBtn=document.getElementById('prevStep');const completeBtn=document.getElementById('completeOnboarding');const goalButtons=document.querySelectorAll('[data-goal]');const userName=document.getElementById('userName');if(startBtn)startBtn.addEventListener('click',()=>{state.onboardingStep=1;render();});if(nextBtn){nextBtn.addEventListener('click',()=>{if(state.onboardingStep===1&&userName)state.userInfo.name=userName.value.trim();if(state.onboardingStep===3){state.userInfo.wakeUpTime=document.getElementById('wakeUpTime').value;state.userInfo.sleepTime=document.getElementById('sleepTime').value;}state.onboardingStep++;render();});}if(prevBtn)prevBtn.addEventListener('click',()=>{state.onboardingStep--;render();});if(completeBtn){completeBtn.addEventListener('click',async()=>{state.userInfo.mainGoal=document.getElementById('mainGoal').value.trim();state.hasCompletedOnboarding=true;state.streak=1;state.lastActiveDate=new Date().toDateString();const habitsByGoal={health:{name:'Зарядка',color:colors.accent3},learning:{name:'Чтение',color:colors.accent2},productivity:{name:'Планирование',color:colors.primary},mindfulness:{name:'Медитация',color:colors.secondary},sleep:{name:'Сон 8 часов',color:colors.accent1},social:{name:'Общение',color:colors.warning}};state.habits=Object.entries(state.userGoals).filter(([_,selected])=>selected).map(([goal],index)=>({id:Date.now()+index,name:habitsByGoal[goal].name,color:habitsByGoal[goal].color,streak:0,completed:false,lastCompletedDate:null}));await saveState();render();});}goalButtons.forEach(btn=>{btn.addEventListener('click',()=>{const goal=btn.dataset.goal;state.userGoals[goal]=!state.userGoals[goal];render();});});}
-        function attachMainListeners(){const tabs=document.querySelectorAll('[data-tab]');const showRankBtn=document.getElementById('showRank');const rankModal=document.getElementById('rankModal');const habitCards=document.querySelectorAll('[data-habit]');const taskChecks=document.querySelectorAll('[data-task-check]');const addTaskBtn=document.getElementById('addTask');const newTaskInput=document.getElementById('newTaskInput');const deleteButtons=document.querySelectorAll('[data-delete]');const goToTasksBtn=document.getElementById('goToTasks');const goToChallengesBtn=document.getElementById('goToChallenges');const toggleChallengeBtn=document.getElementById('toggleChallenge');const shopItems=document.querySelectorAll('[data-shop-item]');const equipButtons=document.querySelectorAll('[data-equip]');tabs.forEach(tab=>{tab.addEventListener('click',()=>{state.activeTab=tab.dataset.tab;render();});});if(showRankBtn){showRankBtn.addEventListener('click',()=>{state.showRankModal=true;render();});}if(rankModal){rankModal.addEventListener('click',(e)=>{if(e.target===rankModal){state.showRankModal=false;render();}});}habitCards.forEach(card=>{card.addEventListener('click',async()=>{const habitId=parseInt(card.dataset.habit);const habit=state.habits.find(h=>h.id===habitId);if(habit){const today=new Date().toDateString();if(!habit.completed){habit.completed=true;habit.lastCompletedDate=today;habit.streak++;state.totalPoints+=10;state.weeklyStats[6]=Math.min(100,state.weeklyStats[6]+5);}else{habit.completed=false;if(habit.streak>0)habit.streak--;state.totalPoints=Math.max(0,state.totalPoints-10);state.weeklyStats[6]=Math.max(0,state.weeklyStats[6]-5);}await saveState();render();}});});taskChecks.forEach(check=>{check.addEventListener('click',async()=>{const taskId=parseInt(check.dataset.taskCheck);const task=state.tasks.find(t=>t.id===taskId);if(task){task.completed=!task.completed;if(task.completed){state.totalPoints+=task.points;state.weeklyStats[6]=Math.min(100,state.weeklyStats[6]+5);}else{state.totalPoints=Math.max(0,state.totalPoints-task.points);state.weeklyStats[6]=Math.max(0,state.weeklyStats[6]-5);}await saveState();render();}});});if(addTaskBtn&&newTaskInput){const addTask=async()=>{const title=newTaskInput.value.trim();if(title){state.tasks.push({id:Date.now(),title,completed:false,points:5,category:'Общее',createdAt:new Date().toISOString()});await saveState();render();}};addTaskBtn.addEventListener('click',addTask);newTaskInput.addEventListener('keypress',(e)=>{if(e.key==='Enter')addTask();});}deleteButtons.forEach(btn=>{btn.addEventListener('click',async(e)=>{e.stopPropagation();const taskId=parseInt(btn.dataset.delete);const task=state.tasks.find(t=>t.id===taskId);if(task&&task.completed){state.totalPoints=Math.max(0,state.totalPoints-task.points);}state.tasks=state.tasks.filter(t=>t.id!==taskId);await saveState();render();});});if(goToTasksBtn){goToTasksBtn.addEventListener('click',()=>{state.activeTab='tasks';render();});}if(goToChallengesBtn){goToChallengesBtn.addEventListener('click',()=>{state.activeTab='challenges';render();});}if(toggleChallengeBtn){toggleChallengeBtn.addEventListener('click',async()=>{const challenge=state.dailyChallenge;if(!challenge.completed){state.challengeProgress=challenge.target;challenge.completed=true;state.totalPoints+=50;state.weeklyStats[6]=Math.min(100,state.weeklyStats[6]+10);const categoryMap={'Спорт':'sport','Здоровье':'health','Обучение':'learning','Осознанность':'mindfulness','Продуктивность':'productivity','Социальное':'social'};const category=categoryMap[challenge.category];if(category)state.categoryStats[category]++;state.completedChallenges.push({...challenge,completedDate:new Date().toISOString()});await saveState();render();}});}shopItems.forEach(item=>{item.addEventListener('click',async()=>{const itemId=item.dataset.shopItem;const shopItem=window.shopItems.find(i=>i.id===itemId);if(!state.ownedItems.includes(itemId)){if(state.totalPoints>=shopItem.price){state.totalPoints-=shopItem.price;state.ownedItems.push(itemId);state.equippedItems[shopItem.type]=itemId;await saveState();render();}}});});equipButtons.forEach(btn=>{btn.addEventListener('click',async(e)=>{e.stopPropagation();const itemId=btn.dataset.equip;const shopItem=window.shopItems.find(i=>i.id===itemId);state.equippedItems[shopItem.type]=itemId;await saveState();render();});});}
-        async function resetDailyHabits(){const today=new Date().toDateString();state.habits.forEach(habit=>{if(habit.lastCompletedDate!==today){habit.completed=false;}});await saveState();}
-        function render(){const app=document.getElementById('app');if(!state.hasCompletedOnboarding){app.innerHTML=renderOnboarding();attachOnboardingListeners();return;}updateStreak();state.activeTab='home';app.innerHTML=renderMain();attachMainListeners();}
-        async function init(){await loadState();await resetDailyHabits();getDailyChallenge();checkMidnight();render();setTimeout(()=>{const loadingScreen=document.getElementById('loadingScreen');if(loadingScreen){loadingScreen.classList.add('fade-out');setTimeout(()=>loadingScreen.remove(),500);}},1000);}
-        window.shopItems=shopItems;
+        const colors = { primary: '#8B9A9C', secondary: '#B8A8C7', accent1: '#9CB3B5', accent2: '#A8B5C7', accent3: '#A5BDA1', warning: '#D4AF7A' };
+
+        const dailyChallenges = [
+            { title: '10 отжиманий', description: 'Сделай 10 отжиманий с правильной техникой', target: 10, unit: 'раз', category: 'Спорт', icon: '💪' },
+            { title: '20 приседаний', description: 'Выполни 20 глубоких приседаний', target: 20, unit: 'раз', category: 'Спорт', icon: '🦵' },
+            { title: 'Планка 60 секунд', description: 'Держи планку ровно минуту', target: 60, unit: 'сек', category: 'Спорт', icon: '⏱️' },
+            { title: 'Выпить 8 стаканов воды', description: 'Поддержи водный баланс организма', target: 8, unit: 'стаканов', category: 'Здоровье', icon: '💧' },
+            { title: 'Прочитать 10 страниц', description: 'Уделите время чтению книги', target: 10, unit: 'страниц', category: 'Обучение', icon: '📚' },
+            { title: 'Медитация 10 минут', description: 'Практика осознанности и релакса', target: 10, unit: 'минут', category: 'Осознанность', icon: '🧘' },
+            { title: '30 минут прогулки', description: 'Пройдись на свежем воздухе', target: 30, unit: 'минут', category: 'Спорт', icon: '🚶' },
+            { title: 'Написать 3 благодарности', description: 'За что ты благодарен сегодня?', target: 3, unit: 'записи', category: 'Осознанность', icon: '✨' },
+            { title: '50 прыжков на скакалке', description: 'Отличное кардио упражнение', target: 50, unit: 'раз', category: 'Спорт', icon: '🪢' },
+            { title: 'Растяжка 15 минут', description: 'Улучши гибкость тела', target: 15, unit: 'минут', category: 'Спорт', icon: '🤸' }
+        ];
+
+        const getInitialState = () => ({
+            hasCompletedOnboarding: false, onboardingStep: 0, activeTab: 'home', showRankModal: false,
+            userGoals: { health: false, learning: false, productivity: false, mindfulness: false, sleep: false, social: false },
+            userInfo: { name: '', wakeUpTime: '07:00', sleepTime: '23:00', mainGoal: '' },
+            tasks: [], habits: [], streak: 0, totalPoints: 0, lastActiveDate: new Date().toDateString(),
+            dailyChallenge: null, challengeProgress: 0, weeklyStats: [0, 0, 0, 0, 0, 0, 0],
+            completedChallenges: [], categoryStats: { sport: 0, health: 0, learning: 0, mindfulness: 0, productivity: 0, social: 0 }
+        });
+
+        let state = getInitialState();
+        const tg = window.Telegram?.WebApp || { expand: () => {}, ready: () => {}, CloudStorage: null };
+        tg.expand(); tg.ready();
+
+        async function loadState() {
+            try {
+                if (tg.CloudStorage) {
+                    return new Promise((resolve) => {
+                        tg.CloudStorage.getItem('livi_state', (error, value) => {
+                            if (!error && value) {
+                                try { state = { ...getInitialState(), ...JSON.parse(value) }; } catch (e) {}
+                            }
+                            resolve();
+                        });
+                    });
+                }
+            } catch (e) {}
+        }
+
+        async function saveState() {
+            try {
+                if (tg.CloudStorage) {
+                    return new Promise((resolve) => {
+                        tg.CloudStorage.setItem('livi_state', JSON.stringify(state), () => resolve());
+                    });
+                }
+            } catch (e) {}
+        }
+
+        function getDailyChallenge() {
+            const today = new Date().toDateString();
+            if (!state.dailyChallenge || state.dailyChallenge.date !== today) {
+                const dayIndex = Math.floor(Date.now() / 86400000) % dailyChallenges.length;
+                state.dailyChallenge = { ...dailyChallenges[dayIndex], date: today, completed: false };
+                state.challengeProgress = 0;
+                saveState();
+            }
+            return state.dailyChallenge;
+        }
+
+        function updateStreak() {
+            const today = new Date().toDateString();
+            if (state.lastActiveDate !== today) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                state.streak = state.lastActiveDate === yesterday.toDateString() ? state.streak + 1 : 1;
+                state.lastActiveDate = today;
+                saveState();
+            }
+        }
+
+        function createSvg(name, color = 'currentColor') {
+            const icons = {
+                home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+                target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+                checkSquare: '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+                barChart: '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>',
+                star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+                flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+                check: '<polyline points="20 6 9 17 4 12"/>',
+                plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+                trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+                arrowRight: '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+                heart: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+                book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+                brain: '<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>',
+                moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+                coffee: '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>',
+                sunrise: '<path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/>',
+                sparkles: '<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>',
+                clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+                zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+                award: '<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>',
+                trendingUp: '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
+                gift: '<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>'
+            };
+            return `<svg width="24" height="24" viewBox="0 0 24 24" style="color: ${color}">${icons[name]}</svg>`;
+        }
+
+        function getLiviState(energy, completion, habits) {
+            const avgScore = (energy + completion + (habits / 4 * 100)) / 3;
+            if (avgScore >= 85) return { size: 120, color: colors.primary, innerSize: 80, label: 'Процветающий', mood: 'happy', phrase: 'Отличная работа! Ты на высоте! 🌟' };
+            if (avgScore >= 70) return { size: 110, color: colors.primary, innerSize: 75, label: 'Стабильный', mood: 'happy', phrase: 'Хороший прогресс! Продолжай! 💪' };
+            if (avgScore >= 50) return { size: 100, color: colors.primary, innerSize: 70, label: 'Формирующийся', mood: 'neutral', phrase: 'Ты на правильном пути! 🌱' };
+            return { size: 90, color: '#666', innerSize: 60, label: 'Зарождающийся', mood: 'sad', phrase: 'Начни с малого, все получится! 🌟' };
+        }
+
+        function getRank(streakDays) {
+            if (streakDays >= 100) return { title: 'Легенда', icon: '👑', level: 6, color: '#FFD700', min: 100 };
+            if (streakDays >= 50) return { title: 'Мастер', icon: '⭐', level: 5, color: colors.warning, min: 50 };
+            if (streakDays >= 30) return { title: 'Профи', icon: '🔥', level: 4, color: colors.accent3, min: 30 };
+            if (streakDays >= 14) return { title: 'Энтузиаст', icon: '💪', level: 3, color: colors.primary, min: 14 };
+            if (streakDays >= 7) return { title: 'Стартер', icon: '🌱', level: 2, color: colors.accent2, min: 7 };
+            return { title: 'Новичок', icon: '🌟', level: 1, color: colors.secondary, min: 0 };
+        }
+
+        function generateAIAnalysis() {
+            const completedTasks = state.tasks.filter(t => t.completed).length;
+            const totalTasks = state.tasks.length || 1;
+            const completionRate = (completedTasks / totalTasks) * 100;
+            const activeHabits = state.habits.filter(h => h.completed).length;
+            const totalHabits = state.habits.length || 1;
+            const habitRate = (activeHabits / totalHabits) * 100;
+            const avgEnergy = (completionRate + habitRate) / 2;
+
+            let insights = [], recommendations = [], patterns = [];
+            const weekAvg = state.weeklyStats.reduce((a, b) => a + b, 0) / 7;
+            const trend = state.weeklyStats[6] - state.weeklyStats[0];
+
+            if (trend > 10) patterns.push('📈 Восходящий тренд: ты становишься продуктивнее');
+            else if (trend < -10) patterns.push('📉 Снижение активности');
+            else patterns.push('➡️ Стабильная активность');
+
+            if (completionRate >= 80) {
+                insights.push('Превосходная продуктивность! Ты выполняешь более 80% задач.');
+                recommendations.push('Попробуй добавить более амбициозные цели');
+            } else if (completionRate >= 60) {
+                insights.push('Хорошая продуктивность с резервом для роста.');
+                recommendations.push('Анализируй, что мешает выполнять оставшиеся задачи');
+            } else {
+                insights.push('Есть потенциал для улучшения.');
+                recommendations.push('Разбивай большие задачи на маленькие подзадачи');
+            }
+
+            if (habitRate >= 75) insights.push(`Отличное формирование привычек! ${activeHabits} из ${state.habits.length} активны.`);
+            else recommendations.push('Выбери одну привычку и сфокусируйся на ней неделю');
+
+            if (state.streak >= 7) insights.push(`Отличный стрик! Первая неделя - самая сложная.`);
+            else recommendations.push('Сфокусируйся на создании стрика в 7 дней подряд');
+
+            return {
+                insights, recommendations: recommendations.slice(0, 4), patterns,
+                completionRate: Math.round(completionRate), avgEnergy: Math.round(avgEnergy),
+                activeHabits, habitRate: Math.round(habitRate), weekAvg: Math.round(weekAvg)
+            };
+        }
+
+        function renderWeeklyChart(stats) {
+            const days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
+            const maxValue = Math.max(...stats, 1);
+            return `
+                <div class="chart-container">
+                    <div class="chart-title">Продуктивность за неделю</div>
+                    <div class="bar-chart">
+                        ${stats.map((value, i) => `
+                            <div class="bar" style="height: ${value === 0 ? 2 : (value/maxValue)*100}px; background: linear-gradient(180deg, ${i === 6 ? colors.primary : '#8B9A9C'} 0%, ${i === 6 ? colors.accent1 : '#9CB3B5'} 100%);">
+                                <div class="bar-label">${days[i]}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDailyChallenge() {
+            const challenge = getDailyChallenge();
+            const progress = Math.min((state.challengeProgress / challenge.target) * 100, 100);
+            const isCompleted = challenge.completed;
+
+            return `
+                <div class="challenge-card" style="background: linear-gradient(135deg, ${isCompleted ? 'rgba(165, 189, 161, 0.3)' : 'rgba(139, 154, 156, 0.2)'} 0%, ${isCompleted ? 'rgba(165, 189, 161, 0.1)' : 'rgba(156, 179, 181, 0.1)'} 100%); border: 2px solid ${isCompleted ? colors.accent3 : 'rgba(139, 154, 156, 0.3)'};">
+                    ${isCompleted ? '<div style="position: absolute; top: 10px; right: 10px; font-size: 48px; opacity: 0.2;">✓</div>' : ''}
+                    <div class="challenge-header">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, ${colors.warning}40, ${colors.warning}20); display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                                ${challenge.icon}
+                            </div>
+                            <div>
+                                <div class="challenge-title">${challenge.title}</div>
+                                <div style="font-size: 12px; color: ${colors.warning}; font-weight: bold; margin-top: 4px;">📁 ${challenge.category}</div>
+                            </div>
+                        </div>
+                        <div class="challenge-badge pulse">+50 ⭐</div>
+                    </div>
+                    <div class="challenge-description">${challenge.description}</div>
+                    <div style="margin-bottom: 12px;">
+                        <div class="progress-label">
+                            <span>Прогресс</span>
+                            <span><strong style="color: ${progress >= 100 ? colors.accent3 : colors.primary};">${state.challengeProgress}</strong> / ${challenge.target} ${challenge.unit}</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width: ${progress}%; background: linear-gradient(90deg, ${colors.warning} 0%, ${progress >= 100 ? colors.accent3 : '#FFD700'} 100%);"></div>
+                        </div>
+                    </div>
+                    ${!isCompleted ? `
+                        <button class="btn ${progress >= 100 ? 'btn-primary' : 'btn-secondary'}" id="toggleChallenge" style="padding: 12px;">
+                            ${createSvg('check', progress >= 100 ? 'white' : colors.primary)}
+                            <span>${progress >= 100 ? 'Завершить!' : 'Отметить выполненным'}</span>
+                        </button>
+                    ` : `
+                        <div style="text-align: center; padding: 12px; background: linear-gradient(135deg, rgba(165, 189, 161, 0.3), rgba(165, 189, 161, 0.1)); border-radius: 12px; border: 1px solid ${colors.accent3};">
+                            <div style="font-size: 20px; margin-bottom: 4px;">🎉</div>
+                            <strong style="color: ${colors.accent3};">Челлендж выполнен!</strong>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function renderLiviWithFace(liviState) {
+            const mouthClass = liviState.mood === 'happy' ? 'happy' : liviState.mood === 'sad' ? 'sad' : '';
+            return `
+                <div class="livi-character">
+                    <div class="livi-circle" style="width: ${liviState.size}px; height: ${liviState.size}px; background-color: ${liviState.color}20; border: 2px solid ${liviState.color};">
+                        <div style="width: ${liviState.innerSize}px; height: ${liviState.innerSize}px; background-color: ${liviState.color}40; border: 1px solid ${liviState.color}; border-radius: 50%;"></div>
+                        <div class="livi-face">
+                            <div class="livi-eyes">
+                                <div class="livi-eye"></div>
+                                <div class="livi-eye"></div>
+                            </div>
+                            <div class="livi-mouth ${mouthClass}"></div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 16px; font-size: 18px; font-weight: bold; color: ${liviState.color};">${liviState.label}</div>
+                    <div class="livi-speech">${liviState.phrase}</div>
+                </div>
+            `;
+        }
+
+        function renderOnboarding() {
+            const steps = [
+                {
+                    title: 'Добро пожаловать в livi! 👋',
+                    subtitle: 'Давайте настроим приложение под ваши цели',
+                    content: `
+                        <div style="text-align: center;">
+                            <p style="font-size: 18px; color: #999; margin-bottom: 24px;">Ответьте на несколько вопросов, чтобы мы могли персонализировать ваш опыт</p>
+                            <button class="btn btn-primary" id="startOnboarding">Начать ${createSvg('arrowRight', 'white')}</button>
+                        </div>
+                    `
+                },
+                {
+                    title: 'Как вас зовут?',
+                    subtitle: 'Давайте познакомимся',
+                    content: `
+                        <div>
+                            <input type="text" id="userName" placeholder="Ваше имя" value="${state.userInfo.name}" style="margin-bottom: 24px;">
+                            <button class="btn btn-primary" id="nextStep">Далее</button>
+                        </div>
+                    `
+                },
+                {
+                    title: 'Ваши цели',
+                    subtitle: 'Выберите, над чем хотите работать',
+                    content: `
+                        <div>
+                            ${[
+                                { key: 'health', icon: 'heart', label: 'Здоровье', desc: 'Спорт, питание, сон' },
+                                { key: 'learning', icon: 'book', label: 'Обучение', desc: 'Чтение, курсы, навыки' },
+                                { key: 'productivity', icon: 'target', label: 'Продуктивность', desc: 'Задачи, проекты, работа' },
+                                { key: 'mindfulness', icon: 'brain', label: 'Осознанность', desc: 'Медитация, дыхание' },
+                                { key: 'sleep', icon: 'moon', label: 'Сон', desc: 'Режим, качество сна' },
+                                { key: 'social', icon: 'coffee', label: 'Социальная жизнь', desc: 'Друзья, хобби' }
+                            ].map(goal => `
+                                <button class="goal-button ${state.userGoals[goal.key] ? 'selected' : ''}" data-goal="${goal.key}">
+                                    <div class="goal-icon">${createSvg(goal.icon, colors.primary)}</div>
+                                    <div class="goal-content">
+                                        <div class="goal-title">${goal.label}</div>
+                                        <div class="goal-desc">${goal.desc}</div>
+                                    </div>
+                                    ${state.userGoals[goal.key] ? createSvg('check', colors.primary) : ''}
+                                </button>
+                            `).join('')}
+                            <button class="btn btn-primary" id="nextStep" style="margin-top: 24px;" ${!Object.values(state.userGoals).some(v => v) ? 'disabled' : ''}>Далее</button>
+                        </div>
+                    `
+                },
+                {
+                    title: 'Ваш режим',
+                    subtitle: 'Когда вы обычно просыпаетесь и ложитесь спать?',
+                    content: `
+                        <div>
+                            <div style="margin-bottom: 24px;">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 14px; color: #999;">${createSvg('sunrise', colors.warning)} Время пробуждения</label>
+                                <input type="time" id="wakeUpTime" value="${state.userInfo.wakeUpTime}">
+                            </div>
+                            <div style="margin-bottom: 24px;">
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 14px; color: #999;">${createSvg('moon', colors.secondary)} Время сна</label>
+                                <input type="time" id="sleepTime" value="${state.userInfo.sleepTime}">
+                            </div>
+                            <button class="btn btn-primary" id="nextStep">Далее</button>
+                        </div>
+                    `
+                },
+                {
+                    title: 'Последний шаг!',
+                    subtitle: 'Какая ваша главная цель на ближайший месяц?',
+                    content: `
+                        <div>
+                            <textarea id="mainGoal" placeholder="Например: Читать 30 минут каждый день, пробежать 5км...">${state.userInfo.mainGoal}</textarea>
+                            <button class="btn btn-primary" id="completeOnboarding" style="margin-top: 24px;">Начать путешествие ${createSvg('sparkles', 'white')}</button>
+                        </div>
+                    `
+                }
+            ];
+
+            const currentStep = steps[state.onboardingStep];
+            return `
+                <div class="onboarding-container slide-up">
+                    <div class="onboarding-box">
+                        ${state.onboardingStep === 0 ? `
+                            <div class="logo-section">
+                                <h1 class="logo-title">livi</h1>
+                                <p class="logo-subtitle">Ваш путь к лучшей версии себя</p>
+                            </div>
+                        ` : `
+                            <div class="progress-bar-container">
+                                ${steps.slice(1).map((_, i) => `<div class="progress-bar ${i < state.onboardingStep ? 'active' : ''}"></div>`).join('')}
+                            </div>
+                        `}
+                        <div class="card">
+                            <h2 style="font-size: 28px; font-weight: bold; margin-bottom: 8px; color: white;">${currentStep.title}</h2>
+                            <p style="font-size: 16px; color: #999; margin-bottom: 32px;">${currentStep.subtitle}</p>
+                            ${currentStep.content}
+                        </div>
+                        ${state.onboardingStep > 0 ? `
+                            <button id="prevStep" style="margin-top: 16px; width: 100%; padding: 12px; background: none; border: none; color: #666; cursor: pointer; font-weight: 500;">Назад</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMain() {
+            const completedTasks = state.tasks.filter(t => t.completed).length;
+            const currentRank = getRank(state.streak);
+            const aiAnalysis = generateAIAnalysis();
+
+            return `
+                <div class="header">
+                    <div class="header-title">livi</div>
+                    <div class="header-stats">
+                        <button class="stat-badge" style="background-color: rgba(212, 175, 122, 0.2);" id="showRank">
+                            ${createSvg('flame', colors.warning)}
+                            <span>${state.streak}</span>
+                        </button>
+                        <button class="stat-badge" style="background-color: rgba(139, 154, 156, 0.2);">
+                            ${createSvg('star', colors.primary)}
+                            <span>${state.totalPoints}</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="content">
+                    <div id="tabContent">${renderTabContent(completedTasks, currentRank, aiAnalysis)}</div>
+                </div>
+                <div class="bottom-nav">
+                    ${[
+                        { tab: 'home', icon: 'home', label: 'Главная' },
+                        { tab: 'challenges', icon: 'target', label: 'Челленджи' },
+                        { tab: 'tasks', icon: 'checkSquare', label: 'Задачи' },
+                        { tab: 'analysis', icon: 'barChart', label: 'Анализ' },
+                        { tab: 'support', icon: 'star', label: 'Поддержка' }
+                    ].map(nav => `
+                        <button class="nav-item ${state.activeTab === nav.tab ? 'active' : ''}" data-tab="${nav.tab}">
+                            <div class="nav-icon">${createSvg(nav.icon, state.activeTab === nav.tab ? colors.primary : '#666')}</div>
+                            <div class="nav-label">${nav.label}</div>
+                        </button>
+                    `).join('')}
+                </div>
+                ${state.showRankModal ? renderRankModal(currentRank) : ''}
+            `;
+        }
+
+        function renderRankModal(currentRank) {
+            const nextRank = getRank(currentRank.min + 1);
+            const progressToNext = currentRank.min === 100 ? 100 : ((state.streak - currentRank.min) / (nextRank.min - currentRank.min)) * 100;
+
+            return `
+                <div class="modal fade-in" id="rankModal">
+                    <div class="modal-content slide-up" onclick="event.stopPropagation();">
+                        <div class="modal-handle"></div>
+                        <div style="text-align: center; margin-bottom: 24px;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">${currentRank.icon}</div>
+                            <h2 style="font-size: 32px; font-weight: bold; margin-bottom: 8px;">${currentRank.title}</h2>
+                            <p style="font-size: 16px; color: #999; margin-bottom: 4px;">Уровень ${currentRank.level}</p>
+                        </div>
+                        <div style="margin-bottom: 24px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-size: 14px; font-weight: 500;">Прогресс</span>
+                                <span style="font-size: 14px; font-weight: bold; color: ${colors.primary};">
+                                    ${currentRank.min === 100 ? 'Максимум' : Math.round(progressToNext) + '%'}
+                                </span>
+                            </div>
+                            <div style="height: 12px; border-radius: 6px; background-color: #2a2a2a;">
+                                <div style="height: 100%; border-radius: 6px; background-color: ${colors.primary}; width: ${progressToNext}%; transition: width 0.5s;"></div>
+                            </div>
+                            ${currentRank.min !== 100 ? `
+                                <p style="font-size: 12px; color: #666; text-align: center; margin-top: 8px;">
+                                    Ещё ${nextRank.min - state.streak} дней до "${nextRank.title}"
+                                </p>
+                            ` : ''}
+                        </div>
+                        ${[
+                            { title: 'Новичок', icon: '🌟', level: 1, days: '0-6' },
+                            { title: 'Стартер', icon: '🌱', level: 2, days: '7-13' },
+                            { title: 'Энтузиаст', icon: '💪', level: 3, days: '14-29' },
+                            { title: 'Профи', icon: '🔥', level: 4, days: '30-49' },
+                            { title: 'Мастер', icon: '⭐', level: 5, days: '50-99' },
+                            { title: 'Легенда', icon: '👑', level: 6, days: '100+' }
+                        ].map(rank => `
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-radius: 12px; background-color: ${rank.title === currentRank.title ? 'rgba(139, 154, 156, 0.2)' : '#0a0a0a'}; border: 1px solid ${rank.title === currentRank.title ? colors.primary : 'transparent'}; margin-bottom: 8px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(139, 154, 156, ${rank.title === currentRank.title ? '0.4' : '0.2'}); display: flex; align-items: center; justify-content: center; font-size: 20px;">${rank.icon}</div>
+                                    <div>
+                                        <div style="font-size: 14px; font-weight: bold;">${rank.title}</div>
+                                        <div style="font-size: 12px; color: #666;">Уровень ${rank.level} • ${rank.days} дней</div>
+                                    </div>
+                                </div>
+                                ${rank.title === currentRank.title ? createSvg('check', colors.primary) : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTabContent(completedTasks, currentRank, aiAnalysis) {
+            if (state.activeTab === 'home') {
+                const liviState = getLiviState(aiAnalysis.avgEnergy, aiAnalysis.completionRate, aiAnalysis.activeHabits);
+                return `
+                    <div class="section">
+                        ${renderLiviWithFace(liviState)}
+                    </div>
+                    <div class="grid-2">
+                        <div class="stat-card card-hover">
+                            ${createSvg('target', colors.primary)}
+                            <div class="stat-value">${completedTasks}/${state.tasks.length}</div>
+                            <div class="stat-label">Задачи</div>
+                        </div>
+                        <div class="stat-card card-hover">
+                            ${createSvg('clock', colors.accent3)}
+                            <div class="stat-value">${state.habits.filter(h => h.completed).length}/${state.habits.length}</div>
+                            <div class="stat-label">Привычки</div>
+                        </div>
+                        <div class="stat-card card-hover">
+                            ${createSvg('zap', colors.warning)}
+                            <div class="stat-value">${aiAnalysis.avgEnergy}%</div>
+                            <div class="stat-label">Энергия</div>
+                        </div>
+                        <div class="stat-card card-hover" id="goToChallenges">
+                            ${createSvg('award', colors.warning)}
+                            <div class="stat-value">${state.completedChallenges.length}</div>
+                            <div class="stat-label">Челленджей</div>
+                        </div>
+                    </div>
+                    <div class="section">
+                        ${renderWeeklyChart(state.weeklyStats)}
+                    </div>
+                    ${state.habits.length > 0 ? `
+                        <div class="section">
+                            <h2 class="section-title">Привычки</h2>
+                            <div class="habit-grid">
+                                ${state.habits.map(habit => `
+                                    <div class="habit-card card-hover" data-habit="${habit.id}" style="background-color: ${habit.completed ? habit.color + '15' : '#0a0a0a'}; border-color: ${habit.completed ? habit.color + '40' : '#2a2a2a'};">
+                                        <div class="habit-icon" style="background-color: ${habit.color}30;">
+                                            <div style="font-size: 24px;">${habit.completed ? '✓' : '○'}</div>
+                                        </div>
+                                        <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">${habit.name}</div>
+                                        <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                            ${createSvg('flame', colors.warning)}
+                                            <span style="font-size: 16px; font-weight: bold;">${habit.streak}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${state.tasks.length > 0 ? `
+                        <div class="section">
+                            <h2 class="section-title">Сегодня</h2>
+                            ${state.tasks.slice(0, 4).map(task => `
+                                <div class="task-item">
+                                    <div class="checkbox ${task.completed ? 'checked' : ''}" data-task-check="${task.id}">
+                                        ${task.completed ? createSvg('check', 'white') : ''}
+                                    </div>
+                                    <div class="task-title" style="color: ${task.completed ? '#666' : 'white'}; text-decoration: ${task.completed ? 'line-through' : 'none'};">
+                                        ${task.title}
+                                    </div>
+                                    <div class="task-points">+${task.points}</div>
+                                </div>
+                            `).join('')}
+                            ${state.tasks.length > 4 ? `<button class="btn btn-secondary" id="goToTasks" style="margin-top: 16px;">Все задачи →</button>` : ''}
+                        </div>
+                    ` : ''}
+                `;
+            } else if (state.activeTab === 'challenges') {
+                return `
+                    <div style="text-align: center; padding: 24px 0;">
+                        <div style="font-size: 64px; margin-bottom: 16px;">🎯</div>
+                        <h2 style="font-size: 28px; font-weight: bold; margin-bottom: 8px;">Ежедневные Челленджи</h2>
+                        <p style="font-size: 14px; color: #999;">Выполняй челленджи и получай бонусные очки</p>
+                    </div>
+                    <div class="section" style="border: 2px solid ${colors.warning}; background: linear-gradient(135deg, rgba(212, 175, 122, 0.1), transparent);">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, ${colors.warning}, ${colors.accent3}); display: flex; align-items: center; justify-content: center; font-size: 24px;">🏆</div>
+                            <div>
+                                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 4px;">Челлендж Дня</h3>
+                                <p style="font-size: 12px; color: #999;">Обновляется каждый день в 00:00</p>
+                            </div>
+                        </div>
+                        ${renderDailyChallenge()}
+                    </div>
+                    ${state.completedChallenges.length > 0 ? `
+                        <div class="section">
+                            <h2 class="section-title">История выполненных (${state.completedChallenges.length})</h2>
+                            <div style="max-height: 400px; overflow-y: auto;">
+                                ${state.completedChallenges.slice(-10).reverse().map(ch => `
+                                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background-color: #0a0a0a; border-radius: 12px; margin-bottom: 8px; border: 1px solid ${colors.accent3}40;">
+                                        <div style="font-size: 32px;">${ch.icon}</div>
+                                        <div style="flex: 1;">
+                                            <div style="font-size: 14px; font-weight: bold; margin-bottom: 4px;">${ch.title}</div>
+                                            <div style="font-size: 11px; color: #666;">${new Date(ch.completedDate).toLocaleDateString('ru-RU')}</div>
+                                        </div>
+                                        <div style="font-size: 12px; font-weight: bold; color: ${colors.warning};">+50 ⭐</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+            } else if (state.activeTab === 'tasks') {
+                return `
+                    <div class="section">
+                        <h2 class="section-title">Новая задача</h2>
+                        <div style="display: flex; gap: 12px;">
+                            <input type="text" id="newTaskInput" placeholder="Что нужно сделать?" style="flex: 1; padding: 12px 16px;">
+                            <button class="btn btn-primary" id="addTask" style="width: auto; padding: 12px 16px;">
+                                ${createSvg('plus', 'white')}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h2 class="section-title">Все задачи (${state.tasks.length})</h2>
+                        ${state.tasks.length > 0 ? `
+                            ${state.tasks.map(task => `
+                                <div class="task-item">
+                                    <div class="checkbox ${task.completed ? 'checked' : ''}" data-task-check="${task.id}">
+                                        ${task.completed ? createSvg('check', 'white') : ''}
+                                    </div>
+                                    <div class="task-title" style="color: ${task.completed ? '#666' : 'white'}; text-decoration: ${task.completed ? 'line-through' : 'none'};">
+                                        ${task.title}
+                                    </div>
+                                    <div class="task-points">${task.category || 'Общее'}</div>
+                                    <button class="delete-btn" data-delete="${task.id}">
+                                        ${createSvg('trash', '#ff4444')}
+                                    </button>
+                                </div>
+                            `).join('')}
+                        ` : `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📝</div>
+                                <p>Здесь пока нет задач</p>
+                            </div>
+                        `}
+                    </div>
+                `;
+            } else if (state.activeTab === 'support') {
+                return `
+                    <div style="text-align: center; padding: 32px 0;">
+                        <div style="font-size: 72px; margin-bottom: 16px;">⭐</div>
+                        <h2 style="font-size: 28px; font-weight: bold; margin-bottom: 12px;">Поддержать Разработчика</h2>
+                        <p style="font-size: 15px; color: #999; line-height: 1.6; max-width: 320px; margin: 0 auto;">
+                            Если livi помогает тебе становиться лучше каждый день, ты можешь поддержать развитие приложения
+                        </p>
+                    </div>
+                    <div class="section" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), transparent); border: 2px solid #FFD70040;">
+                        <div style="text-align: center; margin-bottom: 24px;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">💝</div>
+                            <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 8px;">Отправить Stars</h3>
+                            <p style="font-size: 13px; color: #999; margin-bottom: 24px;">
+                                Telegram Stars — это встроенная валюта для поддержки разработчиков
+                            </p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;">
+                            ${[
+                                { amount: 10, label: 'Спасибо', emoji: '☕' },
+                                { amount: 50, label: 'Круто!', emoji: '🎉' },
+                                { amount: 100, label: 'Огонь!', emoji: '🔥' },
+                                { amount: 250, label: 'Супер!', emoji: '⚡' },
+                                { amount: 500, label: 'Вау!', emoji: '🚀' },
+                                { amount: 1000, label: 'Легенда', emoji: '👑' }
+                            ].map(tier => `
+                                <button class="stat-card card-hover" data-stars="${tier.amount}" style="padding: 16px; text-align: center; cursor: pointer; background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.05));">
+                                    <div style="font-size: 32px; margin-bottom: 8px;">${tier.emoji}</div>
+                                    <div style="font-size: 18px; font-weight: bold; margin-bottom: 4px;">${tier.amount}</div>
+                                    <div style="font-size: 11px; color: #999;">${tier.label}</div>
+                                </button>
+                            `).join('')}
+                        </div>
+                        <button class="star-button" id="customStars" style="width: 100%; justify-content: center; font-size: 16px;">
+                            ${createSvg('gift', '#1a1a1a')}
+                            <span>Другая сумма</span>
+                        </button>
+                    </div>
+                    <div class="section">
+                        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 16px;">💖 Зачем поддерживать?</h3>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            ${[
+                                { icon: '🚀', text: 'Развитие новых функций' },
+                                { icon: '🎨', text: 'Улучшение дизайна' },
+                                { icon: '⚡', text: 'Быстрая работа приложения' },
+                                { icon: '🔧', text: 'Исправление ошибок' },
+                                { icon: '💡', text: 'Реализация ваших идей' }
+                            ].map(item => `
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background-color: #0a0a0a; border-radius: 12px;">
+                                    <div style="font-size: 24px;">${item.icon}</div>
+                                    <div style="font-size: 14px; color: #ccc;">${item.text}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (state.activeTab === 'analysis') {
+                return `
+                    <div class="section">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                            ${createSvg('barChart', colors.primary)}
+                            <div>
+                                <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 4px;">Умный Анализ</h2>
+                                <p style="font-size: 14px; color: #999;">Персональные инсайты и рекомендации</p>
+                            </div>
+                        </div>
+                        <div class="grid-2" style="margin-bottom: 24px;">
+                            <div style="padding: 20px; border-radius: 12px; background-color: rgba(139, 154, 156, 0.15); text-align: center;">
+                                <div style="font-size: 36px; font-weight: bold; margin-bottom: 4px;">${aiAnalysis.completionRate}%</div>
+                                <div style="font-size: 12px; font-weight: 500; color: #999;">Выполнение задач</div>
+                            </div>
+                            <div style="padding: 20px; border-radius: 12px; background-color: rgba(165, 189, 161, 0.15); text-align: center;">
+                                <div style="font-size: 36px; font-weight: bold; margin-bottom: 4px;">${aiAnalysis.habitRate}%</div>
+                                <div style="font-size: 12px; font-weight: 500; color: #999;">Активность привычек</div>
+                            </div>
+                        </div>
+                        ${renderWeeklyChart(state.weeklyStats)}
+                        <div style="margin-bottom: 24px; margin-top: 24px;">
+                            <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                ${createSvg('trendingUp', colors.accent3)}
+                                Паттерны активности
+                            </h3>
+                            ${aiAnalysis.patterns.map(pattern => `
+                                <div style="padding: 12px; border-radius: 12px; background-color: #0a0a0a; margin-bottom: 8px;">
+                                    <p style="font-size: 14px;">${pattern}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="margin-bottom: 24px;">
+                            <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                ${createSvg('sparkles', colors.primary)}
+                                Инсайты
+                            </h3>
+                            ${aiAnalysis.insights.map(insight => `
+                                <div style="padding: 12px; border-radius: 12px; background-color: #0a0a0a; margin-bottom: 8px;">
+                                    <p style="font-size: 14px;">${insight}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="margin-bottom: 24px;">
+                            <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                ${createSvg('target', colors.accent3)}
+                                Персональные рекомендации
+                            </h3>
+                            ${aiAnalysis.recommendations.map((rec, i) => `
+                                <div style="padding: 12px; border-radius: 12px; background-color: rgba(165, 189, 161, 0.15); margin-bottom: 8px; display: flex; align-items: start; gap: 12px;">
+                                    <div style="min-width: 24px; height: 24px; background-color: ${colors.accent3}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">${i + 1}</div>
+                                    <p style="font-size: 14px; flex: 1;">${rec}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ${state.userInfo.mainGoal ? `
+                            <div style="padding: 16px; border-radius: 12px; background-color: rgba(212, 175, 122, 0.15); border: 1px solid rgba(212, 175, 122, 0.3);">
+                                <p style="font-size: 12px; font-weight: bold; color: ${colors.warning}; margin-bottom: 8px;">🎯 ВАША ГЛАВНАЯ ЦЕЛЬ</p>
+                                <p style="font-size: 14px;">${state.userInfo.mainGoal}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+        }
+
+        function attachOnboardingListeners() {
+            const startBtn = document.getElementById('startOnboarding');
+            const nextBtn = document.getElementById('nextStep');
+            const prevBtn = document.getElementById('prevStep');
+            const completeBtn = document.getElementById('completeOnboarding');
+            const goalButtons = document.querySelectorAll('[data-goal]');
+            const userName = document.getElementById('userName');
+
+            if (startBtn) startBtn.addEventListener('click', () => { state.onboardingStep = 1; render(); });
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    if (state.onboardingStep === 1 && userName) state.userInfo.name = userName.value.trim();
+                    if (state.onboardingStep === 3) {
+                        state.userInfo.wakeUpTime = document.getElementById('wakeUpTime').value;
+                        state.userInfo.sleepTime = document.getElementById('sleepTime').value;
+                    }
+                    state.onboardingStep++;
+                    render();
+                });
+            }
+            if (prevBtn) prevBtn.addEventListener('click', () => { state.onboardingStep--; render(); });
+            if (completeBtn) {
+                completeBtn.addEventListener('click', async () => {
+                    state.userInfo.mainGoal = document.getElementById('mainGoal').value.trim();
+                    state.hasCompletedOnboarding = true;
+                    state.streak = 1;
+                    state.lastActiveDate = new Date().toDateString();
+
+                    const habitsByGoal = {
+                        health: { name: 'Зарядка', color: colors.accent3 },
+                        learning: { name: 'Чтение', color: colors.accent2 },
+                        productivity: { name: 'Планирование', color: colors.primary },
+                        mindfulness: { name: 'Медитация', color: colors.secondary },
+                        sleep: { name: 'Сон 8 часов', color: colors.accent1 },
+                        social: { name: 'Общение', color: colors.warning }
+                    };
+
+                    state.habits = Object.entries(state.userGoals)
+                        .filter(([_, selected]) => selected)
+                        .map(([goal], index) => ({
+                            id: Date.now() + index,
+                            name: habitsByGoal[goal].name,
+                            color: habitsByGoal[goal].color,
+                            streak: 0,
+                            completed: false,
+                            lastCompletedDate: null
+                        }));
+
+                    await saveState();
+                    render();
+                });
+            }
+            goalButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const goal = btn.dataset.goal;
+                    state.userGoals[goal] = !state.userGoals[goal];
+                    render();
+                });
+            });
+        }
+
+        function attachMainListeners() {
+            const tabs = document.querySelectorAll('[data-tab]');
+            const showRankBtn = document.getElementById('showRank');
+            const rankModal = document.getElementById('rankModal');
+            const habitCards = document.querySelectorAll('[data-habit]');
+            const taskChecks = document.querySelectorAll('[data-task-check]');
+            const addTaskBtn = document.getElementById('addTask');
+            const newTaskInput = document.getElementById('newTaskInput');
+            const deleteButtons = document.querySelectorAll('[data-delete]');
+            const goToTasksBtn = document.getElementById('goToTasks');
+            const goToChallengesBtn = document.getElementById('goToChallenges');
+            const toggleChallengeBtn = document.getElementById('toggleChallenge');
+            const starButtons = document.querySelectorAll('[data-stars]');
+            const customStarsBtn = document.getElementById('customStars');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    state.activeTab = tab.dataset.tab;
+                    render();
+                });
+            });
+
+            if (showRankBtn) {
+                showRankBtn.addEventListener('click', () => {
+                    state.showRankModal = true;
+                    render();
+                });
+            }
+
+            if (rankModal) {
+                rankModal.addEventListener('click', (e) => {
+                    if (e.target === rankModal) {
+                        state.showRankModal = false;
+                        render();
+                    }
+                });
+            }
+
+            habitCards.forEach(card => {
+                card.addEventListener('click', async () => {
+                    const habitId = parseInt(card.dataset.habit);
+                    const habit = state.habits.find(h => h.id === habitId);
+                    if (habit) {
+                        const today = new Date().toDateString();
+                        if (!habit.completed) {
+                            habit.completed = true;
+                            habit.lastCompletedDate = today;
+                            habit.streak++;
+                            state.totalPoints += 10;
+                            state.weeklyStats[6] = Math.min(100, state.weeklyStats[6] + 5);
+                        } else {
+                            habit.completed = false;
+                            if (habit.streak > 0) habit.streak--;
+                            state.totalPoints = Math.max(0, state.totalPoints - 10);
+                            state.weeklyStats[6] = Math.max(0, state.weeklyStats[6] - 5);
+                        }
+                        await saveState();
+                        render();
+                    }
+                });
+            });
+
+            taskChecks.forEach(check => {
+                check.addEventListener('click', async () => {
+                    const taskId = parseInt(check.dataset.taskCheck);
+                    const task = state.tasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.completed = !task.completed;
+                        if (task.completed) {
+                            state.totalPoints += task.points;
+                            state.weeklyStats[6] = Math.min(100, state.weeklyStats[6] + 5);
+                        } else {
+                            state.totalPoints = Math.max(0, state.totalPoints - task.points);
+                            state.weeklyStats[6] = Math.max(0, state.weeklyStats[6] - 5);
+                        }
+                        await saveState();
+                        render();
+                    }
+                });
+            });
+
+            if (addTaskBtn && newTaskInput) {
+                const addTask = async () => {
+                    const title = newTaskInput.value.trim();
+                    if (title) {
+                        state.tasks.push({
+                            id: Date.now(),
+                            title,
+                            completed: false,
+                            points: 5,
+                            category: 'Общее',
+                            createdAt: new Date().toISOString()
+                        });
+                        await saveState();
+                        render();
+                    }
+                };
+                addTaskBtn.addEventListener('click', addTask);
+                newTaskInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') addTask();
+                });
+            }
+
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const taskId = parseInt(btn.dataset.delete);
+                    const task = state.tasks.find(t => t.id === taskId);
+                    if (task && task.completed) {
+                        state.totalPoints = Math.max(0, state.totalPoints - task.points);
+                    }
+                    state.tasks = state.tasks.filter(t => t.id !== taskId);
+                    await saveState();
+                    render();
+                });
+            });
+
+            if (goToTasksBtn) {
+                goToTasksBtn.addEventListener('click', () => {
+                    state.activeTab = 'tasks';
+                    render();
+                });
+            }
+
+            if (goToChallengesBtn) {
+                goToChallengesBtn.addEventListener('click', () => {
+                    state.activeTab = 'challenges';
+                    render();
+                });
+            }
+
+            if (toggleChallengeBtn) {
+                toggleChallengeBtn.addEventListener('click', async () => {
+                    const challenge = state.dailyChallenge;
+                    if (!challenge.completed) {
+                        state.challengeProgress = challenge.target;
+                        challenge.completed = true;
+                        state.totalPoints += 50;
+                        state.weeklyStats[6] = Math.min(100, state.weeklyStats[6] + 10);
+
+                        const categoryMap = {
+                            'Спорт': 'sport',
+                            'Здоровье': 'health',
+                            'Обучение': 'learning',
+                            'Осознанность': 'mindfulness',
+                            'Продуктивность': 'productivity',
+                            'Социальное': 'social'
+                        };
+                        const category = categoryMap[challenge.category];
+                        if (category) state.categoryStats[category]++;
+
+                        state.completedChallenges.push({
+                            ...challenge,
+                            completedDate: new Date().toISOString()
+                        });
+
+                        await saveState();
+                        render();
+                    }
+                });
+            }
+
+            starButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const amount = parseInt(btn.dataset.stars);
+                    sendStars(amount);
+                });
+            });
+
+            if (customStarsBtn) {
+                customStarsBtn.addEventListener('click', () => {
+                    const amount = prompt('Введите количество Stars:', '100');
+                    if (amount && !isNaN(amount) && parseInt(amount) > 0) {
+                        sendStars(parseInt(amount));
+                    }
+                });
+            }
+        }
+
+        function sendStars(amount) {
+            const botUsername = 'livi_app_bot';
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const deepLink = `https://t.me/${botUsername}?start=stars_${amount}`;
+                if (tg.openTelegramLink) {
+                    tg.openTelegramLink(deepLink);
+                } else if (tg.openLink) {
+                    tg.openLink(deepLink);
+                } else {
+                    window.location.href = deepLink;
+                }
+            } else {
+                if (tg.showPopup) {
+                    tg.showPopup({
+                        title: '⭐ Telegram Stars',
+                        message: 'Откройте приложение в Telegram для отправки Stars!',
+                        buttons: [{type: 'ok'}]
+                    });
+                } else {
+                    alert('Откройте приложение в Telegram!');
+                }
+            }
+        }
+
+        async function resetDailyHabits() {
+            const today = new Date().toDateString();
+            state.habits.forEach(habit => {
+                if (habit.lastCompletedDate !== today) {
+                    habit.completed = false;
+                }
+            });
+            await saveState();
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            if (!state.hasCompletedOnboarding) {
+                app.innerHTML = renderOnboarding();
+                attachOnboardingListeners();
+                return;
+            }
+            updateStreak();
+            app.innerHTML = renderMain();
+            attachMainListeners();
+        }
+
+        async function init() {
+            await loadState();
+            await resetDailyHabits();
+            getDailyChallenge();
+            render();
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('fade-out');
+                    setTimeout(() => loadingScreen.remove(), 500);
+                }
+            }, 1000);
+        }
+
         init();
     </script>
 </body>
 </html>
+
