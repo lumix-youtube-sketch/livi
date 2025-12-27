@@ -6,7 +6,7 @@
     <title>livi</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #1a1a1a; color: white; max-width: 428px; margin: 0 auto; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #1a1a1a; color: white; max-width: 428px; margin: 0 auto; overflow-x: hidden; -webkit-tap-highlight-color: transparent; padding-bottom: 80px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes gentleFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
@@ -45,17 +45,18 @@
         .goal-content { flex: 1; }
         .goal-title { font-weight: bold; margin-bottom: 4px; color: white; }
         .goal-desc { font-size: 14px; color: #666; }
-        .header { position: sticky; top: 0; z-index: 50; background-color: rgba(26, 26, 26, 0.95); backdrop-filter: blur(20px); border-bottom: 1px solid #2a2a2a; padding: 16px 20px; }
-        .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2a2a2a; }
         .header-title { font-size: 24px; font-weight: 600; }
         .header-stats { display: flex; gap: 12px; }
-        .stat-badge { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; transition: transform 0.15s; }
+        .stat-badge { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; transition: transform 0.15s; border: none; }
         .stat-badge:active { transform: scale(0.95); }
-        .tabs { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; }
-        .tabs::-webkit-scrollbar { display: none; }
-        .tab { padding: 8px 16px; font-size: 13px; font-weight: 500; color: #666; background-color: transparent; border-radius: 12px; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
-        .tab.active { color: white; background-color: rgba(139, 154, 156, 0.2); }
-        .content { padding: 24px 20px; padding-bottom: 100px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 428px; margin: 0 auto; background-color: rgba(15, 15, 15, 0.95); backdrop-filter: blur(20px); border-top: 1px solid #2a2a2a; display: flex; justify-content: space-around; padding: 8px 0 calc(8px + env(safe-area-inset-bottom)); z-index: 100; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; cursor: pointer; transition: all 0.2s; border: none; background: none; color: #666; }
+        .nav-item.active { color: #8B9A9C; }
+        .nav-item:active { transform: scale(0.95); }
+        .nav-icon { width: 24px; height: 24px; }
+        .nav-label { font-size: 10px; font-weight: 500; }
+        .content { padding: 24px 20px; }
         .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
         .stat-card { background-color: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 16px; padding: 20px; cursor: pointer; transition: transform 0.15s; }
         .stat-card:active { transform: scale(0.98); }
@@ -89,12 +90,6 @@
         .bar-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 120px; gap: 8px; position: relative; }
         .bar { flex: 1; background: linear-gradient(180deg, #8B9A9C 0%, #9CB3B5 100%); border-radius: 4px 4px 0 0; position: relative; transition: all 0.3s ease; }
         .bar-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #666; white-space: nowrap; }
-        .chart-bar-interactive:hover { opacity: 0.8; transform: scaleY(1.05); }
-        .chart-tooltip { position: absolute; background-color: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 8px; padding: 8px 12px; font-size: 12px; pointer-events: none; z-index: 10; opacity: 0; transition: opacity 0.2s; }
-        .chart-tooltip.show { opacity: 1; }
-        .donut-chart { position: relative; width: 200px; height: 200px; margin: 0 auto; }
-        .donut-segment { cursor: pointer; transition: opacity 0.3s; }
-        .donut-segment:hover { opacity: 0.8; }
         .challenge-card { border-radius: 16px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; }
         .challenge-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
         .challenge-title { font-size: 16px; font-weight: bold; }
@@ -137,7 +132,7 @@
             userGoals: { health: false, learning: false, productivity: false, mindfulness: false, sleep: false, social: false },
             userInfo: { name: '', wakeUpTime: '07:00', sleepTime: '23:00', mainGoal: '' },
             tasks: [], habits: [], streak: 0, totalPoints: 0, lastActiveDate: new Date().toDateString(),
-            dailyChallenge: null, challengeProgress: 0, weeklyStats: [75, 60, 85, 70, 90, 80, 65],
+            dailyChallenge: null, challengeProgress: 0, weeklyStats: [0, 0, 0, 0, 0, 0, 0],
             completedChallenges: [], categoryStats: { sport: 0, health: 0, learning: 0, mindfulness: 0, productivity: 0, social: 0 }
         });
 
@@ -194,26 +189,28 @@
 
         function createSvg(name, color = 'currentColor') {
             const icons = {
+                home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+                target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+                checkSquare: '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+                barChart: '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>',
+                star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+                flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+                check: '<polyline points="20 6 9 17 4 12"/>',
+                plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+                trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
                 arrowRight: '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
                 heart: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
                 book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
-                target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
                 brain: '<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>',
                 moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
                 coffee: '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>',
                 sunrise: '<path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/>',
-                check: '<polyline points="20 6 9 17 4 12"/>',
                 sparkles: '<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>',
-                flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
-                star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
                 clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
                 zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
                 award: '<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>',
                 trendingUp: '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
-                plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
-                trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
-                gift: '<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>',
-                trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>'
+                gift: '<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>'
             };
             return `<svg width="24" height="24" viewBox="0 0 24 24" style="color: ${color}">${icons[name]}</svg>`;
         }
@@ -275,70 +272,17 @@
                 activeHabits, habitRate: Math.round(habitRate), weekAvg: Math.round(weekAvg)
             };
         }
+
         function renderWeeklyChart(stats) {
             const days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
-            const maxValue = Math.max(...stats);
+            const maxValue = Math.max(...stats, 1);
             return `
-                <div class="chart-container interactive-chart">
+                <div class="chart-container">
                     <div class="chart-title">Продуктивность за неделю</div>
                     <div class="bar-chart">
                         ${stats.map((value, i) => `
-                            <div class="bar chart-bar-interactive" data-day="${days[i]}" data-value="${value}"
-                                 style="height: ${(value/maxValue)*100}px; background: linear-gradient(180deg, ${i === 6 ? colors.primary : '#8B9A9C'} 0%, ${i === 6 ? colors.accent1 : '#9CB3B5'} 100%);">
+                            <div class="bar" style="height: ${value === 0 ? 2 : (value/maxValue)*100}px; background: linear-gradient(180deg, ${i === 6 ? colors.primary : '#8B9A9C'} 0%, ${i === 6 ? colors.accent1 : '#9CB3B5'} 100%);">
                                 <div class="bar-label">${days[i]}</div>
-                            </div>
-                        `).join('')}
-                        <div class="chart-tooltip" id="chartTooltip"></div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderDonutChart() {
-            const categories = [
-                { name: 'Спорт', value: state.categoryStats.sport, color: colors.accent3 },
-                { name: 'Здоровье', value: state.categoryStats.health, color: colors.primary },
-                { name: 'Обучение', value: state.categoryStats.learning, color: colors.accent2 },
-                { name: 'Осознанность', value: state.categoryStats.mindfulness, color: colors.secondary },
-                { name: 'Продуктивность', value: state.categoryStats.productivity, color: colors.accent1 },
-                { name: 'Социальное', value: state.categoryStats.social, color: colors.warning }
-            ];
-            const total = categories.reduce((sum, cat) => sum + cat.value, 0) || 1;
-            let currentAngle = -90;
-
-            return `
-                <div class="chart-container">
-                    <div class="chart-title">Распределение по категориям</div>
-                    <div class="donut-chart">
-                        <svg width="200" height="200" viewBox="0 0 200 200">
-                            ${categories.map(cat => {
-                                const percentage = (cat.value / total) * 100;
-                                const angle = (percentage / 100) * 360;
-                                const startAngle = currentAngle;
-                                const endAngle = currentAngle + angle;
-                                const x1 = 100 + 80 * Math.cos((startAngle * Math.PI) / 180);
-                                const y1 = 100 + 80 * Math.sin((startAngle * Math.PI) / 180);
-                                const x2 = 100 + 80 * Math.cos((endAngle * Math.PI) / 180);
-                                const y2 = 100 + 80 * Math.sin((endAngle * Math.PI) / 180);
-                                const largeArc = angle > 180 ? 1 : 0;
-                                currentAngle += angle;
-                                return percentage > 0 ? `
-                                    <path class="donut-segment"
-                                          d="M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z"
-                                          fill="${cat.color}" opacity="0.8"
-                                          data-category="${cat.name}" data-value="${cat.value}" data-percentage="${percentage.toFixed(1)}"/>
-                                ` : '';
-                            }).join('')}
-                            <circle cx="100" cy="100" r="50" fill="#1a1a1a"/>
-                            <text x="100" y="95" text-anchor="middle" fill="white" font-size="24" font-weight="bold">${total}</text>
-                            <text x="100" y="110" text-anchor="middle" fill="#666" font-size="12">челленджей</text>
-                        </svg>
-                    </div>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 16px;">
-                        ${categories.map(cat => `
-                            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
-                                <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${cat.color};"></div>
-                                <span style="color: #999;">${cat.name}: ${cat.value}</span>
                             </div>
                         `).join('')}
                     </div>
@@ -356,42 +300,35 @@
                     ${isCompleted ? '<div style="position: absolute; top: 10px; right: 10px; font-size: 48px; opacity: 0.2;">✓</div>' : ''}
                     <div class="challenge-header">
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, ${colors.warning}40, ${colors.warning}20); display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, ${colors.warning}40, ${colors.warning}20); display: flex; align-items: center; justify-content: center; font-size: 32px;">
                                 ${challenge.icon}
                             </div>
                             <div>
-                                <div class="challenge-title" style="font-size: 20px;">${challenge.title}</div>
+                                <div class="challenge-title">${challenge.title}</div>
                                 <div style="font-size: 12px; color: ${colors.warning}; font-weight: bold; margin-top: 4px;">📁 ${challenge.category}</div>
                             </div>
                         </div>
-                        <div class="challenge-badge pulse" style="font-size: 16px;">+50 ⭐</div>
+                        <div class="challenge-badge pulse">+50 ⭐</div>
                     </div>
-                    <div class="challenge-description" style="font-size: 15px; line-height: 1.6;">${challenge.description}</div>
-                    <div class="challenge-progress" style="margin-bottom: 12px;">
+                    <div class="challenge-description">${challenge.description}</div>
+                    <div style="margin-bottom: 12px;">
                         <div class="progress-label">
-                            <span style="font-weight: 600; color: white;">Прогресс выполнения</span>
-                            <span style="font-size: 16px;"><strong style="color: ${progress >= 100 ? colors.accent3 : colors.primary};">${state.challengeProgress}</strong> / ${challenge.target} ${challenge.unit}</span>
+                            <span>Прогресс</span>
+                            <span><strong style="color: ${progress >= 100 ? colors.accent3 : colors.primary};">${state.challengeProgress}</strong> / ${challenge.target} ${challenge.unit}</span>
                         </div>
-                        <div class="progress-track" style="height: 12px;">
-                            <div class="progress-fill" style="width: ${progress}%; background: linear-gradient(90deg, ${colors.warning} 0%, ${progress >= 100 ? colors.accent3 : '#FFD700'} 100%);">
-                            </div>
-                            <div style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 10px; font-weight: bold; color: ${progress > 50 ? 'white' : '#666'};">${progress.toFixed(0)}%</div>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width: ${progress}%; background: linear-gradient(90deg, ${colors.warning} 0%, ${progress >= 100 ? colors.accent3 : '#FFD700'} 100%);"></div>
                         </div>
                     </div>
                     ${!isCompleted ? `
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
-                            <button class="btn btn-secondary" id="updateProgress" style="padding: 12px;">
-                                ${createSvg('plus', colors.primary)} <span>Обновить</span>
-                            </button>
-                            <button class="btn btn-primary" id="completeChallenge" ${progress < 100 ? 'disabled' : ''} style="padding: 12px;">
-                                ${createSvg('check', 'white')} <span>${progress >= 100 ? 'Завершить!' : 'Завершить'}</span>
-                            </button>
-                        </div>
+                        <button class="btn ${progress >= 100 ? 'btn-primary' : 'btn-secondary'}" id="toggleChallenge" style="padding: 12px;">
+                            ${createSvg('check', progress >= 100 ? 'white' : colors.primary)}
+                            <span>${progress >= 100 ? 'Завершить!' : 'Отметить выполненным'}</span>
+                        </button>
                     ` : `
-                        <div style="text-align: center; padding: 16px; background: linear-gradient(135deg, rgba(165, 189, 161, 0.3), rgba(165, 189, 161, 0.1)); border-radius: 12px; margin-top: 16px; border: 1px solid ${colors.accent3};">
-                            <div style="font-size: 24px; margin-bottom: 8px;">🎉</div>
-                            <strong style="color: ${colors.accent3}; font-size: 16px;">Челлендж выполнен!</strong>
-                            <p style="font-size: 12px; color: #999; margin-top: 4px;">Возвращайся завтра за новым</p>
+                        <div style="text-align: center; padding: 12px; background: linear-gradient(135deg, rgba(165, 189, 161, 0.3), rgba(165, 189, 161, 0.1)); border-radius: 12px; border: 1px solid ${colors.accent3};">
+                            <div style="font-size: 20px; margin-bottom: 4px;">🎉</div>
+                            <strong style="color: ${colors.accent3};">Челлендж выполнен!</strong>
                         </div>
                     `}
                 </div>
@@ -417,6 +354,7 @@
                 </div>
             `;
         }
+
         function renderOnboarding() {
             const steps = [
                 {
@@ -471,11 +409,11 @@
                     content: `
                         <div>
                             <div style="margin-bottom: 24px;">
-                                <label class="form-label">${createSvg('sunrise', colors.warning)} Время пробуждения</label>
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 14px; color: #999;">${createSvg('sunrise', colors.warning)} Время пробуждения</label>
                                 <input type="time" id="wakeUpTime" value="${state.userInfo.wakeUpTime}">
                             </div>
                             <div style="margin-bottom: 24px;">
-                                <label class="form-label">${createSvg('moon', colors.secondary)} Время сна</label>
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 14px; color: #999;">${createSvg('moon', colors.secondary)} Время сна</label>
                                 <input type="time" id="sleepTime" value="${state.userInfo.sleepTime}">
                             </div>
                             <button class="btn btn-primary" id="nextStep">Далее</button>
@@ -528,33 +466,34 @@
 
             return `
                 <div class="header">
-                    <div class="header-top">
-                        <div class="header-title">livi</div>
-                        <div class="header-stats">
-                            <button class="stat-badge" style="background-color: rgba(212, 175, 122, 0.2);" id="showRank">
-                                ${createSvg('flame', colors.warning)}
-                                <span>${state.streak}</span>
-                            </button>
-                            <button class="stat-badge" style="background-color: rgba(139, 154, 156, 0.2);">
-                                ${createSvg('star', colors.primary)}
-                                <span>${state.totalPoints}</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="tabs">
-                        ${['home', 'challenges', 'tasks', 'analysis', 'support'].map(tab => `
-                            <div class="tab ${state.activeTab === tab ? 'active' : ''}" data-tab="${tab}">
-                                ${tab === 'home' ? '🏠 Главная' :
-                                  tab === 'challenges' ? '🎯 Челленджи' :
-                                  tab === 'tasks' ? '✓ Задачи' :
-                                  tab === 'analysis' ? '📊 Анализ' :
-                                  '⭐ Поддержка'}
-                            </div>
-                        `).join('')}
+                    <div class="header-title">livi</div>
+                    <div class="header-stats">
+                        <button class="stat-badge" style="background-color: rgba(212, 175, 122, 0.2);" id="showRank">
+                            ${createSvg('flame', colors.warning)}
+                            <span>${state.streak}</span>
+                        </button>
+                        <button class="stat-badge" style="background-color: rgba(139, 154, 156, 0.2);">
+                            ${createSvg('star', colors.primary)}
+                            <span>${state.totalPoints}</span>
+                        </button>
                     </div>
                 </div>
                 <div class="content">
                     <div id="tabContent">${renderTabContent(completedTasks, currentRank, aiAnalysis)}</div>
+                </div>
+                <div class="bottom-nav">
+                    ${[
+                        { tab: 'home', icon: 'home', label: 'Главная' },
+                        { tab: 'challenges', icon: 'target', label: 'Челленджи' },
+                        { tab: 'tasks', icon: 'checkSquare', label: 'Задачи' },
+                        { tab: 'analysis', icon: 'barChart', label: 'Анализ' },
+                        { tab: 'support', icon: 'star', label: 'Поддержка' }
+                    ].map(nav => `
+                        <button class="nav-item ${state.activeTab === nav.tab ? 'active' : ''}" data-tab="${nav.tab}">
+                            <div class="nav-icon">${createSvg(nav.icon, state.activeTab === nav.tab ? colors.primary : '#666')}</div>
+                            <div class="nav-label">${nav.label}</div>
+                        </button>
+                    `).join('')}
                 </div>
                 ${state.showRankModal ? renderRankModal(currentRank) : ''}
             `;
@@ -612,6 +551,7 @@
                 </div>
             `;
         }
+
         function renderTabContent(completedTasks, currentRank, aiAnalysis) {
             if (state.activeTab === 'home') {
                 const liviState = getLiviState(aiAnalysis.avgEnergy, aiAnalysis.completionRate, aiAnalysis.activeHabits);
@@ -636,7 +576,7 @@
                             <div class="stat-label">Энергия</div>
                         </div>
                         <div class="stat-card card-hover" id="goToChallenges">
-                            ${createSvg('trophy', colors.warning)}
+                            ${createSvg('award', colors.warning)}
                             <div class="stat-value">${state.completedChallenges.length}</div>
                             <div class="stat-label">Челленджей</div>
                         </div>
@@ -644,9 +584,9 @@
                     <div class="section">
                         ${renderWeeklyChart(state.weeklyStats)}
                     </div>
-                    <div class="section">
-                        <h2 class="section-title">Привычки</h2>
-                        ${state.habits.length > 0 ? `
+                    ${state.habits.length > 0 ? `
+                        <div class="section">
+                            <h2 class="section-title">Привычки</h2>
                             <div class="habit-grid">
                                 ${state.habits.map(habit => `
                                     <div class="habit-card card-hover" data-habit="${habit.id}" style="background-color: ${habit.completed ? habit.color + '15' : '#0a0a0a'}; border-color: ${habit.completed ? habit.color + '40' : '#2a2a2a'};">
@@ -661,16 +601,11 @@
                                     </div>
                                 `).join('')}
                             </div>
-                        ` : `
-                            <div class="empty-state">
-                                <div class="empty-state-icon">🌱</div>
-                                <p>Добавьте первую привычку!</p>
-                            </div>
-                        `}
-                    </div>
-                    <div class="section">
-                        <h2 class="section-title">Сегодня</h2>
-                        ${state.tasks.length > 0 ? `
+                        </div>
+                    ` : ''}
+                    ${state.tasks.length > 0 ? `
+                        <div class="section">
+                            <h2 class="section-title">Сегодня</h2>
                             ${state.tasks.slice(0, 4).map(task => `
                                 <div class="task-item">
                                     <div class="checkbox ${task.completed ? 'checked' : ''}" data-task-check="${task.id}">
@@ -682,17 +617,9 @@
                                     <div class="task-points">+${task.points}</div>
                                 </div>
                             `).join('')}
-                            ${state.tasks.length > 4 ? `
-                                <button class="btn btn-secondary" id="goToTasks" style="margin-top: 16px;">Все задачи →</button>
-                            ` : ''}
-                        ` : `
-                            <div class="empty-state">
-                                <div class="empty-state-icon">✨</div>
-                                <p>Начните день с первой задачи!</p>
-                                <button class="btn btn-primary" id="goToTasks" style="margin-top: 16px;">Добавить задачу</button>
-                            </div>
-                        `}
-                    </div>
+                            ${state.tasks.length > 4 ? `<button class="btn btn-secondary" id="goToTasks" style="margin-top: 16px;">Все задачи →</button>` : ''}
+                        </div>
+                    ` : ''}
                 `;
             } else if (state.activeTab === 'challenges') {
                 return `
@@ -727,34 +654,14 @@
                                 `).join('')}
                             </div>
                         </div>
-                    ` : `
-                        <div class="section">
-                            <div class="empty-state">
-                                <div class="empty-state-icon">📜</div>
-                                <p style="color: #999;">Здесь появится история<br>выполненных челленджей</p>
-                            </div>
-                        </div>
-                    `}
-                    <div class="section">
-                        ${renderDonutChart()}
-                    </div>
-                    <div class="section" style="background: linear-gradient(135deg, rgba(139, 154, 156, 0.1), transparent); border: 1px solid ${colors.primary}40;">
-                        <div style="text-align: center;">
-                            <div style="font-size: 48px; margin-bottom: 12px;">💡</div>
-                            <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">Совет дня</h3>
-                            <p style="font-size: 14px; color: #999; line-height: 1.6;">
-                                Выполнение челленджей помогает формировать полезные привычки.
-                                Даже небольшой прогресс каждый день приводит к значительным результатам!
-                            </p>
-                        </div>
-                    </div>
+                    ` : ''}
                 `;
             } else if (state.activeTab === 'tasks') {
                 return `
                     <div class="section">
                         <h2 class="section-title">Новая задача</h2>
                         <div style="display: flex; gap: 12px;">
-                            <input type="text" id="newTaskInput" placeholder="Что нужно сделать?" value="${state.newTask}" style="flex: 1; padding: 12px 16px;">
+                            <input type="text" id="newTaskInput" placeholder="Что нужно сделать?" style="flex: 1; padding: 12px 16px;">
                             <button class="btn btn-primary" id="addTask" style="width: auto; padding: 12px 16px;">
                                 ${createSvg('plus', 'white')}
                             </button>
@@ -840,18 +747,12 @@
                             `).join('')}
                         </div>
                     </div>
-                    <div class="section" style="background-color: rgba(139, 154, 156, 0.1); text-align: center;">
-                        <p style="font-size: 13px; color: #999; line-height: 1.6;">
-                            🙏 Огромное спасибо всем, кто поддерживает проект!<br>
-                            Ваша поддержка помогает делать livi лучше каждый день
-                        </p>
-                    </div>
                 `;
             } else if (state.activeTab === 'analysis') {
                 return `
                     <div class="section">
                         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
-                            ${createSvg('brain', colors.primary)}
+                            ${createSvg('barChart', colors.primary)}
                             <div>
                                 <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 4px;">Умный Анализ</h2>
                                 <p style="font-size: 14px; color: #999;">Персональные инсайты и рекомендации</p>
@@ -985,12 +886,9 @@
             const deleteButtons = document.querySelectorAll('[data-delete]');
             const goToTasksBtn = document.getElementById('goToTasks');
             const goToChallengesBtn = document.getElementById('goToChallenges');
-            const completeChallengeBtn = document.getElementById('completeChallenge');
-            const updateProgressBtn = document.getElementById('updateProgress');
+            const toggleChallengeBtn = document.getElementById('toggleChallenge');
             const starButtons = document.querySelectorAll('[data-stars]');
             const customStarsBtn = document.getElementById('customStars');
-            const chartBars = document.querySelectorAll('.chart-bar-interactive');
-            const donutSegments = document.querySelectorAll('.donut-segment');
 
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -1026,10 +924,12 @@
                             habit.lastCompletedDate = today;
                             habit.streak++;
                             state.totalPoints += 10;
+                            state.weeklyStats[6] = Math.min(100, state.weeklyStats[6] + 5);
                         } else {
                             habit.completed = false;
                             if (habit.streak > 0) habit.streak--;
                             state.totalPoints = Math.max(0, state.totalPoints - 10);
+                            state.weeklyStats[6] = Math.max(0, state.weeklyStats[6] - 5);
                         }
                         await saveState();
                         render();
@@ -1068,7 +968,6 @@
                             category: 'Общее',
                             createdAt: new Date().toISOString()
                         });
-                        state.newTask = '';
                         await saveState();
                         render();
                     }
@@ -1107,22 +1006,11 @@
                 });
             }
 
-            if (updateProgressBtn) {
-                updateProgressBtn.addEventListener('click', async () => {
+            if (toggleChallengeBtn) {
+                toggleChallengeBtn.addEventListener('click', async () => {
                     const challenge = state.dailyChallenge;
-                    const newProgress = prompt(`Введите прогресс (максимум ${challenge.target} ${challenge.unit}):`, state.challengeProgress);
-                    if (newProgress !== null) {
-                        state.challengeProgress = Math.min(parseInt(newProgress) || 0, challenge.target);
-                        await saveState();
-                        render();
-                    }
-                });
-            }
-
-            if (completeChallengeBtn) {
-                completeChallengeBtn.addEventListener('click', async () => {
-                    const challenge = state.dailyChallenge;
-                    if (state.challengeProgress >= challenge.target && !challenge.completed) {
+                    if (!challenge.completed) {
+                        state.challengeProgress = challenge.target;
                         challenge.completed = true;
                         state.totalPoints += 50;
                         state.weeklyStats[6] = Math.min(100, state.weeklyStats[6] + 10);
@@ -1145,16 +1033,6 @@
 
                         await saveState();
                         render();
-
-                        setTimeout(() => {
-                            if (tg.showPopup) {
-                                tg.showPopup({
-                                    title: '🎉 Поздравляем!',
-                                    message: 'Челлендж выполнен! +50 очков',
-                                    buttons: [{type: 'ok'}]
-                                });
-                            }
-                        }, 100);
                     }
                 });
             }
@@ -1174,43 +1052,10 @@
                     }
                 });
             }
-
-            chartBars.forEach(bar => {
-                bar.addEventListener('mouseenter', (e) => {
-                    const tooltip = document.getElementById('chartTooltip');
-                    if (tooltip) {
-                        const day = bar.dataset.day;
-                        const value = bar.dataset.value;
-                        tooltip.textContent = `${day}: ${value}%`;
-                        tooltip.classList.add('show');
-                        const rect = bar.getBoundingClientRect();
-                        tooltip.style.left = `${rect.left + rect.width / 2 - 30}px`;
-                        tooltip.style.top = `${rect.top - 35}px`;
-                    }
-                });
-
-                bar.addEventListener('mouseleave', () => {
-                    const tooltip = document.getElementById('chartTooltip');
-                    if (tooltip) tooltip.classList.remove('show');
-                });
-            });
-
-            donutSegments.forEach(segment => {
-                segment.addEventListener('click', () => {
-                    const category = segment.dataset.category;
-                    const value = segment.dataset.value;
-                    const percentage = segment.dataset.percentage;
-                    if (tg.showAlert) {
-                        tg.showAlert(`${category}: ${value} челленджей (${percentage}%)`);
-                    } else {
-                        alert(`${category}: ${value} челленджей (${percentage}%)`);
-                    }
-                });
-            });
         }
 
         function sendStars(amount) {
-            const botUsername = 'livi_app_bot'; // ← ЗАМЕНИТЕ НА ВАШ USERNAME (без @)
+            const botUsername = 'livi_app_bot';
             if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
                 const deepLink = `https://t.me/${botUsername}?start=stars_${amount}`;
                 if (tg.openTelegramLink) {
@@ -1242,7 +1087,6 @@
             });
             await saveState();
         }
-
 
         function render() {
             const app = document.getElementById('app');
