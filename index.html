@@ -1210,19 +1210,26 @@
         }
 
         function sendStars(amount) {
-            const botUsername = '@livi_app_bot'; // ЗАМЕНИТЕ!
-            
-            if (tg.showConfirm) {
-                tg.showConfirm(
-                    `Поддержать проект на ${amount} Stars?`,
-                    (confirmed) => {
-                        if (confirmed) {
-                            tg.openTelegramLink(`https://t.me/${botUsername}?start=pay_${amount}`);
-                        }
-                    }
-                );
+            const botUsername = 'livi_app_bot'; // ← ЗАМЕНИТЕ НА ВАШ USERNAME (без @)
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const deepLink = `https://t.me/${botUsername}?start=stars_${amount}`;
+                if (tg.openTelegramLink) {
+                    tg.openTelegramLink(deepLink);
+                } else if (tg.openLink) {
+                    tg.openLink(deepLink);
+                } else {
+                    window.location.href = deepLink;
+                }
             } else {
-                tg.openTelegramLink(`https://t.me/${botUsername}?start=pay_${amount}`);
+                if (tg.showPopup) {
+                    tg.showPopup({
+                        title: '⭐ Telegram Stars',
+                        message: 'Откройте приложение в Telegram для отправки Stars!',
+                        buttons: [{type: 'ok'}]
+                    });
+                } else {
+                    alert('Откройте приложение в Telegram!');
+                }
             }
         }
 
@@ -1235,6 +1242,7 @@
             });
             await saveState();
         }
+
 
         function render() {
             const app = document.getElementById('app');
