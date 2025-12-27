@@ -64,12 +64,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .mouth{position:absolute;bottom:35px;left:50%;transform:translateX(-50%);width:24px;height:12px;border-bottom:3px solid white;border-radius:0 0 15px 15px}
 
 /* ITEMS CSS DRAWING */
-/* 1. Cap: Detailed stitching, fabric texture */
 .item-cap {position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:90px;height:35px;background:linear-gradient(to bottom, #D4AF7A, #C09555);border-radius:20px 20px 0 0;z-index:20;box-shadow:inset 0 2px 5px rgba(255,255,255,0.2)}
 .item-cap::before {content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:12px;height:6px;background:#C09555;border-radius:50%}
 .item-cap::after {content:'';position:absolute;bottom:0;right:-15px;width:40px;height:10px;background:#b08545;border-radius:0 50px 50px 0;transform:rotate(5deg)}
 
-/* 2. Crown: Gold gradient, gems */
 .item-crown {position:absolute;top:-45px;left:50%;transform:translateX(-50%);width:70px;height:50px;z-index:20;
     background: linear-gradient(to bottom, #FFD700, #DAA520);
     clip-path: polygon(0% 100%, 20% 40%, 40% 100%, 60% 20%, 80% 100%, 100% 40%, 100% 100%);
@@ -77,36 +75,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 }
 .item-crown::after {content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:radial-gradient(circle, #ff0000, #800000);border-radius:50%;box-shadow:20px 0 0 #800000, -20px 0 0 #800000}
 
-/* 3. Glasses: Gradient lens, reflection */
 .item-glasses {position:absolute;top:55px;left:50%;transform:translateX(-50%);width:80px;height:24px;z-index:30;display:flex;justify-content:space-between}
 .g-lens {width:36px;height:24px;background:rgba(0,0,0,0.85);border-radius:6px;border:2px solid #555;position:relative;overflow:hidden}
 .g-lens::after {content:'';position:absolute;top:0;left:0;width:150%;height:40%;background:rgba(255,255,255,0.15);transform:rotate(25deg) translateY(-5px)}
 .g-bridge {position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:3px;background:#555}
 
-/* 4. Scarf: Striped pattern */
 .item-scarf {position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);width:100px;height:35px;z-index:25;
     background: repeating-linear-gradient(45deg, #D45D79, #D45D79 10px, #C04560 10px, #C04560 20px);
     border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.3);
 }
 
-/* 5. Monocle: Gold rim, chain */
 .item-monocle {position:absolute;top:55px;right:38px;width:28px;height:28px;border:2px solid #FFD700;border-radius:50%;background:rgba(255,255,255,0.1);z-index:30}
 .item-monocle::before {content:'';position:absolute;bottom:-30px;right:-10px;width:30px;height:30px;border-right:1px solid #FFD700;border-radius:50%}
+
+.item-bowtie {position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:40px;height:20px;z-index:25;background:#D45D79;clip-path:polygon(0 50%, 40% 0, 50% 50%, 40% 100%, 0 50%, 50% 50%, 60% 0, 100% 50%, 60% 100%, 50% 50%)}
 
 /* --- CHESTS (VISUALS) --- */
 .chest-wrapper {display:grid;gap:15px;margin-bottom:30px}
 .chest-card {position:relative;border-radius:16px;padding:20px;overflow:hidden;cursor:pointer;transition:transform .2s}
 .chest-card:active {transform:scale(0.98)}
 
-/* Common: Wood & Iron */
 .chest-common {background:linear-gradient(135deg, #5D4037, #3E2723);border:2px solid #8D6E63}
 .chest-common::before {content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(0,0,0,0.2) 20px);opacity:0.3}
 
-/* Rare: Tech Case */
 .chest-rare {background:linear-gradient(135deg, #1e2424, #0f1212);border:2px solid var(--gold);box-shadow:inset 0 0 20px rgba(212,175,122,0.1)}
 .chest-rare::after {content:'';position:absolute;top:0;right:0;width:60px;height:60px;background:linear-gradient(135deg, transparent 50%, var(--gold) 50%);opacity:0.2}
 
-/* Legendary: Magic Cube */
 .chest-legendary {background:linear-gradient(135deg, #2b0a16, #1a050d);border:2px solid var(--epic);animation:pulse-glow 3s infinite}
 .chest-legendary::before {content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, rgba(212,93,121,0.2), transparent);z-index:1}
 
@@ -128,21 +122,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:white}
 .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888}
 
-/* Fixed Add Button - Improved Position */
+/* Fixed Add Button */
 .add-btn {
     position: fixed;
-    bottom: 90px; /* Выше навбара */
+    bottom: 90px;
     right: 20px;
-    width: 60px; height: 60px;
+    width: 60px;
+    height: 60px;
     border-radius: 30px;
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
     color: white;
     font-size: 32px;
     border: none;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    z-index: 90; /* Ниже модалок, выше контента */
-    display: flex; align-items: center; justify-content: center;
-    transform: translateZ(0); /* Force hardware accel */
+    box-shadow: 0 4px 20px rgba(139,154,156,0.5);
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.add-btn:active {
+    transform: scale(0.95);
 }
 
 /* Nav */
@@ -154,10 +155,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .chart-container {width:100%;height:180px;position:relative;margin-top:20px}
 .chart-tooltip {position:absolute;top:0;right:0;background:#333;padding:4px 8px;border-radius:4px;font-size:10px;display:none}
 .period-switch {display:flex;background:#111;padding:4px;border-radius:12px;margin-bottom:15px}
-.p-btn {flex:1;padding:8px;text-align:center;font-size:12px;border-radius:8px;color:#666;cursor:pointer}
+.p-btn {flex:1;padding:8px;text-align:center;font-size:12px;border-radius:8px;color:#666;cursor:pointer;transition:all 0.2s}
 .p-btn.active {background:#333;color:white;font-weight:bold}
 .heatmap {display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
 .heat-cell {width:10px;height:10px;border-radius:2px;background:#333}
+
+.progress-bar {width:100%;height:8px;background:#222;border-radius:4px;overflow:hidden;margin-top:10px}
+.progress-fill {height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width 0.3s}
 
 svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
@@ -171,7 +175,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 <div id="rouletteModal" class="hidden roulette-modal">
     <h2 style="margin-bottom:10px; color:#fff; font-weight:800; letter-spacing:1px">ОТКРЫТИЕ...</h2>
     <div class="roulette-window">
-        <div class="roulette-marker"></div>
+        <div class="r-marker"></div>
         <div class="roulette-strip" id="rouletteStrip"></div>
     </div>
     <div id="winMessage" style="opacity:0; text-align:center; transition:opacity .5s">
@@ -188,6 +192,14 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 const tg = window.Telegram?.WebApp;
 if(tg) { tg.expand(); tg.ready(); tg.setHeaderColor('#141414'); tg.setBackgroundColor('#141414'); }
 
+// Cloud Storage API для синхронизации
+const CloudStorage = tg?.CloudStorage || {
+    setItem: (key, value) => Promise.resolve(),
+    getItem: (key) => Promise.resolve(''),
+    getItems: (keys) => Promise.resolve({}),
+    removeItem: (key) => Promise.resolve()
+};
+
 // --- ICONS & ASSETS ---
 const icons = {
     home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -196,7 +208,9 @@ const icons = {
     shop: '<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>',
     chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
     star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
-    trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>'
+    trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+    trendUp: '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
+    clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'
 };
 const getIcon = (n) => `<svg>${icons[n]}</svg>`;
 
@@ -212,16 +226,12 @@ const ITEMS = [
 ];
 
 // --- STATE MANAGEMENT ---
-// Добавлена полноценная история statsHistory для аналитики
 const defaultState = {
     activeTab: 'home',
     streak: 1,
-    totalPoints: 200, 
+    totalPoints: 200,
     lastVisitDate: new Date().toISOString().split('T')[0],
-    
-    // Stats History: Массив объектов {date: '2023-10-01', points: 50, tasks: 2}
-    statsHistory: [], 
-    
+    statsHistory: [],
     tasks: [
         { id: 1, title: 'Забрать награду', completed: false, type: 'habit', points: 10 },
         { id: 2, title: 'Запустить Livi', completed: true, type: 'task', points: 5 }
@@ -232,74 +242,140 @@ const defaultState = {
         date: new Date().toISOString().split('T')[0],
         title: 'Сделать 20 шагов', target: 20, completed: false, reward: 50
     },
-    analysisPeriod: 'week' // 'week', 'month', 'year'
+    analysisPeriod: 'week'
 };
 
 let state = { ...defaultState };
+let isSyncing = false;
+
+// --- CLOUD SYNC FUNCTIONS ---
+async function saveToCloud() {
+    if (isSyncing) return;
+    isSyncing = true;
+    try {
+        await CloudStorage.setItem('livi_state', JSON.stringify(state));
+        console.log('✅ Synced to cloud');
+    } catch (e) {
+        console.error('Cloud sync error:', e);
+    }
+    isSyncing = false;
+}
+
+async function loadFromCloud() {
+    try {
+        const cloudData = await CloudStorage.getItem('livi_state');
+        if (cloudData) {
+            const parsed = JSON.parse(cloudData);
+            state = { ...defaultState, ...parsed };
+            console.log('✅ Loaded from cloud');
+            return true;
+        }
+    } catch (e) {
+        console.error('Cloud load error:', e);
+    }
+    return false;
+}
 
 // Helper для записи истории
-function updateHistory(pointsDelta, taskDelta = 0) {
+function updateHistory(pointsDelta = 0, completedTask = false) {
     const today = new Date().toISOString().split('T')[0];
     let entry = state.statsHistory.find(e => e.date === today);
+
     if (!entry) {
-        entry = { date: today, points: 0, tasks: 0 };
+        entry = { date: today, points: 0, completedTasks: 0 };
         state.statsHistory.push(entry);
     }
+
     entry.points += pointsDelta;
-    entry.tasks += taskDelta;
+    if (completedTask) entry.completedTasks += 1;
+
+    // ограничиваем историю (≈1 год)
+    state.statsHistory = state.statsHistory.slice(-400);
+
     saveState();
 }
 
+
 function saveState() {
-    try { localStorage.setItem('livi_v4_pro', JSON.stringify(state)); } catch (e) {}
+    try {
+        localStorage.setItem('livi_v4_pro', JSON.stringify(state));
+        saveToCloud(); // Синхронизация с облаком
+    } catch (e) {}
 }
 
-function loadState() {
-    try {
-        const saved = localStorage.getItem('livi_v4_pro');
-        if (saved) {
-            state = { ...defaultState, ...JSON.parse(saved) };
-            
-            // New Day Logic
-            const today = new Date().toISOString().split('T')[0];
-            if (state.lastVisitDate !== today) {
-                state.streak += 1;
-                state.lastVisitDate = today;
-                state.dailyChallenge = {
-                    date: today, title: 'Новая цель!', target: 15, completed: false, reward: 50
-                };
-                state.tasks.forEach(t => { if(t.type === 'habit') t.completed = false; });
-                saveState();
+function hadActivityYesterday() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const y = d.toISOString().split('T')[0];
+    const entry = state.statsHistory.find(e => e.date === y);
+    return entry && (entry.points > 0 || entry.completedTasks > 0);
+}
+
+
+async function loadState() {
+    const today = new Date().toISOString().split('T')[0];
+
+    // Сначала пробуем загрузить из облака
+    const cloudLoaded = await loadFromCloud();
+
+    if (!cloudLoaded) {
+        try {
+            const saved = localStorage.getItem('livi_v4_pro');
+            if (saved) {
+                state = { ...defaultState, ...JSON.parse(saved) };
             }
-            // Ensure today exists in history
-            if(!state.statsHistory.find(e => e.date === today)) {
-                state.statsHistory.push({ date: today, points: 0, tasks: 0 });
-            }
-        } else {
-            // First Launch Init
-            const today = new Date().toISOString().split('T')[0];
-            state.statsHistory.push({ date: today, points: 0, tasks: 0 });
-        }
-    } catch (e) {}
+        } catch (e) {}
+    }
+
+    // New Day Logic
+    if (state.lastVisitDate !== today) {
+        state.streak = hadActivityYesterday() ? state.streak + 1 : 1;
+        state.lastVisitDate = today;
+
+        state.dailyChallenge = {
+            date: today,
+            title: 'Новая цель!',
+            target: 15,
+            completed: false,
+            reward: 50
+        };
+
+        state.tasks.forEach(t => {
+            if (t.type === 'habit') t.completed = false;
+        });
+
+        saveState();
+    }
+
+    if (!state.statsHistory.find(e => e.date === today)) {
+        state.statsHistory.push({ date: today, points: 0, completedTasks: 0 });
+    }
 }
 
 // --- ACTIONS ---
 const actions = {
     toggleTask: (id) => {
-        const task = state.tasks.find(t => t.id === id);
-        if (task) {
-            task.completed = !task.completed;
-            const multiplier = task.completed ? 1 : -1;
-            state.totalPoints += (task.points * multiplier);
-            updateHistory(task.points * multiplier, 1 * multiplier);
-            if(task.completed) tg?.HapticFeedback?.notificationOccurred('success');
-            saveState(); render();
-        }
+    const task = state.tasks.find(t => t.id === id);
+    if (!task) return;
+
+    if (!task.completed) {
+        task.completed = true;
+        state.totalPoints += task.points;
+        updateHistory(task.points, true);
+        tg?.HapticFeedback?.notificationOccurred('success');
+    } else {
+        task.completed = false;
+        state.totalPoints -= task.points;
+        updateHistory(-task.points, false); // задачи НЕ уменьшаем
+    }
+
+    saveState();
+    render();
     },
     addTask: () => {
         const title = prompt("Что нужно сделать?");
-        if (title) {
-            state.tasks.push({ id: Date.now(), title, completed: false, type: 'task', points: 15 });
+        if (title && title.trim()) {
+            state.tasks.push({ id: Date.now(), title: title.trim(), completed: false, type: 'task', points: 15 });
             saveState(); render();
         }
     },
@@ -321,13 +397,22 @@ const actions = {
     equip: (id) => {
         const item = ITEMS.find(i => i.id === id);
         if(!item) return;
-        state.equipped[item.type] = state.equipped[item.type] === id ? null : id;
-        saveState(); render();
+
+        // Если предмет уже надет - снимаем
+        if (state.equipped[item.type] === id) {
+            state.equipped[item.type] = null;
+        } else {
+            // Иначе надеваем (автоматически заменяя старый в этом слоте)
+            state.equipped[item.type] = id;
+        }
+
+        saveState();
+        render();
     },
     openChest: (type, cost) => {
         if (state.totalPoints < cost) return alert("Не хватает очков!");
         state.totalPoints -= cost;
-        updateHistory(0); // просто сохраняем очки
+        updateHistory(-cost);
         startRoulette(type);
     },
     setPeriod: (p) => {
@@ -345,24 +430,21 @@ function startRoulette(type) {
     const modal = document.getElementById('rouletteModal');
     const strip = document.getElementById('rouletteStrip');
     const winMsg = document.getElementById('winMessage');
-    
+
     modal.classList.remove('hidden');
     winMsg.style.opacity = '0';
     strip.innerHTML = '';
     strip.style.transition = 'none';
     strip.style.transform = 'translateX(0)';
 
-    // Logic
     let pool = type === 'common' ? ITEMS.filter(i=>i.rarity!=='legendary') : ITEMS;
-    // Simple weight logic
     let winner = pool[Math.floor(Math.random() * pool.length)];
     if(type === 'legendary' && Math.random() > 0.5) winner = ITEMS.find(i => i.rarity === 'legendary') || winner;
 
-    // Build Strip (Longer for suspense)
-    const count = 60; 
+    const count = 60;
     const winIdx = 50;
-    const itemW = 128; // 120 + 8 margin
-    
+    const itemW = 128;
+
     for(let i=0; i<count; i++) {
         const item = i === winIdx ? winner : pool[Math.floor(Math.random()*pool.length)];
         const el = document.createElement('div');
@@ -372,19 +454,22 @@ function startRoulette(type) {
     }
 
     setTimeout(() => {
-        const offset = (window.innerWidth/2) - (120/2);
+        const windowEl = document.querySelector('.roulette-window');
+        const offset = (windowEl.offsetWidth / 2) - (itemW / 2);
         const pos = -(winIdx * itemW) + offset;
-        strip.style.transition = 'transform 6s cubic-bezier(0.1, 0.9, 0.2, 1)'; // 6 sec spin
+        strip.style.transition = 'transform 6s cubic-bezier(0.1, 0.9, 0.2, 1)';
         strip.style.transform = `translateX(${pos}px)`;
         tg?.HapticFeedback?.selectionChanged();
-        
+
         setTimeout(() => {
             tg?.HapticFeedback?.notificationOccurred('success');
             document.getElementById('winItemName').innerText = winner.name;
             document.getElementById('winItemName').style.color = winner.rarity === 'legendary' ? '#D45D79' : '#fff';
             winMsg.style.opacity = '1';
-            if(!state.inventory.includes(winner.id)) state.inventory.push(winner.id);
-            saveState();
+            if(!state.inventory.includes(winner.id)) {
+                state.inventory.push(winner.id);
+                saveState();
+            }
         }, 6000);
     }, 100);
 }
@@ -399,7 +484,7 @@ function getChartData(period) {
     const days = period === 'week' ? 7 : period === 'month' ? 30 : 365;
     const now = new Date();
     const data = [];
-    
+
     for (let i = days - 1; i >= 0; i--) {
         const d = new Date(now);
         d.setDate(d.getDate() - i);
@@ -408,7 +493,7 @@ function getChartData(period) {
         data.push({
             date: dateStr,
             val: entry ? entry.points : 0,
-            tasks: entry ? entry.tasks : 0
+            tasks: entry ? entry.completedTasks : 0
         });
     }
     return data;
@@ -416,11 +501,11 @@ function getChartData(period) {
 
 function renderChart(data) {
     if (data.length === 0) return '<div style="text-align:center;padding:40px;color:#555">Нет данных</div>';
-    
+
     const w = 100; const h = 50;
     const max = Math.max(...data.map(d => d.val), 10);
     const step = w / (data.length - 1 || 1);
-    
+
     const points = data.map((d, i) => {
         const x = i * step;
         const y = h - ((d.val / max) * h);
@@ -443,11 +528,37 @@ function renderChart(data) {
     </svg>`;
 }
 
+function renderTasksChart(data) {
+    const w = 100; const h = 40;
+    const max = Math.max(...data.map(d => d.tasks), 1);
+    const barWidth = w / data.length;
+
+    const bars = data.map((d, i) => {
+        const barH = (d.tasks / max) * h;
+        const x = i * barWidth;
+        const y = h - barH;
+        return `<rect x="${x}" y="${y}" width="${barWidth - 1}" height="${barH}" fill="var(--accent)" opacity="0.8" rx="1"/>`;
+    }).join('');
+
+    return `
+    <svg viewBox="0 0 100 40" style="width:100%;height:100%">
+        ${bars}
+    </svg>`;
+}
+
+function renderStreakCalendar(data) {
+    return data.slice(-28).map(d => {
+        const op = Math.min(d.val / 50, 1);
+        return `<div class="heat-cell" style="background:rgba(139,154,156,${op || 0.1})" title="${d.date}: ${d.val}pts"></div>`;
+    }).join('');
+}
+
 function getAIAdvice(data) {
     const total = data.reduce((a,b) => a + b.val, 0);
-    const avg = Math.round(total / data.length);
+    const active = data.filter(d => d.val > 0);
+    const avg = active.length ? Math.round(total / active.length) : 0;
     const last = data[data.length-1].val;
-    
+
     if (total === 0) return "Данных пока мало. Выполни пару задач, чтобы я мог построить стратегию! 🤖";
     if (last > avg * 1.5) return "Феноменально! Сегодня ты превзошел средние показатели. Главное не выгореть, сделай перерыв. 🚀";
     if (last < avg * 0.5) return "Активность ниже обычного. Может, стоит начать с маленькой задачи на 5 минут? 👀";
@@ -459,8 +570,7 @@ function getAIAdvice(data) {
 function renderHome() {
     const done = state.tasks.filter(t=>t.completed).length;
     const all = state.tasks.length;
-    
-    // Аксессуары для Livi
+
     const h = ITEMS.find(i=>i.id===state.equipped.head);
     const f = ITEMS.find(i=>i.id===state.equipped.face);
     const b = ITEMS.find(i=>i.id===state.equipped.body);
@@ -477,7 +587,7 @@ function renderHome() {
                     <div class="livi-face">
                         <div class="eye eye-l"></div>
                         <div class="eye eye-r"></div>
-                        ${f ? `<div class="${f.css}"></div>` : ''}
+                        ${f ? `<div class="${f.css}"><div class="g-lens"></div><div class="g-lens"></div><div class="g-bridge"></div></div>` : ''}
                         <div class="mouth"></div>
                     </div>
                 </div>
@@ -496,7 +606,7 @@ function renderHome() {
                 </div>
             </div>
 
-            <div class="section" style="margin-top:15px; border-color:var(--gold)" onclick="actions.setPeriod('week');state.activeTab='analysis';render()">
+            <div class="section" style="margin-top:15px; border-color:var(--gold)" onclick="actions.completeChallenge()">
                  <div style="display:flex;justify-content:space-between;align-items:center">
                     <div>
                         <div style="font-weight:bold;margin-bottom:4px">Цель дня</div>
@@ -517,20 +627,23 @@ function renderAnalysis() {
     const p = state.analysisPeriod;
     const data = getChartData(p);
     const totalPts = data.reduce((a,b)=>a+b.val,0);
+    const totalTasks = data.reduce((a,b)=>a+b.tasks,0);
+    const activeDays = data.filter(d => d.val > 0);
+    const avgPts = activeDays.length
+        ? Math.round(totalPts / activeDays.length)
+        : 0;
+
+    const completionRate = state.tasks.length > 0 ? Math.round((state.tasks.filter(t=>t.completed).length / state.tasks.length) * 100) : 0;
     const advice = getAIAdvice(data);
-    
-    // Heatmap dots
-    const heatMap = data.map(d => {
-        const op = Math.min(d.val / 50, 1); // 50 pts = full bright
-        return `<div class="heat-cell" style="background:rgba(139,154,156,${op || 0.1})"></div>`;
-    }).join('');
+
+    const heatMap = renderStreakCalendar(data);
 
     return `
     <div class="slide-up">
         ${renderHeader()}
         <div class="content">
             <h2 style="margin-bottom:15px;font-weight:800">АНАЛИТИКА</h2>
-            
+
             <div class="period-switch">
                 <div class="p-btn ${p==='week'?'active':''}" onclick="actions.setPeriod('week')">Неделя</div>
                 <div class="p-btn ${p==='month'?'active':''}" onclick="actions.setPeriod('month')">Месяц</div>
@@ -540,13 +653,34 @@ function renderAnalysis() {
             <div class="section">
                 <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">Активность (Очки)</div>
                 <div style="font-size:28px;font-weight:800;margin-bottom:10px">${totalPts} <span style="font-size:14px;font-weight:400;color:#666">за период</span></div>
-                <div class="chart-container">
+                <div class="chart-container" style="height:150px">
                     ${renderChart(data)}
                 </div>
             </div>
 
+            <div class="grid-2" style="margin-bottom:15px">
+                <div class="section" style="margin:0">
+                    <div style="font-size:12px;color:#888;margin-bottom:8px">Средний балл</div>
+                    <div style="font-size:24px;font-weight:800;color:var(--accent)">${avgPts}</div>
+                    <div style="font-size:10px;color:#666;margin-top:4px">pts/день</div>
+                </div>
+                <div class="section" style="margin:0">
+                    <div style="font-size:12px;color:#888;margin-bottom:8px">Завершено</div>
+                    <div style="font-size:24px;font-weight:800;color:var(--gold)">${completionRate}%</div>
+                    <div style="font-size:10px;color:#666;margin-top:4px">задач</div>
+                </div>
+            </div>
+
             <div class="section">
-                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">Интенсивность</div>
+                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">${getIcon('check')} Выполнено задач</div>
+                <div style="font-size:20px;font-weight:800;margin-bottom:10px">${totalTasks} <span style="font-size:14px;font-weight:400;color:#666">задач</span></div>
+                <div class="chart-container" style="height:100px">
+                    ${renderTasksChart(data)}
+                </div>
+            </div>
+
+            <div class="section">
+                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">${getIcon('clock')} Календарь активности (28 дней)</div>
                 <div class="heatmap">${heatMap}</div>
             </div>
 
@@ -611,7 +745,7 @@ function renderShop() {
 
 function renderTasks() {
     const list = state.tasks.map(t => `
-        <div class="section" style="display:flex;align-items:center;padding:15px;margin-bottom:10px;opacity:${t.completed?.5:1}">
+        <div class="section" style="display:flex;align-items:center;padding:15px;margin-bottom:10px;opacity:${t.completed?0.5:1}">
             <div style="width:24px;height:24px;border:2px solid var(--primary);border-radius:6px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:${t.completed?'var(--primary)':'transparent'}" onclick="actions.toggleTask(${t.id})">
                 ${t.completed?'<svg width="14" height="14" stroke="white"><polyline points="20 6 9 17 4 12"/></svg>':''}
             </div>
@@ -644,9 +778,9 @@ function renderChallenges() {
                 <div style="font-size:50px;margin-bottom:15px">🎯</div>
                 <h2 style="font-weight:900;font-size:26px;margin-bottom:10px">${c.title}</h2>
                 <div style="color:#888;margin-bottom:25px">Цель обновляется ежедневно</div>
-                
-                ${c.completed 
-                ? '<div class="btn" style="background:var(--glass);color:var(--accent)">ВЫПОЛНЕНО</div>' 
+
+                ${c.completed
+                ? '<div class="btn" style="background:var(--glass);color:var(--accent)">ВЫПОЛНЕНО</div>'
                 : `<button class="btn btn-primary" onclick="actions.completeChallenge()">ЗАВЕРШИТЬ (+${c.reward})</button>`}
             </div>
         </div>
@@ -671,7 +805,7 @@ function render() {
         {id:'shop',icon:'shop',l:'Shop'},
         {id:'analysis',icon:'chart',l:'Data'}
     ];
-    
+
     let html = '';
     if(state.activeTab === 'home') html = renderHome();
     else if(state.activeTab === 'challenges') html = renderChallenges();
@@ -686,8 +820,8 @@ function render() {
 }
 
 // --- INIT ---
-window.onload = () => {
-    loadState();
+window.onload = async () => {
+    await loadState();
     render();
     setTimeout(() => document.getElementById('loadingScreen').classList.add('fade-out'), 1000);
 };
