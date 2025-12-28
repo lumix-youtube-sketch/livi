@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>livi</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <style>
 :root {
     --primary: #8B9A9C;
@@ -19,9 +18,7 @@
     --danger: #ff4757;
     --success: #2ed573;
 }
-
 *{margin:0;padding:0;box-sizing:border-box}
-
 body{
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
     background:#000;
@@ -41,172 +38,154 @@ body{
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @keyframes pulse-glow{0%,100%{box-shadow:0 0 10px var(--epic)}50%{box-shadow:0 0 25px var(--epic)}}
 @keyframes blink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(0.1)}}
-@keyframes pulse-red {
-    0% {box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4);}
-    70% {box-shadow: 0 0 0 20px rgba(255, 71, 87, 0);}
-    100% {box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);}
-}
-@keyframes wave {0%,100%{height:10px}50%{height:30px}}
-@keyframes twinkle {0%,100%{opacity:0.2;transform:scale(1)}50%{opacity:0.8;transform:scale(1.5)}}
-@keyframes shimmer {0%{background-position:-200% 0}100%{background-position:200% 0}}
-@keyframes slideInRight {from{transform:translateX(100%)}to{transform:translateX(0)}}
-@keyframes growBar {from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1);transform-origin:bottom}}
+@keyframes pulse-red {0% {box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4);} 70% {box-shadow: 0 0 0 20px rgba(255, 71, 87, 0);} 100% {box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);}}
+@keyframes wave {0%, 100% {height: 10px;} 50% {height: 30px;}}
+@keyframes twinkle {0%, 100% {opacity: 0.2; transform: scale(1);} 50% {opacity: 0.8; transform: scale(1.5);}}
+@keyframes shimmer {0% {background-position: -200% 0;} 100% {background-position: 200% 0;}}
 
 .fade-in{animation:fadeIn .4s ease-out}
 .slide-up{animation:slideUp .4s ease-out}
 .hidden{display:none!important}
 
 /* UI Elements */
-.loading-screen{
-    position:fixed;
-    inset:0;
-    background:#050505;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:9999;
-    transition:opacity .5s
-}
+.loading-screen{position:fixed;inset:0;background:#050505;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s}
 .loading-screen.fade-out{opacity:0;pointer-events:none}
-.loading-logo{
-    font-size:64px;
-    font-weight:800;
-    background:linear-gradient(135deg,var(--primary),var(--accent));
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    letter-spacing:-2px
-}
+.loading-logo{font-size:64px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px}
 
-.header{
-    padding:20px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    background:rgba(15,15,15,0.6);
-    backdrop-filter:blur(20px);
-    border-bottom:1px solid rgba(255,255,255,0.05);
-    position:sticky;
-    top:0;
-    z-index:50
-}
-.header-title{
-    font-size:28px;
-    font-weight:800;
-    background:linear-gradient(135deg,var(--primary),var(--accent));
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent
-}
+.header{padding:20px;display:flex;align-items:center;justify-content:space-between;background:rgba(15,15,15,0.6);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05);position:sticky;top:0;z-index:50}
+.header-title{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header-stats{display:flex;gap:10px;align-items:center}
-.stat-badge{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    padding:6px 12px;
-    border-radius:20px;
-    font-weight:700;
-    font-size:14px;
-    background:var(--glass);
-    border:1px solid var(--glass-border);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
-}
-.profile-btn{
-    width:40px;
-    height:40px;
-    border-radius:50%;
-    overflow:hidden;
-    border:2px solid var(--primary);
-    cursor:pointer;
-    box-shadow:0 0 15px rgba(139,154,156,0.3)
-}
+.stat-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-weight:700;font-size:14px;background:var(--glass);border:1px solid var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);}
+.profile-btn{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid var(--primary);cursor:pointer;box-shadow:0 0 15px rgba(139,154,156,0.3)}
 .profile-btn img{width:100%;height:100%;object-fit:cover}
 
 /* Livi Character */
-.livi-container{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:30px 0;
-    position:relative;
-    z-index:5
-}
-.livi-bg-glow{
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    width:220px;
-    height:220px;
-    background:radial-gradient(circle,rgba(139,154,156,0.15) 0%,rgba(0,0,0,0) 70%);
-    z-index:1;
-    pointer-events:none
-}
+.livi-container{display:flex;flex-direction:column;align-items:center;padding:30px 0;position:relative; z-index: 5;}
+.livi-bg-glow {position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 220px; height: 220px; background: radial-gradient(circle, rgba(139,154,156,0.15) 0%, rgba(0,0,0,0) 70%); z-index: 1; pointer-events: none;}
 .livi-body{
-    width:120px;
-    height:120px;
+    width:120px;height:120px;
     border-radius:50%;
     background:radial-gradient(circle at 30% 30%, #3a3a3a, #1a1a1a);
     border:2px solid rgba(139,154,156,0.5);
     position:relative;
     box-shadow:0 15px 40px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,0,0,0.8);
     animation:float 6s ease-in-out infinite;
-    z-index:5
+    z-index:5;
 }
-.livi-antenna{
-    position:absolute;
-    width:3px;
-    height:30px;
-    background:var(--primary);
-    border-radius:4px;
-    z-index:1;
-    opacity:0.8
-}
-.livi-antenna::after{
-    content:'';
-    position:absolute;
-    top:-6px;
-    left:-2px;
-    width:7px;
-    height:7px;
-    background:var(--accent);
-    border-radius:50%;
-    box-shadow:0 0 8px var(--primary)
-}
+.livi-antenna{position:absolute;width:3px;height:30px;background:var(--primary);border-radius:4px;z-index:1; opacity: 0.8}
+.livi-antenna::after{content:'';position:absolute;top:-6px;left:-2px;width:7px;height:7px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px var(--primary)}
 .ant-l{top:-20px;left:25px;transform:rotate(-20deg)}
 .ant-r{top:-20px;right:25px;transform:rotate(20deg)}
 .livi-face{position:absolute;inset:0;z-index:10}
-.eye{
-    position:absolute;
-    top:45%;
-    width:12px;
-    height:16px;
-    background:white;
-    border-radius:50%;
-    animation:blink 4s infinite;
-    box-shadow:0 0 10px rgba(255,255,255,0.5)
-}
-.eye-l{left:32px}
-.eye-r{right:32px}
-.mouth{
-    position:absolute;
-    bottom:32px;
-    left:50%;
-    transform:translateX(-50%);
-    width:20px;
-    height:10px;
-    border-bottom:2px solid white;
-    border-radius:0 0 15px 15px
-}
+.eye{position:absolute;top:45%;width:12px;height:16px;background:white;border-radius:50%;animation:blink 4s infinite; box-shadow: 0 0 10px rgba(255,255,255,0.5);}
+.eye-l{left:32px} .eye-r{right:32px}
+.mouth{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);width:20px;height:10px;border-bottom:2px solid white;border-radius:0 0 15px 15px}
 
-/* SVG */
-svg{
-    width:24px;
-    height:24px;
-    fill:none;
-    stroke:currentColor;
-    stroke-width:2;
-    stroke-linecap:round;
-    stroke-linejoin:round
+/* Items CSS */
+.item-cap {position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:80px;height:30px;background:linear-gradient(to bottom, #D4AF7A, #C09555);border-radius:20px 20px 0 0;z-index:20;box-shadow:inset 0 2px 5px rgba(255,255,255,0.2)}
+.item-crown {position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:60px;height:45px;z-index:20;background: linear-gradient(to bottom, #FFD700, #DAA520);clip-path: polygon(0% 100%, 20% 40%, 40% 100%, 60% 20%, 80% 100%, 100% 40%, 100% 100%);filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));}
+.item-glasses {position:absolute;top:50px;left:50%;transform:translateX(-50%);width:70px;height:20px;z-index:30;display:flex;justify-content:space-between}
+.g-lens {width:30px;height:20px;background:rgba(0,0,0,0.85);border-radius:6px;border:1px solid #555;position:relative;overflow:hidden}
+.g-bridge {position:absolute;top:8px;left:50%;transform:translateX(-50%);width:10px;height:2px;background:#555}
+.item-scarf {position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);width:90px;height:30px;z-index:25;background: repeating-linear-gradient(45deg, #D45D79, #D45D79 10px, #C04560 10px, #C04560 20px);border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.3);}
+.item-monocle {position:absolute;top:50px;right:35px;width:24px;height:24px;border:1px solid #FFD700;border-radius:50%;background:rgba(255,255,255,0.1);z-index:30}
+.item-bowtie {position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:36px;height:18px;z-index:25;background:#D45D79;clip-path:polygon(0 50%, 40% 0, 50% 50%, 40% 100%, 0 50%, 50% 50%, 60% 0, 100% 50%, 60% 100%, 50% 50%)}
+.item-insurance {position:absolute;top:-25px;left:50%;transform:translateX(-50%);width:50px;height:50px;z-index:20;background:radial-gradient(circle, #FFD700, #B8860B);border-radius:50%;border:2px solid #FFA500;box-shadow:0 0 20px rgba(255,215,0,0.6);display:flex;align-items:center;justify-content:center;font-size:24px;}
+
+/* Main Layout & Beautiful Boxes */
+.content{padding:20px}
+.section {
+    background: linear-gradient(160deg, rgba(30,30,30,0.6) 0%, rgba(10,10,10,0.8) 100%);
+    border: 1px solid var(--glass-border);
+    border-top: 1px solid var(--glass-highlight);
+    border-radius: 24px;
+    padding: 20px;
+    margin-bottom: 15px;
+    backdrop-filter: blur(15px);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
+.section:active { transform: scale(0.99); }
+/* Noise texture for detail */
+.section::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; mix-blend-mode: overlay;
+}
+.section > * { position: relative; z-index: 1; }
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.btn{width:100%;padding:16px;border-radius:16px;font-weight:700;font-size:16px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;position:relative;overflow:hidden}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:white; box-shadow: 0 4px 15px rgba(139,154,156,0.3)}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888}
+.add-btn {position: fixed;bottom: 90px;right: 20px;width: 60px;height: 60px;border-radius: 30px;background: linear-gradient(135deg, var(--primary), var(--accent));color: white;font-size: 32px;border: none;box-shadow: 0 4px 20px rgba(139,154,156,0.5);z-index: 80;display: flex;align-items: center;justify-content: center;cursor: pointer;transition: transform 0.2s;}
+.add-btn:active {transform: scale(0.95);}
+
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:428px;margin:0 auto;background:rgba(10,10,10,0.95);backdrop-filter:blur(20px);border-top:1px solid #222;display:flex;justify-content:space-around;padding:12px 0 calc(12px + env(safe-area-inset-bottom));z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:none;color:#555;transition:color .2s}
+.nav-item.active{color:var(--primary)}
+.nav-item.active svg {filter: drop-shadow(0 0 8px var(--primary));}
+
+/* Stats Chart CSS */
+.chart-container {display: flex; align-items: flex-end; justify-content: space-between; height: 80px; padding-top: 10px;}
+.chart-col {display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1;}
+.chart-bar {width: 6px; background: #333; border-radius: 3px; position: relative; transition: height 0.5s ease;}
+.chart-bar.active {background: var(--primary); box-shadow: 0 0 10px var(--primary);}
+.chart-day {font-size: 10px; color: #666;}
+
+/* Challenge Card Styles */
+.challenge-card {
+    background: linear-gradient(135deg, rgba(212,175,122,0.1) 0%, rgba(0,0,0,0) 100%);
+    border: 1px solid rgba(212,175,122,0.3);
+}
+.challenge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+
+/* Shop & Items */
+.chest-wrapper {display:grid;gap:15px;margin-bottom:30px}
+.chest-card {position:relative;border-radius:16px;padding:20px;overflow:hidden;cursor:pointer;transition:transform .2s; border: 1px solid rgba(255,255,255,0.05);}
+.chest-card:active {transform:scale(0.98)}
+.chest-common {background:linear-gradient(135deg, #3e2723 0%, #1a100e 100%); border-color: #5D4037}
+.chest-rare {background:linear-gradient(135deg, #1e2424 0%, #0f1212 100%);border-color: var(--gold); box-shadow: inset 0 0 30px rgba(212,175,122,0.05)}
+
+.roulette-modal {position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.roulette-window {width:100%;height:140px;background:#050505;border-block:2px solid #333;position:relative;overflow:hidden;margin:30px 0}
+.roulette-strip {display:flex;height:100%;align-items:center;position:absolute;left:0;will-change:transform}
+.r-item {width:120px;height:110px;margin:0 4px;background:#151515;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #333;flex-shrink:0;position:relative}
+.r-item.legendary {border-color:var(--epic);box-shadow:inset 0 0 15px rgba(212,93,121,0.2)}
+.r-item.rare {border-color:var(--gold)}
+.r-marker {position:absolute;top:0;bottom:0;left:50%;width:2px;background:var(--primary);z-index:10;transform:translateX(-50%);box-shadow:0 0 10px var(--primary)}
+
+/* Education */
+.mic-btn {width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(145deg, #222, #111); border: 1px solid #333; display: flex; align-items: center; justify-content: center; margin: 20px auto; cursor: pointer; transition: all 0.3s; position: relative; box-shadow: 5px 5px 15px #050505, -5px -5px 15px #222;}
+.mic-btn:active {transform: scale(0.95);}
+.mic-btn.recording {background: rgba(255, 71, 87, 0.1); border-color: var(--danger); animation: pulse-red 1.5s infinite;}
+.voice-wave {display: flex; gap: 3px; align-items: center; height: 30px;}
+.bar {width: 3px; background: var(--danger); border-radius: 2px; animation: wave 1s infinite ease-in-out;}
+.bar:nth-child(2) {animation-delay: 0.1s; height: 15px}
+.bar:nth-child(3) {animation-delay: 0.2s; height: 25px}
+.bar:nth-child(4) {animation-delay: 0.3s; height: 15px}
+
+.note-card {background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: background .2s;}
+.note-card:active {background: rgba(255,255,255,0.05);}
+.note-date {font-size: 11px; color: #777; margin-bottom: 5px; display: flex; justify-content: space-between;}
+.note-title {font-weight: 700; margin-bottom: 5px; color: #eee; font-size: 16px;}
+.note-preview {font-size: 13px; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis}
+
+.note-modal {position: fixed; inset: 0; background: #080808; z-index: 3000; display: flex; flex-direction: column; padding: 20px; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); transform: translateY(100%);}
+.note-modal.open {transform: translateY(0);}
+.note-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;}
+.note-textarea {flex: 1; background: transparent; border: none; color: #eee; font-size: 16px; line-height: 1.6; resize: none; outline: none; font-family: inherit; padding-bottom: 100px;}
+.ai-actions {display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px;}
+.ai-chip {background: rgba(139,154,156,0.1); padding: 8px 16px; border-radius: 20px; font-size: 12px; color: var(--accent); white-space: nowrap; border: 1px solid rgba(139,154,156,0.2); cursor: pointer;}
+
+/* Particles */
+.particle-container {position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;}
+.particle {position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; opacity: 0; animation: twinkle var(--duration) ease-in-out infinite; animation-delay: var(--delay);}
+
+svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body>
@@ -239,7 +218,6 @@ svg{
         <div class="ai-chip" onclick="actions.enhanceNote()">⚡ AI Структура</div>
         <div class="ai-chip" onclick="actions.addSummary()">🧠 Главная мысль</div>
         <div class="ai-chip" onclick="actions.extractTasks()">✅ Найти задачи</div>
-        <div class="ai-chip" onclick="actions.extractKeywords()">🏷️ Ключевые слова</div>
     </div>
     <textarea id="modalText" class="note-textarea" placeholder="Текст заметки..."></textarea>
     <button class="btn btn-primary" onclick="actions.saveAndCloseNote()" style="margin-top: auto;">СОХРАНИТЬ</button>
@@ -267,7 +245,7 @@ const photoUrl = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDat
 function initStars() {
     const container = document.getElementById('stars');
     const count = 50;
-    for (let i = 0; i < count; i++) {
+    for(let i=0; i<count; i++) {
         const p = document.createElement('div');
         p.className = 'particle';
         p.style.left = Math.random() * 100 + '%';
@@ -287,23 +265,17 @@ const Storage = {
             if (tg && tg.CloudStorage && key.includes('stats')) {
                 tg.CloudStorage.setItem(key, JSON.stringify(data));
             }
-        } catch (e) {
-            console.error("Save failed", e);
-        }
+        } catch (e) { console.error("Save failed", e); }
     },
     load: async (key) => {
         try {
             if (tg && tg.CloudStorage && key.includes('stats')) {
-                const cloudData = await new Promise(r =>
-                    tg.CloudStorage.getItem(key, (err, val) => r(val))
-                );
+                const cloudData = await new Promise(r => tg.CloudStorage.getItem(key, (err, val) => r(val)));
                 if (cloudData) return JSON.parse(cloudData);
             }
             const local = localStorage.getItem(key);
             return local ? JSON.parse(local) : null;
-        } catch (e) {
-            return null;
-        }
+        } catch (e) { return null; }
     }
 };
 
@@ -314,11 +286,10 @@ const icons = {
     chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
     star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
     trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
-    spark: '<path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5z"/>',
+    spark: '<path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5z"/>', // Minimalist Spark
     book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
-    mic: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>'
+    mic: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>',
 };
-
 const getIcon = (n) => `<svg viewBox="0 0 24 24">${icons[n]}</svg>`;
 
 const ITEMS = [
@@ -350,7 +321,7 @@ const defaultState = {
         completed: false,
         reward: 50
     },
-    notes: [],
+    notes: [], 
     hasStreakInsurance: false,
     referralCount: 0,
     totalFire: 0,
@@ -363,20 +334,21 @@ let recognition = null;
 let isRecording = false;
 let currentTranscript = "";
 let editingNoteId = null;
+
 async function loadState() {
     const statsData = await Storage.load(`livi_stats_${userId}`);
     if (statsData) state = { ...defaultState, ...statsData };
-
+    
     const notesData = await Storage.load(`livi_notes_${userId}`);
     if (notesData) state.notes = notesData;
 
-    if (state.statsHistory.length === 0) {
-        for (let i = 6; i >= 0; i--) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
+    // Fill history stats if empty
+    if(state.statsHistory.length === 0) {
+        for(let i=6; i>=0; i--) {
+            const d = new Date(); d.setDate(d.getDate() - i);
             state.statsHistory.push({
                 date: d.toISOString().split('T')[0],
-                points: Math.floor(Math.random() * 50)
+                points: Math.floor(Math.random() * 50) 
             });
         }
     }
@@ -384,25 +356,17 @@ async function loadState() {
     const today = new Date().toISOString().split('T')[0];
     if (state.lastVisitDate !== today) {
         if (!state.statsHistory.find(e => e.date === today)) {
-            state.streak = hadActivityYesterday() ? state.streak + 1 : 1;
+             state.streak = hadActivityYesterday() ? state.streak + 1 : 1;
         }
         state.lastVisitDate = today;
-        const challenges = [
-            'Выполнить 3 задачи',
-            'Набрать 100 очков',
-            'Прочитать лекцию',
-            'Сделать конспект',
-            'Пройти 5000 шагов'
-        ];
+        const challenges = ['Выполнить 3 задачи','Набрать 100 очков','Прочитать лекцию','Сделать конспект','Пройти 5000 шагов'];
         state.dailyChallenge = {
             date: today,
             title: challenges[Math.floor(Math.random() * challenges.length)],
             completed: false,
             reward: 50
         };
-        state.tasks.forEach(t => {
-            if (t.type === 'habit') t.completed = false;
-        });
+        state.tasks.forEach(t => { if (t.type === 'habit') t.completed = false; });
         saveAll();
     }
 }
@@ -415,8 +379,7 @@ function saveAll() {
 }
 
 function hadActivityYesterday() {
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
+    const d = new Date(); d.setDate(d.getDate() - 1);
     const y = d.toISOString().split('T')[0];
     return !!state.statsHistory.find(e => e.date === y);
 }
@@ -433,274 +396,203 @@ function updateHistory(pointsDelta) {
     saveAll();
 }
 
-// --- ENHANCED AI LOGIC ---
+// --- IMPROVED AI LOGIC (Heuristic Based) ---
 const AI = {
     clean: (text) => text.replace(/\s+/g, ' ').trim(),
-
+    
     structure: (text) => {
-        let processed = text;
-
-        processed = processed.replace(
-            /([а-яА-ЯёЁa-zA-Z0-9]+)\s*[-–—]\s*([^.!?]+[.!?])/g,
-            "**$1** — $2"
-        );
-
-        processed = processed.replace(
-            /([.!?])\s+(?=[А-ЯЁA-Z])/g,
-            "$1\n\n"
-        );
-
-        processed = processed.replace(/\n\s*[-•]\s*/g, "\n• ");
-        processed = processed.replace(/\n\s*(\d+)[.)]\s*/g, "\n$1. ");
-
-        const importantWords = [
-            'важно',
-            'необходимо',
-            'следует',
-            'ключевой',
-            'основной',
-            'главный'
-        ];
-
-        importantWords.forEach(word => {
-            const regex = new RegExp(`(${word}[а-яё]*)`, 'gi');
-            processed = processed.replace(regex, '**$1**');
-        });
-
-        processed = processed.replace(
-            /(\d{1,2}[./]\d{1,2}[./]\d{2,4})/g,
-            "**$1**"
-        );
-
+        // Detect definitions (Hyphens)
+        let processed = text.replace(/([а-яА-Яa-zA-Z]+)\s*-\s*([а-яА-Яa-zA-Z].+?)(?=[.!?]|$)/g, "**$1** — $2");
+        // Structure paragraphs
+        processed = processed.replace(/([.!?])\s*(?=[А-Я])/g, "$1\n\n");
+        // Lists detection (lines starting with dash)
+        processed = processed.replace(/\n\s*-\s*/g, "\n• ");
         return processed;
     },
 
     extractSummary: (text) => {
         const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-
-        const signalWords = [
-            'важно','суть','вывод','поэтому','итак','запомнить',
-            'следует','необходимо','главное','основное','ключевое',
-            'таким образом','в результате','в итоге','заключение'
-        ];
-
-        let keySentences = [];
-
-        if (sentences[0]) keySentences.push(sentences[0].trim());
-
-        sentences.forEach((s, idx) => {
-            if (idx === 0) return;
-            const lowerS = s.toLowerCase();
-            if (signalWords.some(word => lowerS.includes(word))) {
+        // Heuristic: First sentence + any sentence with "signaling" words
+        const signals = ['важно', 'суть', 'вывод', 'поэтому', 'итак', 'запомнить'];
+        let keySentences = [sentences[0]];
+        
+        sentences.slice(1).forEach(s => {
+            if (signals.some(sig => s.toLowerCase().includes(sig))) {
                 keySentences.push(s.trim());
             }
         });
-
-        if (keySentences.length < 3 && sentences.length > 1) {
-            const lastSentence = sentences[sentences.length - 1].trim();
-            if (!keySentences.includes(lastSentence)) {
-                keySentences.push(lastSentence);
-            }
-        }
-
-        keySentences = keySentences.slice(0, 4);
-
-        return "📌 ГЛАВНАЯ МЫСЛЬ:\n" +
-            keySentences.join(' ') +
-            (keySentences.length < sentences.length ? "..." : "");
+        
+        return "📌 СУТЬ:\n" + keySentences.slice(0, 3).join(' ') + (keySentences.length < sentences.length ? ".." : "");
     },
 
     findTasks: (text) => {
-        const actionVerbs = [
-            'сделать','выполнить','написать','прочитать','изучить',
-            'купить','отправить','позвонить','связаться','найти',
-            'подготовить','создать','разработать','проверить','завершить',
-            'организовать','спланировать','записаться','забронировать'
-        ];
-
+        // Find verbs of action
+        const verbs = ['сделать', 'купить', 'прочитать', 'написать', 'отправить', 'позвонить', 'найти'];
         const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
         let tasks = [];
-
+        
         sentences.forEach(s => {
-            const lowerS = s.toLowerCase();
-            const hasAction = actionVerbs.some(v => lowerS.includes(v));
-            const hasNeed = /нужно|надо|необходимо|следует|требуется/.test(lowerS);
-
-            if (hasAction || hasNeed) {
+            if (verbs.some(v => s.toLowerCase().includes(v))) {
                 tasks.push("• " + s.trim());
             }
         });
-
-        return tasks.length > 0
-            ? "\n\n📋 ЗАДАЧИ ИЗ ТЕКСТА:\n" + tasks.join('\n')
-            : "";
+        
+        return tasks.length > 0 ? "\n\n📝 ЗАДАЧИ ИЗ ТЕКСТА:\n" + tasks.join('\n') : "";
     },
-
-    extractKeywords: (text) => {
-        const words = text.toLowerCase()
-            .replace(/[^\wа-яё\s]/gi, ' ')
-            .split(/\s+/)
-            .filter(w => w.length > 4);
-
-        const freq = {};
-        words.forEach(w => freq[w] = (freq[w] || 0) + 1);
-
-        const stopWords = [
-            'который','может','более','очень','также',
-            'только','через','между','после','перед'
-        ];
-
-        return Object.entries(freq)
-            .filter(([word]) => !stopWords.includes(word))
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5)
-            .map(([word]) => word);
-    },
-
+    
     getTip: (text) => {
         if (text.length < 20) return "💡 Livi слушает...";
-
-        const lower = text.toLowerCase();
-
-        if (/\d+\s*[+\-*/=]\s*\d+|формула|уравнение|теорема/.test(lower)) {
-            return "💡 Математика? Попробуй решить примеры на практике.";
-        }
-
-        if (/\d{4}|век|эпоха|период/.test(text)) {
-            return "💡 Создай временную линию событий.";
-        }
-
-        if ((text.match(/[-–—]/g) || []).length > 2) {
-            return "💡 Много определений — используй карточки.";
-        }
-
-        if ((text.match(/\n/g) || []).length > 5) {
-            return "💡 Используй интервальное повторение.";
-        }
-
-        if ((text.match(/\?/g) || []).length > 2) {
-            return "💡 Попробуй ответить на вопросы своими словами.";
-        }
-
-        if (text.length > 500) {
-            return "💡 Раздели материал на блоки по 15–20 минут.";
-        }
-
-        return "💡 Перечитай это завтра утром.";
+        if (text.match(/\d{4}/)) return "💡 Похоже на историю. Стоит сделать таймлайн дат.";
+        if (text.match(/[\+\-\*=]/)) return "💡 Математика? Проверь формулы на практике.";
+        if (text.includes("?")) return "💡 Хороший вопрос. Попробуй найти ответ в источниках.";
+        return "💡 Перечитай это завтра, чтобы запомнить надолго.";
     }
 };
 
-// --- ACTIONS ---
 const actions = {
     toggleTask: (id) => {
         const task = state.tasks.find(t => t.id === id);
-        if (!task) return;
-
-        task.completed = !task.completed;
-        const delta = task.completed ? task.points : -task.points;
-        state.totalPoints += delta;
-        updateHistory(delta);
-
-        if (task.completed && tg) {
-            tg.HapticFeedback.notificationOccurred('success');
+        if (task) {
+            task.completed = !task.completed;
+            const delta = task.completed ? task.points : -task.points;
+            state.totalPoints += delta;
+            updateHistory(delta);
+            if(task.completed && tg) tg.HapticFeedback.notificationOccurred('success');
+            saveAll();
+            render();
         }
-
-        saveAll();
-        render();
     },
-
     completeChallenge: () => {
-        if (state.dailyChallenge.completed) return;
-
-        state.dailyChallenge.completed = true;
-        state.totalPoints += state.dailyChallenge.reward;
-        state.totalFire += 1;
-        updateHistory(state.dailyChallenge.reward);
-
-        if (tg) tg.HapticFeedback.notificationOccurred('success');
-
-        saveAll();
-        render();
+        if (!state.dailyChallenge.completed) {
+            state.dailyChallenge.completed = true;
+            state.totalPoints += state.dailyChallenge.reward;
+            state.totalFire += 1;
+            updateHistory(state.dailyChallenge.reward);
+            if(tg) tg.HapticFeedback.notificationOccurred('success');
+            saveAll();
+            render();
+        }
     },
-
     addTask: () => {
         const title = prompt("Что нужно сделать?");
-        if (!title) return;
-
-        state.tasks.push({
-            id: Date.now(),
-            title,
-            completed: false,
-            type: 'task',
-            points: 15
-        });
-
-        saveAll();
-        render();
+        if (title) {
+            state.tasks.push({ id: Date.now(), title, completed: false, type: 'task', points: 15 });
+            saveAll();
+            render();
+        }
     },
-
     deleteTask: (id) => {
-        if (!confirm("Удалить?")) return;
-
-        state.tasks = state.tasks.filter(t => t.id !== id);
-        saveAll();
-        render();
+        if(confirm("Удалить?")) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            saveAll();
+            render();
+        }
     },
-
     equip: (id) => {
         const item = ITEMS.find(i => i.id === id);
-        if (!item) return;
-
-        const slot = item.special ? 'special' : item.type;
-        state.equipped[slot] = state.equipped[slot] === id ? null : id;
-
-        if (item.special) {
-            state.hasStreakInsurance = !!state.equipped.special;
+        if (item) {
+            const slot = item.special ? 'special' : item.type;
+            state.equipped[slot] = state.equipped[slot] === id ? null : id;
+            if(item.special) state.hasStreakInsurance = !!state.equipped.special;
+            saveAll();
+            render();
         }
-
-        saveAll();
-        render();
     },
-
     openChest: (type, cost) => {
-        if (state.totalPoints < cost) {
-            alert("Не хватает очков!");
+        if (state.totalPoints >= cost) {
+            state.totalPoints -= cost;
+            updateHistory(-cost);
+            startRoulette(type);
+        } else alert("Не хватает очков!");
+    },
+    startRecording: () => {
+        if (!window.webkitSpeechRecognition && !window.SpeechRecognition) {
+            alert("Нужен Chrome или Android");
             return;
         }
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'ru-RU';
+        recognition.continuous = true;
+        recognition.interimResults = true;
 
-        state.totalPoints -= cost;
-        updateHistory(-cost);
-        startRoulette(type);
+        recognition.onstart = () => { isRecording = true; render(); };
+        recognition.onresult = (event) => {
+            let interim = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) currentTranscript += event.results[i][0].transcript + " ";
+                else interim += event.results[i][0].transcript;
+            }
+            const el = document.getElementById('liveTranscript');
+            if(el) el.innerText = (currentTranscript + interim) || "Слушаю...";
+        };
+        recognition.onend = () => { if(isRecording) recognition.start(); else render(); };
+        recognition.start();
     },
-
-    openProfile: () => {
-        state.activeTab = 'profile';
+    stopRecording: () => {
+        isRecording = false;
+        if(recognition) recognition.stop();
+        if (currentTranscript.length > 0) {
+            const cleanText = AI.clean(currentTranscript);
+            const newNote = {
+                id: Date.now(),
+                date: new Date().toLocaleString('ru-RU'),
+                title: 'Заметка ' + new Date().toLocaleTimeString().slice(0,5),
+                text: AI.structure(cleanText)
+            };
+            state.notes.unshift(newNote);
+            currentTranscript = "";
+            saveAll();
+        }
         render();
     },
-
-    copyReferral: () => {
-        const refLink = `https://t.me/livi_app_bot?start=ref${userId}`;
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(refLink).then(() => {
-                alert("Скопировано!");
-                if (tg) tg.HapticFeedback.notificationOccurred('success');
-            });
-        } else {
-            alert(refLink);
+    openNote: (id) => {
+        const note = state.notes.find(n => n.id === id);
+        if (!note) return;
+        editingNoteId = id;
+        document.getElementById('modalTitle').innerText = note.title;
+        document.getElementById('modalText').value = note.text;
+        document.getElementById('noteModal').classList.add('open');
+    },
+    saveAndCloseNote: () => {
+        const text = document.getElementById('modalText').value;
+        const note = state.notes.find(n => n.id === editingNoteId);
+        if (note) { note.text = text; saveAll(); }
+        actions.closeNote(); render();
+    },
+    closeNote: () => { document.getElementById('noteModal').classList.remove('open'); editingNoteId = null; },
+    deleteNote: (id) => {
+        if(confirm("Удалить?")) {
+            state.notes = state.notes.filter(n => n.id !== id);
+            saveAll(); render();
         }
+    },
+    enhanceNote: () => {
+        const f = document.getElementById('modalText');
+        f.value = AI.structure(AI.clean(f.value));
+        if(tg) tg.HapticFeedback.notificationOccurred('selection');
+    },
+    addSummary: () => {
+        const f = document.getElementById('modalText');
+        f.value = AI.extractSummary(f.value) + "\n\n" + f.value;
+    },
+    extractTasks: () => {
+        const f = document.getElementById('modalText');
+        f.value = f.value + AI.findTasks(f.value);
+    },
+    openProfile: () => { state.activeTab = 'profile'; render(); },
+    copyReferral: () => {
+        navigator.clipboard.writeText(`https://t.me/livi_app_bot?start=ref${userId}`).then(() => alert("Скопировано!"));
     }
 };
+
 // --- RENDERERS ---
 function renderHeader() {
     return `<div class="header">
         <div class="header-title">livi</div>
         <div class="header-stats">
-            <div class="stat-badge" style="color:var(--gold)">
-                ${getIcon('star')} ${state.totalPoints}
-            </div>
-            <div class="stat-badge" style="color:#ff6b81">
-                ${getIcon('spark')} ${state.totalFire}
-            </div>
+            <div class="stat-badge" style="color:var(--gold)">${getIcon('star')} ${state.totalPoints}</div>
+            <div class="stat-badge" style="color:#ff6b81">${getIcon('spark')} ${state.totalFire}</div>
             <div class="profile-btn" onclick="actions.openProfile()">
                 <img src="${state.avatar || 'https://via.placeholder.com/40?text=👤'}" alt="Profile">
             </div>
@@ -710,32 +602,24 @@ function renderHeader() {
 
 function renderHome() {
     const done = state.tasks.filter(t => t.completed).length;
-    const total = state.tasks.length;
-    const completionPercent = total > 0 ? Math.round((done / total) * 100) : 0;
-    const progressDeg = (completionPercent / 100) * 360;
-
     const h = ITEMS.find(i => i.id === state.equipped.head);
     const f = ITEMS.find(i => i.id === state.equipped.face);
     const b = ITEMS.find(i => i.id === state.equipped.body);
     const s = ITEMS.find(i => i.id === state.equipped.special);
-
+    
+    // Chart Logic
     const maxVal = Math.max(...state.statsHistory.map(h => h.points), 50);
     const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-    const today = new Date().toISOString().split('T')[0];
-
-    const chartHtml = state.statsHistory.map(hs => {
-        const height = Math.max((hs.points / maxVal) * 80, 10);
-        const isToday = hs.date === today;
-        const dayName = days[new Date(hs.date).getDay()];
-
+    const chartHtml = state.statsHistory.map((h, i) => {
+        const height = (h.points / maxVal) * 50 + 10; // min 10px
+        const isToday = h.date === new Date().toISOString().split('T')[0];
         return `<div class="chart-col">
-            <div class="chart-value">${hs.points} pts</div>
-            <div class="chart-bar ${isToday ? 'active' : ''}" style="height:${height}px"></div>
-            <div class="chart-day">${dayName}</div>
+            <div class="chart-bar ${isToday?'active':''}" style="height:${height}px"></div>
+            <div class="chart-day">${days[new Date(h.date).getDay()]}</div>
         </div>`;
     }).join('');
 
-    const streakPercent = Math.min((state.streak / 7) * 100, 100);
+    // AI Tip
     const lastNote = state.notes.length > 0 ? state.notes[0].text : "";
     const aiTip = AI.getTip(lastNote);
 
@@ -752,63 +636,35 @@ function renderHome() {
                     <div class="livi-face">
                         <div class="eye eye-l"></div>
                         <div class="eye eye-r"></div>
-                        ${f ? `<div class="${f.css}">
-                            <div class="g-lens"></div>
-                            <div class="g-lens"></div>
-                            <div class="g-bridge"></div>
-                        </div>` : ''}
+                        ${f ? `<div class="${f.css}"><div class="g-lens"></div><div class="g-lens"></div><div class="g-bridge"></div></div>` : ''}
                         <div class="mouth"></div>
                     </div>
                     ${s ? `<div class="${s.css}">${s.icon}</div>` : ''}
                 </div>
-                ${b ? `<div style="position:relative;width:0;height:0;top:-10px">
-                    <div class="${b.css}"></div>
-                </div>` : ''}
-                <div style="margin-top:20px;font-weight:700;font-size:18px">
-                    Привет, ${state.nick}!
-                </div>
+                ${b ? `<div style="position:relative;width:0;height:0;top:-10px"><div class="${b.css}"></div></div>` : ''}
+                <div style="margin-top:20px;font-weight:700; font-size: 18px">Привет, ${state.nick}!</div>
             </div>
 
             <div class="grid-2">
-                <div class="section" style="margin:0;padding:15px;display:flex;flex-direction:column;align-items:center">
-                    <div class="pie-chart" style="--progress-deg:${progressDeg}deg;">
-                        <div class="pie-center">
-                            <div class="pie-percentage">${completionPercent}%</div>
-                            <div class="pie-label">Задачи</div>
-                        </div>
-                    </div>
-                    <div style="font-size:13px;color:#888;margin-top:10px">
-                        ${done} из ${total} выполнено
-                    </div>
-                </div>
-
                 <div class="section" style="margin:0;text-align:center">
-                    <div style="font-size:36px;font-weight:900;color:var(--gold)">
-                        ${state.streak}
-                    </div>
-                    <div style="font-size:12px;color:#888;text-transform:uppercase">
-                        Дней подряд
-                    </div>
-                    <div class="streak-progress">
-                        <div class="streak-fill" style="width:${streakPercent}%"></div>
-                    </div>
+                    <div style="font-size:24px;font-weight:800;color:var(--primary)">${done}/${state.tasks.length}</div>
+                    <div style="font-size:12px;color:#888">Задачи</div>
+                </div>
+                <div class="section" style="margin:0;text-align:center">
+                    <div style="font-size:24px;font-weight:800;color:var(--gold)">${state.streak}</div>
+                    <div style="font-size:12px;color:#888">Стрик дня</div>
                 </div>
             </div>
 
-            <div class="section">
-                <div style="display:flex;justify-content:space-between;margin-bottom:10px">
-                    <div style="font-size:12px;color:#888">Активность за неделю</div>
-                    <div style="font-size:11px;color:var(--gold)">
-                        Всего: ${state.statsHistory.reduce((a,b)=>a+b.points,0)} pts
-                    </div>
-                </div>
+            <div class="section" style="margin-top: 15px">
+                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">Активность</div>
                 <div class="chart-container">${chartHtml}</div>
             </div>
 
-            <div class="section" style="display:flex;gap:12px;align-items:center">
-                <div style="font-size:28px">🤖</div>
-                <div style="font-size:13px;line-height:1.5;color:#ccc">
-                    <b style="color:var(--accent)">Livi думает:</b><br>${aiTip}
+            <div class="section" style="display:flex; gap:10px; align-items:center; background:linear-gradient(135deg, rgba(139,154,156,0.1), rgba(0,0,0,0))">
+                <div style="font-size:24px">🤖</div>
+                <div style="font-size:13px; line-height:1.4; color:#ccc">
+                    <b>Livi думает:</b><br>${aiTip}
                 </div>
             </div>
         </div>
@@ -816,75 +672,14 @@ function renderHome() {
 }
 
 function renderEducation() {
-    const notesList = state.notes.map(n => {
-        const tagsHtml = n.keywords && n.keywords.length
-            ? `<div class="note-tags">
-                ${n.keywords.map(k => `<span class="note-tag">#${k}</span>`).join('')}
-               </div>`
-            : '';
-
-        return `
+    const notesList = state.notes.map(n => `
         <div class="note-card" onclick="actions.openNote(${n.id})">
             <div class="note-date">
                 <span>${n.date}</span>
                 <span onclick="event.stopPropagation(); actions.deleteNote(${n.id})" style="color:#666">✕</span>
             </div>
             <div class="note-title">${n.title}</div>
-            <div class="note-preview">${n.text.replace(/[*#]/g,'').slice(0,80)}...</div>
-            ${tagsHtml}
-        </div>`;
-    }).join('');
-
-    const transcriptDisplay = currentTranscript || (isRecording ? "Говорите..." : "Текст появится здесь...");
-
-    return `
-    <div class="slide-up">
-        ${renderHeader()}
-        <div class="content">
-            <h2 style="margin-bottom:15px;font-weight:800;text-align:center">
-                УМНЫЙ КОНСПЕКТ
-            </h2>
-
-            <div class="section" style="text-align:center">
-                <div class="transcript-box">
-                    <div class="transcript-text" id="liveTranscript">${transcriptDisplay}</div>
-                    <div class="processing-indicator" id="processingIndicator">
-                        <div class="processing-dot"></div>
-                        <span>AI обрабатывает...</span>
-                    </div>
-                </div>
-
-                <button class="mic-btn ${isRecording ? 'recording' : ''}"
-                    onclick="${isRecording ? 'actions.stopRecording()' : 'actions.startRecording()'}">
-                    ${isRecording
-                        ? '<div class="voice-wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>'
-                        : getIcon('mic')}
-                </button>
-            </div>
-
-            <h3 style="margin:25px 0 10px;font-size:12px;color:#666;text-transform:uppercase">
-                Сохраненные записи
-            </h3>
-            ${notesList || '<div style="text-align:center;color:#555">Пока пусто</div>'}
-        </div>
-    </div>`;
-}
-
-function renderTasks() {
-    const list = state.tasks.map(t => `
-        <div class="section" style="display:flex;align-items:center;opacity:${t.completed ? 0.6 : 1}">
-            <div style="width:24px;height:24px;border:2px solid var(--primary);
-                border-radius:8px;margin-right:12px;
-                background:${t.completed ? 'var(--primary)' : 'transparent'}"
-                onclick="actions.toggleTask(${t.id})">
-            </div>
-            <div style="flex:1">
-                <div style="font-weight:600">${t.title}</div>
-                <div style="font-size:11px;color:#666">${t.points} pts</div>
-            </div>
-            <div onclick="actions.deleteTask(${t.id})" style="cursor:pointer;color:#444">
-                ${getIcon('trash')}
-            </div>
+            <div class="note-preview">${n.text.slice(0, 60)}...</div>
         </div>
     `).join('');
 
@@ -892,8 +687,63 @@ function renderTasks() {
     <div class="slide-up">
         ${renderHeader()}
         <div class="content">
+            <h2 style="margin-bottom:15px;font-weight:800; text-align: center">УМНЫЙ КОНСПЕКТ</h2>
+            <div class="section" style="text-align:center;">
+                <div style="font-size:13px;color:#aaa;margin-bottom:15px; line-height: 1.4;">
+                    Включи запись. AI выделит главное,<br>найдет задачи и оформит текст.
+                </div>
+                <div style="background: #111; padding: 15px; border-radius: 12px; min-height: 80px; margin-bottom: 20px; text-align: left; font-size: 14px; color: #ccc; border: 1px solid #333;" id="liveTranscript">
+                    ${currentTranscript || (isRecording ? "Слушаю..." : "Текст появится здесь...")}
+                </div>
+                <button class="mic-btn ${isRecording ? 'recording' : ''}" onclick="${isRecording ? 'actions.stopRecording()' : 'actions.startRecording()'}">
+                    ${isRecording ? '<div class="voice-wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>' : getIcon('mic')}
+                </button>
+            </div>
+            <h3 style="margin:25px 0 10px;font-weight:700; padding-left: 5px; color:#666; font-size:12px">СОХРАНЕННЫЕ ЗАПИСИ</h3>
+            ${notesList || '<div style="text-align:center;color:#555;padding:20px; font-style: italic;">Пусто</div>'}
+        </div>
+    </div>`;
+}
+
+function renderTasks() {
+    const list = state.tasks.map(t => `
+        <div class="section" style="display:flex;align-items:center;padding:15px;margin-bottom:10px;opacity:${t.completed ? 0.6 : 1}">
+            <div style="width:24px;height:24px;border:2px solid var(--primary);border-radius:8px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:${t.completed ? 'var(--primary)' : 'transparent'}; transition:background 0.2s" onclick="actions.toggleTask(${t.id})">
+                ${t.completed ? '<svg width="14" height="14" stroke="white"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+            </div>
+            <div style="flex:1">
+                <div style="font-weight:600; font-size:15px; text-decoration:${t.completed ? 'line-through' : 'none'}; color:${t.completed?'#777':'#eee'}">${t.title}</div>
+                <div style="font-size:11px;color:#666; margin-top:2px">${t.points} pts • ${t.type === 'habit' ? 'Привычка' : 'Задача'}</div>
+            </div>
+            <div onclick="actions.deleteTask(${t.id})" style="color:#444; padding:5px">${getIcon('trash')}</div>
+        </div>
+    `).join('');
+
+    const challenge = state.dailyChallenge;
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
             <h2 style="margin-bottom:15px;font-weight:800">ЗАДАЧИ</h2>
-            ${list || '<div style="text-align:center;color:#555">Нет задач</div>'}
+            
+            <div class="section challenge-card" onclick="actions.completeChallenge()">
+                <div class="challenge-header">
+                    <div style="color:var(--gold); font-weight:800; font-size:12px; letter-spacing:1px">ЧЕЛЛЕНДЖ ДНЯ</div>
+                    <div style="color:var(--gold); font-weight:bold">+${challenge.reward} pts</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:15px">
+                    <div style="font-size:28px; filter: grayscale(${challenge.completed?1:0})">🔥</div>
+                    <div style="flex:1">
+                        <div style="font-size:18px; font-weight:700; text-decoration: ${challenge.completed?'line-through':''}">${challenge.title}</div>
+                        <div style="font-size:12px; color:#aaa; margin-top:4px">${challenge.completed ? 'Выполнено!' : 'Нажми, чтобы завершить'}</div>
+                    </div>
+                    ${challenge.completed ? '<div style="background:var(--success); color:black; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px">DONE</div>' : ''}
+                </div>
+            </div>
+
+            <div style="margin-top:20px">
+                ${list}
+            </div>
         </div>
         <button class="add-btn" onclick="actions.addTask()">+</button>
     </div>`;
@@ -903,34 +753,39 @@ function renderShop() {
     const inv = state.inventory.map(id => {
         const i = ITEMS.find(x => x.id === id);
         const eq = Object.values(state.equipped).includes(id);
-        const color = i.special
-            ? '#FFA500'
-            : i.rarity === 'legendary'
-                ? 'var(--epic)'
-                : i.rarity === 'rare'
-                    ? 'var(--gold)'
-                    : 'var(--primary)';
-
-        return `
-        <div class="section" style="padding:15px;text-align:center;
-            border-color:${eq ? color : 'var(--glass-border)'}"
-            onclick="actions.equip('${id}')">
-            <div style="font-size:42px">${i.icon}</div>
-            <div style="font-size:11px;color:#aaa">${i.name}</div>
+        const color = i.special ? '#FFA500' : (i.rarity === 'legendary' ? 'var(--epic)' : i.rarity === 'rare' ? 'var(--gold)' : 'var(--primary)');
+        return `<div class="section" style="padding:15px 10px;margin:0;display:flex;flex-direction:column;align-items:center; border-color:${eq ? color : 'var(--glass-border)'}; box-shadow:${eq?'0 0 15px '+color+'40':'none'}" onclick="actions.equip('${id}')">
+            <div style="font-size:42px;margin-bottom:10px; filter:drop-shadow(0 5px 5px rgba(0,0,0,0.5))">${i.icon}</div>
+            <div style="font-size:11px;color:#aaa;text-align:center;font-weight:600">${i.name}</div>
+            ${eq ? `<div style="width:6px;height:6px;background:${color};border-radius:50%;margin-top:8px"></div>` : ''}
         </div>`;
     }).join('');
-
     return `
     <div class="slide-up">
         ${renderHeader()}
         <div class="content">
-            <div style="text-align:center;margin-bottom:20px">
-                <div style="font-size:48px;font-weight:900;color:var(--gold)">
-                    ${state.totalPoints}
+            <div style="text-align:center;margin-bottom:25px">
+                <div style="font-size:12px;color:#888; letter-spacing:1px; margin-bottom:5px">БАЛАНС</div>
+                <div style="font-size:42px;font-weight:900;color:var(--gold); text-shadow: 0 0 20px rgba(212,175,122,0.2)">${state.totalPoints}</div>
+            </div>
+            <div class="chest-wrapper">
+                <div class="chest-card chest-common" onclick="actions.openChest('common', 150)">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div style="font-weight:800;font-size:18px;">Базовый ящик</div>
+                        <div style="font-size:14px;color:#bbb">150 pts</div>
+                    </div>
+                    <div style="font-size:12px;opacity:0.6;margin-top:5px">Обычные предметы и аксессуары</div>
+                </div>
+                <div class="chest-card chest-rare" onclick="actions.openChest('rare', 300)">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div style="font-weight:800;font-size:18px;color:var(--gold)">Редкий ящик</div>
+                        <div style="font-size:14px;color:var(--gold)">300 pts</div>
+                    </div>
+                    <div style="font-size:12px;opacity:0.6;margin-top:5px; color:var(--gold)">Повышенный шанс легендарки</div>
                 </div>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-                ${inv || '<div style="grid-column:1/-1;text-align:center;color:#444">Инвентарь пуст</div>'}
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px">
+                ${inv || '<div style="grid-column:1/-1;text-align:center;color:#444;padding:20px">Инвентарь пуст</div>'}
             </div>
         </div>
     </div>`;
@@ -941,19 +796,26 @@ function renderProfile() {
     <div class="slide-up">
         ${renderHeader()}
         <div class="content" style="text-align:center">
-            <div class="profile-btn" style="width:100px;height:100px;margin:0 auto 20px">
-                <img src="${state.avatar || 'https://via.placeholder.com/100?text=👤'}">
+            <h2 style="margin-bottom:30px;font-weight:800">ПРОФИЛЬ</h2>
+            <div class="profile-btn" style="width:100px;height:100px;margin:0 auto 20px; border-width:3px">
+                <img src="${state.avatar || 'https://via.placeholder.com/100?text=👤'}" alt="Avatar">
             </div>
-            <div style="font-size:28px;font-weight:800">${state.nick}</div>
-            <div style="font-size:11px;color:#444;margin-top:10px">
-                ID: ${userId}
+            <div style="font-size:28px;font-weight:800;margin-bottom:5px">${state.nick}</div>
+            <div style="font-size:14px;color:#888;margin-bottom:30px">Уровень: Новичок</div>
+            
+            <div class="section" style="margin-top:20px; text-align:left">
+                <div style="font-weight:bold;margin-bottom:10px; color:var(--accent)">Пригласить друга</div>
+                <div style="font-size:13px; color:#999; margin-bottom:15px">Получи 500 очков за каждого друга.</div>
+                <div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:12px;margin:10px 0;font-family:monospace;font-size:12px;color:#fff;word-break:break-all;border:1px dashed #444">https://t.me/livi_app_bot?start=ref${userId}</div>
+                <button class="btn btn-primary" onclick="actions.copyReferral()">Копировать ссылку</button>
             </div>
+            <div style="margin-top:20px; font-size:12px; color:#444">ID: ${userId}</div>
         </div>
     </div>`;
 }
+
 function render() {
     let html = '';
-
     if (state.activeTab === 'home') html = renderHome();
     else if (state.activeTab === 'tasks') html = renderTasks();
     else if (state.activeTab === 'education') html = renderEducation();
@@ -962,22 +824,10 @@ function render() {
 
     document.getElementById('app').innerHTML = html + `
     <div class="bottom-nav">
-        <button class="nav-item ${state.activeTab==='home'?'active':''}"
-            onclick="state.activeTab='home';saveAll();render()">
-            ${getIcon('home')}
-        </button>
-        <button class="nav-item ${state.activeTab==='tasks'?'active':''}"
-            onclick="state.activeTab='tasks';saveAll();render()">
-            ${getIcon('check')}
-        </button>
-        <button class="nav-item ${state.activeTab==='education'?'active':''}"
-            onclick="state.activeTab='education';saveAll();render()">
-            ${getIcon('book')}
-        </button>
-        <button class="nav-item ${state.activeTab==='shop'?'active':''}"
-            onclick="state.activeTab='shop';saveAll();render()">
-            ${getIcon('shop')}
-        </button>
+        <button class="nav-item ${state.activeTab==='home'?'active':''}" onclick="state.activeTab='home';saveAll();render()">${getIcon('home')}</button>
+        <button class="nav-item ${state.activeTab==='tasks'?'active':''}" onclick="state.activeTab='tasks';saveAll();render()">${getIcon('check')}</button>
+        <button class="nav-item ${state.activeTab==='education'?'active':''}" onclick="state.activeTab='education';saveAll();render()">${getIcon('book')}</button>
+        <button class="nav-item ${state.activeTab==='shop'?'active':''}" onclick="state.activeTab='shop';saveAll();render()">${getIcon('shop')}</button>
     </div>`;
 }
 
@@ -985,20 +835,12 @@ function render() {
 function startRoulette(type) {
     const modal = document.getElementById('rouletteModal');
     modal.classList.remove('hidden');
-
     const strip = document.getElementById('rouletteStrip');
-    strip.innerHTML = '';
-    strip.style.transition = 'none';
-    strip.style.transform = 'translateX(0px)';
-
-    let pool = type === 'common'
-        ? ITEMS.filter(i => i.rarity !== 'legendary')
-        : ITEMS;
-
+    strip.innerHTML = ''; strip.style.transition = 'none'; strip.style.transform = 'translateX(0px)';
+    
+    let pool = type === 'common' ? ITEMS.filter(i => i.rarity !== 'legendary') : ITEMS;
     let winner = pool[Math.floor(Math.random() * pool.length)];
-    if (type === 'rare' && Math.random() > 0.7) {
-        winner = ITEMS.find(i => i.rarity === 'legendary') || winner;
-    }
+    if(type === 'rare' && Math.random() > 0.7) winner = ITEMS.find(i=>i.rarity === 'legendary') || winner;
 
     for (let i = 0; i < 60; i++) {
         const item = i === 50 ? winner : pool[Math.floor(Math.random() * pool.length)];
@@ -1009,34 +851,19 @@ function startRoulette(type) {
     }
 
     setTimeout(() => {
-        const offset =
-            (document.querySelector('.roulette-window').offsetWidth / 2) - 64;
-
+        const offset = (document.querySelector('.roulette-window').offsetWidth / 2) - 64;
         strip.style.transition = 'transform 6s cubic-bezier(0.1, 0.9, 0.2, 1)';
-        strip.style.transform =
-            `translateX(-${(50 * 128) - offset}px)`;
-
+        strip.style.transform = `translateX(-${(50 * 128) - offset}px)`;
         setTimeout(() => {
-            if (tg) tg.HapticFeedback.notificationOccurred('success');
-
+            if(tg) tg.HapticFeedback.notificationOccurred('success');
             document.getElementById('winItemName').innerText = winner.name;
             document.getElementById('winMessage').style.opacity = '1';
-
-            if (!state.inventory.includes(winner.id)) {
-                state.inventory.push(winner.id);
-                saveAll();
-            }
+            if (!state.inventory.includes(winner.id)) { state.inventory.push(winner.id); saveAll(); }
         }, 6200);
     }, 100);
 }
+function closeRoulette() { document.getElementById('rouletteModal').classList.add('hidden'); render(); }
 
-function closeRoulette() {
-    document.getElementById('rouletteModal').classList.add('hidden');
-    document.getElementById('winMessage').style.opacity = '0';
-    render();
-}
-
-// --- START ---
 document.addEventListener('DOMContentLoaded', async () => {
     initStars();
     await loadState();
