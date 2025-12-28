@@ -16,14 +16,6 @@
     --glass: rgba(255,255,255,0.03);
     --glass-border: rgba(255,255,255,0.08);
     --glass-highlight: rgba(255,255,255,0.15);
-    
-    /* Новые пастельные цвета */
-    --pastel-green: #b8e994;
-    --pastel-red: #ff7675;
-    --pastel-yellow: #ffeaa7;
-    --pastel-purple: #a29bfe;
-    --pastel-blue: #74b9ff;
-
     --danger: #ff4757;
     --success: #2ed573;
     --warning: #ffa502;
@@ -51,6 +43,7 @@ body{
 @keyframes pulse-red {0% {box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4);} 70% {box-shadow: 0 0 0 20px rgba(255, 71, 87, 0);} 100% {box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);}}
 @keyframes wave {0%, 100% {height: 10px;} 50% {height: 30px;}}
 @keyframes twinkle {0%, 100% {opacity: 0.2; transform: scale(1);} 50% {opacity: 0.8; transform: scale(1.5);}}
+@keyframes shimmer {0% {background-position: -200% 0;} 100% {background-position: 200% 0;}}
 
 .fade-in{animation:fadeIn .4s ease-out}
 .slide-up{animation:slideUp .4s ease-out}
@@ -117,6 +110,7 @@ body{
     transition: transform 0.2s, box-shadow 0.2s;
 }
 .section:active { transform: scale(0.99); }
+/* Noise texture for detail */
 .section::before {
     content: ''; position: absolute; inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
@@ -124,19 +118,11 @@ body{
 }
 .section > * { position: relative; z-index: 1; }
 
-/* AI Analysis Box */
-.ai-insight-box {
-    background: linear-gradient(135deg, rgba(162, 155, 254, 0.1) 0%, rgba(0,0,0,0) 100%);
-    border: 1px solid rgba(162, 155, 254, 0.2);
-    display: flex; gap: 12px; align-items: flex-start;
-}
-.ai-insight-title { font-size: 11px; text-transform: uppercase; color: var(--pastel-purple); letter-spacing: 1px; font-weight: 700; margin-bottom: 5px; }
-.ai-insight-text { font-size: 13px; line-height: 1.5; color: #ddd; }
-
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
 .btn{width:100%;padding:16px;border-radius:16px;font-weight:700;font-size:16px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;position:relative;overflow:hidden}
 .btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:white; box-shadow: 0 4px 15px rgba(139,154,156,0.3)}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888}
 .add-btn {position: fixed;bottom: 90px;right: 20px;width: 60px;height: 60px;border-radius: 30px;background: linear-gradient(135deg, var(--primary), var(--accent));color: white;font-size: 32px;border: none;box-shadow: 0 4px 20px rgba(139,154,156,0.5);z-index: 80;display: flex;align-items: center;justify-content: center;cursor: pointer;transition: transform 0.2s;}
 .add-btn:active {transform: scale(0.95);}
 
@@ -145,14 +131,14 @@ body{
 .nav-item.active{color:var(--primary)}
 .nav-item.active svg {filter: drop-shadow(0 0 8px var(--primary));}
 
-/* Stats Chart CSS */
+/* Stats Chart CSS - REPLACED WITH CANVAS CONTAINER */
 .chart-wrapper {
     position: relative;
     height: 200px;
     width: 100%;
 }
 
-/* Challenge Card */
+/* Challenge Card Styles */
 .challenge-card {
     background: linear-gradient(135deg, rgba(212,175,122,0.1) 0%, rgba(0,0,0,0) 100%);
     border: 1px solid rgba(212,175,122,0.3);
@@ -193,16 +179,15 @@ body{
 .note-modal {position: fixed; inset: 0; background: #080808; z-index: 3000; display: flex; flex-direction: column; padding: 20px; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); transform: translateY(100%);}
 .note-modal.open {transform: translateY(0);}
 .note-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;}
-.note-title-input {background: transparent; border: none; font-weight: 800; font-size: 20px; color: var(--gold); width: 100%; outline: none;}
 .note-textarea {flex: 1; background: transparent; border: none; color: #eee; font-size: 16px; line-height: 1.6; resize: none; outline: none; font-family: inherit; padding-bottom: 100px;}
 .ai-actions {display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px;}
 .ai-chip {background: rgba(139,154,156,0.1); padding: 8px 16px; border-radius: 20px; font-size: 12px; color: var(--accent); white-space: nowrap; border: 1px solid rgba(139,154,156,0.2); cursor: pointer;}
 
 /* Task Details */
 .priority-dot {width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px;}
-.p-high {background: var(--pastel-red); box-shadow: 0 0 5px var(--pastel-red);}
-.p-med {background: var(--pastel-yellow); box-shadow: 0 0 5px var(--pastel-yellow);}
-.p-low {background: var(--pastel-green);}
+.p-high {background: var(--danger); box-shadow: 0 0 5px var(--danger);}
+.p-med {background: var(--warning); box-shadow: 0 0 5px var(--warning);}
+.p-low {background: var(--success);}
 
 /* Particles */
 .particle-container {position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;}
@@ -234,13 +219,13 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 
 <div id="noteModal" class="note-modal">
     <div class="note-header">
-        <input type="text" id="noteTitleInput" class="note-title-input" placeholder="Название заметки...">
+        <div style="font-weight: 800; font-size: 20px; color: var(--gold)" id="modalTitle">Заметка</div>
         <div onclick="actions.closeNote()" style="padding: 10px; cursor: pointer;">✕</div>
     </div>
     <div class="ai-actions">
         <div class="ai-chip" onclick="actions.enhanceNote()">⚡ AI Структура</div>
-        <div class="ai-chip" onclick="actions.replaceWithSummary()">🧠 Главная мысль</div>
-        <div class="ai-chip" onclick="actions.replaceWithTasks()">✅ Найти задачи</div>
+        <div class="ai-chip" onclick="actions.addSummary()">🧠 Главная мысль</div>
+        <div class="ai-chip" onclick="actions.extractTasks()">✅ Найти задачи</div>
     </div>
     <textarea id="modalText" class="note-textarea" placeholder="Текст заметки..."></textarea>
     <button class="btn btn-primary" onclick="actions.saveAndCloseNote()" style="margin-top: auto;">СОХРАНИТЬ</button>
@@ -420,12 +405,13 @@ function updateHistory(pointsDelta) {
     saveAll();
 }
 
-// --- UPGRADED AI ENGINE ---
+// --- UPGRADED AI ENGINE (HEURISTIC) ---
 const AI = {
     stopWords: ['и', 'в', 'во', 'не', 'на', 'я', 'с', 'со', 'как', 'а', 'то', 'все', 'она', 'так', 'его', 'но', 'да', 'ты', 'к', 'у', 'же', 'вы', 'за', 'бы', 'по', 'только', 'ее', 'мне', 'было', 'вот', 'от', 'меня', 'еще', 'нет', 'о', 'из', 'ему', 'теперь', 'когда', 'даже', 'ну', 'вдруг', 'ли', 'если', 'уже', 'или', 'ни', 'быть', 'был', 'него', 'до', 'вас', 'нибудь', 'опять', 'уж', 'вам', 'ведь', 'там', 'потом', 'себя', 'ничего', 'ей', 'может', 'они', 'тут', 'где', 'есть', 'надо', 'ней', 'для', 'мы', 'тебя', 'их', 'чем', 'была', 'сам', 'чтоб', 'без', 'будто', 'чего', 'раз', 'тоже', 'себе', 'под', 'будет', 'ж', 'тогда', 'кто', 'этот', 'того', 'потому', 'этого', 'какой', 'совсем', 'ним', 'здесь', 'этом', 'один', 'почти', 'мой', 'тем', 'чтобы', 'нее', 'сейчас', 'были', 'куда', 'зачем', 'всех', 'никогда', 'можно', 'при', 'наконец', 'два', 'об', 'другой', 'хоть', 'после', 'над', 'больше', 'тот', 'через', 'эти', 'нас', 'про', 'всего', 'них', 'какая', 'много', 'разве', 'три', 'эту', 'моя', 'впрочем', 'хорошо', 'свою', 'этой', 'перед', 'иногда', 'лучше', 'чуть', 'том', 'нельзя', 'такой', 'им', 'более', 'всегда', 'конечно', 'всю', 'между'],
 
     clean: (text) => text.replace(/\s+/g, ' ').trim(),
     
+    // Подсчет частоты слов (TF - Term Frequency)
     getWordFrequencies: (text) => {
         const words = text.toLowerCase().replace(/[.,!?;:()]/g, '').split(/\s+/);
         const freqs = {};
@@ -437,9 +423,11 @@ const AI = {
         return freqs;
     },
 
+    // Оценка предложений на основе ключевых слов
     scoreSentences: (text) => {
         const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
         const freqs = AI.getWordFrequencies(text);
+        const maxFreq = Math.max(...Object.values(freqs), 1);
         
         return sentences.map(s => {
             let score = 0;
@@ -448,53 +436,63 @@ const AI = {
                 const cleanW = w.replace(/[^а-яёa-z]/gi, '');
                 if (freqs[cleanW]) score += freqs[cleanW];
             });
+            // Бонус за "сигнальные слова"
             if (s.match(/(важно|суть|вывод|итак|значит|поэтому|запомнить)/i)) score *= 1.5;
+            // Нормализация по длине (чтобы короткие предложения не страдали)
             return { text: s.trim(), score: score / (words.length || 1) };
         });
     },
 
     structure: (text) => {
         let processed = text;
+        // Определение определений (Тире)
         processed = processed.replace(/([а-яА-Яa-zA-Z]+)\s*-\s*([а-яА-Яa-zA-Z].+?)(?=[.!?]|$)/g, "**$1** — $2");
+        // Абзацы
         processed = processed.replace(/([.!?])\s*(?=[А-Я])/g, "$1\n\n");
+        // Списки: слова "во-первых", "во-вторых", "пункт" или тире в начале строки
         processed = processed.replace(/(\n|^)\s*-\s*/g, "\n• ");
         processed = processed.replace(/(Во-первых|Во-вторых|В-третьих),?/gi, "\n🔹 $1:");
+        
         return processed;
     },
 
     extractSummary: (text) => {
         const scored = AI.scoreSentences(text);
+        // Сортируем по весу и берем топ-30%
         const count = Math.max(1, Math.ceil(scored.length * 0.3));
         const topSentences = [...scored].sort((a,b) => b.score - a.score).slice(0, count);
-        return topSentences.map(s => "🔸 " + s.text).join('\n');
+        
+        // Восстанавливаем порядок предложений, чтобы текст был связным
+        // Но для summary лучше просто взять самые "жирные" мысли
+        const result = topSentences.map(s => "🔸 " + s.text).join('\n');
+
+        return "📌 ГЛАВНАЯ МЫСЛЬ:\n" + result;
     },
 
     findTasks: (text) => {
+        // Улучшенный поиск глаголов действия
         const verbs = ['сделать', 'купить', 'прочитать', 'написать', 'отправить', 'позвонить', 'найти', 'изучить', 'подготовить', 'встретиться'];
         const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
         let tasks = [];
+        
         sentences.forEach(s => {
             const lower = s.toLowerCase();
+            // Проверка на глаголы в повелительном наклонении или инфинитиве (эвристика)
             if (verbs.some(v => lower.includes(v))) {
+                // Очистка от мусора
                 let t = s.trim();
                 if(t.length < 100) tasks.push("◻️ " + t);
             }
         });
-        return tasks.length > 0 ? tasks.join('\n') : "Задач не обнаружено.";
+        
+        return tasks.length > 0 ? "\n\n✅ ОБНАРУЖЕННЫЕ ЗАДАЧИ:\n" + tasks.join('\n') : "\n\n✅ Задач не найдено";
     },
     
     getTip: (text) => {
-        if (!text || text.length < 20) return { title: "Наблюдение", text: "Пока мало данных. Создай первую заметку, чтобы я могла проанализировать твой фокус." };
-        
+        if (!text || text.length < 20) return "Livi ждет твоих мыслей...";
         const freqs = AI.getWordFrequencies(text);
-        const topWords = Object.entries(freqs).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]);
-        
-        if (topWords.length === 0) return { title: "Наблюдение", text: "Продолжай вести записи, и я найду закономерности." };
-        
-        return {
-            title: "Твой фокус сегодня",
-            text: `Ты часто упоминаешь темы: <b>${topWords.join(", ")}</b>. Возможно, стоит превратить это в конкретные задачи?`
-        };
+        const topWords = Object.entries(freqs).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]).join(", ");
+        return `Похоже, речь про: ${topWords}. Стоит выделить это в отдельную категорию.`;
     }
 };
 
@@ -523,8 +521,10 @@ const actions = {
         }
     },
     addTask: () => {
+        // Простая эмуляция модального окна добавления через prompt для сохранения структуры
         const title = prompt("Название задачи:");
         if (title) {
+            // Эвристика: если есть слово "важно" -> high priority
             const isUrgent = title.toLowerCase().includes('важно') || title.toLowerCase().includes('срочно');
             const priority = isUrgent ? 'high' : 'med';
             
@@ -610,19 +610,14 @@ const actions = {
         const note = state.notes.find(n => n.id === id);
         if (!note) return;
         editingNoteId = id;
-        document.getElementById('noteTitleInput').value = note.title;
+        document.getElementById('modalTitle').innerText = note.title;
         document.getElementById('modalText').value = note.text;
         document.getElementById('noteModal').classList.add('open');
     },
     saveAndCloseNote: () => {
         const text = document.getElementById('modalText').value;
-        const title = document.getElementById('noteTitleInput').value || 'Без названия';
         const note = state.notes.find(n => n.id === editingNoteId);
-        if (note) { 
-            note.text = text; 
-            note.title = title;
-            saveAll(); 
-        }
+        if (note) { note.text = text; saveAll(); }
         actions.closeNote(); render();
     },
     closeNote: () => { document.getElementById('noteModal').classList.remove('open'); editingNoteId = null; },
@@ -641,19 +636,14 @@ const actions = {
         }, 500);
         if(tg) tg.HapticFeedback.notificationOccurred('selection');
     },
-    replaceWithSummary: () => {
+    addSummary: () => {
         const f = document.getElementById('modalText');
-        if (!f.value) return;
         const summary = AI.extractSummary(f.value);
-        f.value = "📌 СЖАТАЯ СУТЬ:\n" + summary;
-        if(tg) tg.HapticFeedback.notificationOccurred('impact');
+        f.value = summary + "\n\n---\n" + f.value;
     },
-    replaceWithTasks: () => {
+    extractTasks: () => {
         const f = document.getElementById('modalText');
-        if (!f.value) return;
-        const tasks = AI.findTasks(f.value);
-        f.value = "✅ СПИСОК ДЕЛ:\n" + tasks;
-        if(tg) tg.HapticFeedback.notificationOccurred('impact');
+        f.value = f.value + AI.findTasks(f.value);
     },
     openProfile: () => { state.activeTab = 'profile'; render(); },
     copyReferral: () => {
@@ -684,7 +674,7 @@ function renderHome() {
     
     // AI Tip
     const lastNote = state.notes.length > 0 ? state.notes[0].text : "";
-    const aiInsight = AI.getTip(lastNote);
+    const aiTip = AI.getTip(lastNote);
 
     return `
     <div class="slide-up">
@@ -731,19 +721,15 @@ function renderHome() {
             
             <div class="grid-2">
                  <div class="section" style="margin:0">
-                    <div style="font-size:12px;color:#888;margin-bottom:5px;">Баланс Энергии</div>
+                    <div style="font-size:12px;color:#888;margin-bottom:5px;">Типы задач</div>
                     <div style="height:100px; position:relative">
                         <canvas id="taskDistributionChart"></canvas>
                     </div>
                  </div>
-                 
-                 <div class="section ai-insight-box" style="margin:0; flex-direction: column; gap: 5px;">
-                    <div style="display:flex; align-items:center; gap:6px; width:100%">
-                        <span style="font-size:16px">✨</span>
-                        <div class="ai-insight-title">${aiInsight.title}</div>
-                    </div>
-                    <div class="ai-insight-text">
-                        ${aiInsight.text}
+                 <div class="section" style="margin:0; display:flex; flex-direction:column; justify-content:center; align-items:center; background:linear-gradient(135deg, rgba(139,154,156,0.1), rgba(0,0,0,0))">
+                    <div style="font-size:24px; margin-bottom:5px">🤖</div>
+                    <div style="font-size:11px; line-height:1.4; color:#ccc; text-align:center">
+                        <b>Livi:</b> ${aiTip}
                     </div>
                  </div>
             </div>
@@ -788,7 +774,7 @@ function renderEducation() {
 
 function renderTasks() {
     const list = state.tasks.map(t => `
-        <div class="section" style="padding:15px;margin-bottom:10px;opacity:${t.completed ? 0.6 : 1}; border-left: 4px solid ${t.priority === 'high' ? 'var(--pastel-red)' : t.priority === 'med' ? 'var(--pastel-yellow)' : 'var(--pastel-green)'}">
+        <div class="section" style="padding:15px;margin-bottom:10px;opacity:${t.completed ? 0.6 : 1}; border-left: 4px solid ${t.priority === 'high' ? 'var(--danger)' : t.priority === 'med' ? 'var(--warning)' : 'var(--success)'}">
             <div style="display:flex;align-items:center;">
                 <div style="width:24px;height:24px;border:2px solid var(--primary);border-radius:8px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:${t.completed ? 'var(--primary)' : 'transparent'}; transition:background 0.2s; flex-shrink:0" onclick="actions.toggleTask(${t.id})">
                     ${t.completed ? '<svg width="14" height="14" stroke="white"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
@@ -915,20 +901,18 @@ function initCharts() {
         const dataPoints = state.statsHistory.map(h => h.points);
 
         activityChart = new Chart(ctxActivity, {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Очки',
                     data: dataPoints,
-                    backgroundColor: (ctx) => {
-                        const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 200);
-                        gradient.addColorStop(0, '#A8C4C6');
-                        gradient.addColorStop(1, '#8B9A9C');
-                        return gradient;
-                    },
-                    borderRadius: 4,
-                    barPercentage: 0.6
+                    borderColor: '#A8C4C6',
+                    backgroundColor: 'rgba(168, 196, 198, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointBackgroundColor: '#fff',
+                    fill: true
                 }]
             },
             options: {
@@ -936,15 +920,8 @@ function initCharts() {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { grid: { display: false }, ticks: { color: '#666', font:{size:10} } },
-                    y: { display: false, min: 0 } // min:0 keeps scale sensible
-                },
-                // IMPORTANT: ensures bars are visible even if value is 0
-                indexAxis: 'x',
-                datasets: {
-                    bar: {
-                        minBarLength: 5 
-                    }
+                    x: { grid: { display: false, color: '#333' }, ticks: { color: '#666', font:{size:10} } },
+                    y: { display: false, grid: { color: '#222' } }
                 },
                 animation: { duration: 1500, easing: 'easeOutQuart' }
             }
@@ -955,26 +932,25 @@ function initCharts() {
     if (ctxTask) {
         if (taskChart) taskChart.destroy();
         
-        // Mock data for balance based on task tags or random for now to look good
-        // In real app, you would count tags: Work, Study, Health
-        const data = [40, 30, 30]; 
+        const habitCount = state.tasks.filter(t => t.type === 'habit').length;
+        const taskCount = state.tasks.filter(t => t.type === 'task').length;
 
         taskChart = new Chart(ctxTask, {
             type: 'doughnut',
             data: {
-                labels: ['Творчество', 'Дисциплина', 'Отдых'],
+                labels: ['Привычки', 'Задачи'],
                 datasets: [{
-                    data: data,
-                    backgroundColor: ['#a29bfe', '#ffeaa7', '#b8e994'], // Pastel colors
+                    data: [habitCount, taskCount],
+                    backgroundColor: ['#D4AF7A', '#8B9A9C'],
                     borderWidth: 0,
-                    hoverOffset: 6
+                    hoverOffset: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                cutout: '75%',
+                cutout: '70%',
                 animation: { animateScale: true }
             }
         });
