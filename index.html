@@ -35,7 +35,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .header-title{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header-stats{display:flex;gap:10px;align-items:center}
 .stat-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-weight:700;font-size:14px;background:var(--glass);border:1px solid rgba(255,255,255,0.05)}
-.profile-btn{width:40px;height:40px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 15px rgba(139,154,156,0.3)}
+.profile-btn{width:40px;height:40px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 15px rgba(139,154,156,0.3);font-size:20px}
 
 .livi-container{display:flex;flex-direction:column;align-items:center;padding:30px 0;position:relative}
 .livi-body{
@@ -139,7 +139,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .copy-btn {background:var(--primary);color:white;padding:10px 20px;border-radius:12px;margin-top:8px}
 
 .profile-avatar {width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);margin-bottom:15px}
-.profile-nick {font-size:24px;font-weight:800;margin-bottom:10px}
+.profile-nick {font-size:24px;font-weight:800;margin-bottom:10px;color:var(--accent)}
 
 svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
@@ -166,29 +166,39 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 <div id="app"></div>
 
 <script>
-const tg = window.Telegram.WebApp;
-tg.expand(); tg.ready(); tg.setHeaderColor('#141414'); tg.setBackgroundColor('#141414');
+// Безопасная работа с Telegram WebApp
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+if (tg) {
+    tg.expand();
+    tg.ready();
+    tg.setHeaderColor('#141414');
+    tg.setBackgroundColor('#141414');
+}
 
-const userId = tg.initDataUnsafe.user?.id || 'local';
-const username = tg.initDataUnsafe.user?.username || '';
-const firstName = tg.initDataUnsafe.user?.first_name || 'User';
-const photoUrl = tg.initDataUnsafe.user?.photo_url || '';
+// Данные пользователя
+const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'local';
+const firstName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name || 'User' : 'User';
+const username = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.username || '' : '';
+const photoUrl = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.photo_url || '' : '';
 
-const CloudStorage = tg.CloudStorage;
+// CloudStorage с fallback
+const CloudStorage = tg ? tg.CloudStorage : {
+    setItem: () => Promise.resolve(),
+    getItem: () => Promise.resolve(''),
+};
 
 const icons = {
     home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
     check: '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
     users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><circle cx="16" cy="7" r="4"/>',
     shop: '<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>',
-    chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
     star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
     trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
     shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
     fire: '<path d="M8 22s3-8 3-13c0-3-2-5-5-5 1-3 5-5 5-8 2 4 6 5 8 5 2 0 6-1 8 5 0 3-4 5-5 5-1 4 3 13 3 13H8z"/>',
     user: '<circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>'
 };
-const getIcon = (n) => `<svg>${icons[n]}</svg>`;
+const getIcon = (n) => `<svg viewBox="0 0 24 24">${icons[n]}</svg>`;
 
 const ITEMS = [
     { id: 'c_cap', name: 'Кепка', type: 'head', rarity: 'common', icon: '🧢', css: 'item-cap' },
@@ -250,7 +260,7 @@ async function saveToCloud() {
             total += 1;
         }
         await CloudStorage.setItem(`group_fire_${today}`, total.toString());
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error('Cloud sync error:', e); }
     isSyncing = false;
 }
 
@@ -264,7 +274,7 @@ async function loadFromCloud() {
         if (globalFire) state.groupChallenge.current = parseInt(globalFire) || 0;
 
         return true;
-    } catch (e) { return false; }
+    } catch (e) { console.error('Load error:', e); return false; }
 }
 
 function updateHistory(pointsDelta = 0, completedTask = false) {
@@ -281,7 +291,9 @@ function updateHistory(pointsDelta = 0, completedTask = false) {
 }
 
 function saveState() {
-    localStorage.setItem('livi_v4_pro', JSON.stringify(state));
+    try {
+        localStorage.setItem('livi_v4_pro', JSON.stringify(state));
+    } catch (e) {}
     saveToCloud();
 }
 
@@ -294,17 +306,21 @@ function hadActivityYesterday() {
 
 async function loadState() {
     const today = new Date().toISOString().split('T')[0];
-    await loadFromCloud() || (() => {
-        const saved = localStorage.getItem('livi_v4_pro');
-        if (saved) state = { ...defaultState, ...JSON.parse(saved) };
-    })();
+
+    const loaded = await loadFromCloud();
+    if (!loaded) {
+        try {
+            const saved = localStorage.getItem('livi_v4_pro');
+            if (saved) state = { ...defaultState, ...JSON.parse(saved) };
+        } catch (e) {}
+    }
 
     if (state.lastVisitDate !== today) {
         const yesterdayActive = hadActivityYesterday();
         if (!yesterdayActive && state.hasStreakInsurance) {
             state.hasStreakInsurance = false;
             if (state.equipped.special === 'insurance') state.equipped.special = null;
-            tg.showPopup({title:'🛡️', message:'Страховка спасла стрик!', buttons:[{type:'ok'}]});
+            if (tg) tg.showPopup({title:'🛡️', message:'Страховка спасла стрик!', buttons:[{type:'ok'}]});
         } else if (!yesterdayActive) {
             state.streak = 1;
         } else {
@@ -312,14 +328,18 @@ async function loadState() {
         }
 
         state.lastVisitDate = today;
+
+        const challenges = ['Выполнить 3 задачи','Набрать 100 очков','Сделать 20 шагов','Пройти 5 км'];
         state.dailyChallenge = {
             date: today,
-            title: ['Выполнить 3 задачи','Набрать 100 очков','Сделать 20 шагов','Пройти 5 км'][Math.floor(Math.random()*4)],
+            title: challenges[Math.floor(Math.random() * challenges.length)],
             completed: false,
             reward: 50
         };
+
         state.groupChallenge.personalContributedToday = false;
         state.tasks.forEach(t => { if (t.type === 'habit') t.completed = false; });
+
         saveState();
     }
 
@@ -333,22 +353,30 @@ const actions = {
         const task = state.tasks.find(t => t.id === id);
         if (!task) return;
         task.completed = !task.completed;
-        if (task.completed) state.totalPoints += task.points, updateHistory(task.points, true);
-        else state.totalPoints -= task.points, updateHistory(-task.points);
-        tg.HapticFeedback.notificationOccurred('success');
-        saveState(); render();
+        if (task.completed) {
+            state.totalPoints += task.points;
+            updateHistory(task.points, true);
+        } else {
+            state.totalPoints -= task.points;
+            updateHistory(-task.points);
+        }
+        if (tg) tg.HapticFeedback.notificationOccurred('success');
+        saveState();
+        render();
     },
     addTask: () => {
         const title = prompt("Что нужно сделать?");
-        if (title?.trim()) {
+        if (title && title.trim()) {
             state.tasks.push({ id: Date.now(), title: title.trim(), completed: false, type: 'task', points: 15 });
-            saveState(); render();
+            saveState();
+            render();
         }
     },
     deleteTask: (id) => {
         if (confirm("Удалить?")) {
             state.tasks = state.tasks.filter(t => t.id !== id);
-            saveState(); render();
+            saveState();
+            render();
         }
     },
     completeChallenge: () => {
@@ -362,8 +390,9 @@ const actions = {
             state.groupChallenge.current += 1;
             saveToCloud();
         }
-        tg.HapticFeedback.notificationOccurred('success');
-        saveState(); render();
+        if (tg) tg.HapticFeedback.notificationOccurred('success');
+        saveState();
+        render();
     },
     equip: (id) => {
         const item = ITEMS.find(i => i.id === id);
@@ -374,15 +403,22 @@ const actions = {
         } else {
             state.equipped[item.type] = state.equipped[item.type] === id ? null : id;
         }
-        saveState(); render();
+        saveState();
+        render();
     },
     openChest: (type, cost) => {
-        if (state.totalPoints < cost) return alert("Не хватает очков!");
+        if (state.totalPoints < cost) {
+            alert("Не хватает очков!");
+            return;
+        }
         state.totalPoints -= cost;
         updateHistory(-cost);
         startRoulette(type);
     },
-    openProfile: () => { state.activeTab = 'profile'; render(); },
+    openProfile: () => {
+        state.activeTab = 'profile';
+        render();
+    },
     saveNick: () => {
         const newNick = prompt("Введите новый ник:", state.nick);
         if (newNick && newNick.trim()) {
@@ -393,19 +429,69 @@ const actions = {
     },
     copyReferral: () => {
         const link = `https://t.me/livi_app_bot?start=ref${userId}`;
-        navigator.clipboard.writeText(link);
-        tg.HapticFeedback.success();
-        alert("Ссылка скопирована!");
+        navigator.clipboard.writeText(link).then(() => {
+            if (tg) tg.HapticFeedback.notificationOccurred('success');
+            alert("Ссылка скопирована!");
+        });
     },
     shareReferral: () => {
         const link = `https://t.me/livi_app_bot?start=ref${userId}`;
-        tg.shareUrl(link, `Присоединяйся к Livi! Получи бонусы за регистрацию: +100 очков и +5 🔥`);
+        const text = "Присоединяйся к Livi! Получи бонусы за регистрацию: +100 очков и +5 🔥";
+        if (tg) tg.shareUrl(link, text);
+        else location.href = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
     }
 };
 
 function startRoulette(type) {
-    // (полный код рулетки — без изменений из предыдущей версии)
-    // ... (оставляем как было)
+    const modal = document.getElementById('rouletteModal');
+    const strip = document.getElementById('rouletteStrip');
+    const winMsg = document.getElementById('winMessage');
+
+    modal.classList.remove('hidden');
+    winMsg.style.opacity = '0';
+    strip.innerHTML = '';
+    strip.style.transition = 'none';
+    strip.style.transform = 'translateX(0)';
+
+    let pool = type === 'common' 
+        ? ITEMS.filter(i => i.rarity !== 'legendary' && !i.special) 
+        : ITEMS;
+
+    let winner = pool[Math.floor(Math.random() * pool.length)];
+
+    if (Math.random() < 0.25) winner = ITEMS.find(i => i.id === 'insurance') || winner;
+    else if (type === 'legendary' && Math.random() > 0.5) winner = ITEMS.find(i => i.rarity === 'legendary') || winner;
+
+    const count = 60;
+    const winIdx = 50;
+    const itemW = 128;
+
+    for (let i = 0; i < count; i++) {
+        const item = i === winIdx ? winner : pool[Math.floor(Math.random() * pool.length)];
+        const el = document.createElement('div');
+        el.className = `r-item ${item.rarity}`;
+        el.innerHTML = `<div style="font-size:40px">${item.icon}</div>`;
+        strip.appendChild(el);
+    }
+
+    requestAnimationFrame(() => {
+        const windowEl = document.querySelector('.roulette-window');
+        const offset = (windowEl.offsetWidth / 2) - (itemW / 2);
+        const pos = -(winIdx * itemW) + offset;
+        strip.style.transition = 'transform 6s cubic-bezier(0.1, 0.9, 0.2, 1)';
+        strip.style.transform = `translateX(${pos}px)`;
+
+        setTimeout(() => {
+            if (tg) tg.HapticFeedback.notificationOccurred('success');
+            document.getElementById('winItemName').innerText = winner.name;
+            document.getElementById('winItemName').style.color = winner.special ? '#FFA500' : (winner.rarity === 'legendary' ? '#D45D79' : '#D4AF7A');
+            winMsg.style.opacity = '1';
+            if (!state.inventory.includes(winner.id)) {
+                state.inventory.push(winner.id);
+                saveState();
+            }
+        }, 6200);
+    });
 }
 
 function closeRoulette() {
@@ -425,34 +511,84 @@ function renderHeader() {
     </div>`;
 }
 
-function renderProfile() {
+function renderHome() {
+    const done = state.tasks.filter(t => t.completed).length;
+    const all = state.tasks.length;
+
+    const h = ITEMS.find(i => i.id === state.equipped.head);
+    const f = ITEMS.find(i => i.id === state.equipped.face);
+    const b = ITEMS.find(i => i.id === state.equipped.body);
+    const s = ITEMS.find(i => i.id === state.equipped.special);
+
     return `
     <div class="slide-up">
         ${renderHeader()}
-        <div class="content" style="text-align:center">
-            <h2 style="margin-bottom:30px;font-weight:800">ПРОФИЛЬ</h2>
-            <img src="${state.avatar || 'https://via.placeholder.com/100?text=😊'}" class="profile-avatar" alt="Аватар">
-            <div class="profile-nick">${state.nick || 'Без ника'}</div>
-            <button class="btn btn-primary" style="width:80%;margin:20px auto" onclick="actions.saveNick()">Изменить ник</button>
-
-            <div class="section">
-                <div style="font-weight:bold;margin-bottom:10px">Твоя реферальная ссылка</div>
-                <div class="referral-link">https://t.me/livi_app_bot?start=ref${userId}</div>
-                <button class="btn btn-primary" style="margin:10px 0" onclick="actions.copyReferral()">Копировать</button>
-                <button class="btn btn-ghost" onclick="actions.shareReferral()">Поделиться с друзьями</button>
-                <div style="margin-top:15px;color:var(--gold)">Приглашено: ${state.referralCount} человек</div>
+        <div class="content">
+            <div class="livi-container">
+                <div class="livi-body">
+                    ${h ? `<div class="${h.css}" style="${h.style || ''}"></div>` : ''}
+                    <div class="livi-antenna ant-l"></div>
+                    <div class="livi-antenna ant-r"></div>
+                    <div class="livi-face">
+                        <div class="eye eye-l"></div>
+                        <div class="eye eye-r"></div>
+                        ${f ? `<div class="${f.css}"><div class="g-lens"></div><div class="g-lens"></div><div class="g-bridge"></div></div>` : ''}
+                        <div class="mouth"></div>
+                    </div>
+                    ${s ? `<div class="${s.css}">${s.icon}</div>` : ''}
+                </div>
+                ${b ? `<div style="position:relative;width:0;height:0;top:-10px"><div class="${b.css}"></div></div>` : ''}
+                <div style="margin-top:20px;font-weight:700">Привет, ${firstName}!</div>
             </div>
 
-            <div class="section">
-                <div>🔥 Всего огоньков: ${state.totalFire}</div>
-                <div>Стрик: ${state.streak} дней</div>
-                <div>Очков: ${state.totalPoints}</div>
+            <div class="grid-2">
+                <div class="section" style="margin:0;text-align:center">
+                    <div style="font-size:24px;font-weight:800;color:var(--primary)">${done}/${all}</div>
+                    <div style="font-size:12px;color:#888">Задачи</div>
+                </div>
+                <div class="section" style="margin:0;text-align:center">
+                    <div style="font-size:24px;font-weight:800;color:var(--gold)">${state.streak}</div>
+                    <div style="font-size:12px;color:#888">Стрик</div>
+                </div>
             </div>
         </div>
     </div>`;
 }
 
-// Остальные render-функции (home, tasks, group, shop) — без изменений, только renderGroupChallenges теперь без фейковых лидербордов
+function renderTasks() {
+    const c = state.dailyChallenge;
+    const list = state.tasks.map(t => `
+        <div class="section" style="display:flex;align-items:center;padding:15px;margin-bottom:10px;opacity:${t.completed ? 0.5 : 1}">
+            <div style="width:24px;height:24px;border:2px solid var(--primary);border-radius:6px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:${t.completed ? 'var(--primary)' : 'transparent'}" onclick="actions.toggleTask(${t.id})">
+                ${t.completed ? '<svg width="14" height="14" stroke="white"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+            </div>
+            <div style="flex:1">
+                <div style="font-weight:500;text-decoration:${t.completed ? 'line-through' : 'none'}">${t.title}</div>
+                <div style="font-size:11px;color:#666">${t.points} pts</div>
+            </div>
+            <div onclick="actions.deleteTask(${t.id})" style="color:#666">${getIcon('trash')}</div>
+        </div>
+    `).join('');
+
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
+            <h2 style="margin-bottom:20px;font-weight:800">ЗАДАЧИ И ЦЕЛЬ ДНЯ</h2>
+
+            <div class="section" style="border:2px solid var(--gold);box-shadow:0 0 20px rgba(212,175,122,0.1);padding:25px;text-align:center" onclick="actions.completeChallenge()">
+                <div style="font-size:50px;margin-bottom:15px">🎯</div>
+                <h3 style="font-weight:900;font-size:22px">${c.title}</h3>
+                <div style="color:#aaa;margin-bottom:20px">+${c.reward} очков и +1 🔥</div>
+                ${c.completed ? '<div class="btn" style="background:var(--glass);color:var(--accent);width:220px;margin:0 auto">ВЫПОЛНЕНО ✅</div>' : '<button class="btn btn-primary" style="width:220px">ЗАВЕРШИТЬ</button>'}
+            </div>
+
+            <h3 style="margin:20px 0 10px;font-weight:700">Задачи</h3>
+            ${list || '<div class="section" style="text-align:center;padding:40px;color:#666">Задач нет. Нажми +</div>'}
+        </div>
+        <button class="add-btn" onclick="actions.addTask()">+</button>
+    </div>`;
+}
 
 function renderGroupChallenges() {
     const g = state.groupChallenge;
@@ -469,28 +605,89 @@ function renderGroupChallenges() {
                 <div style="font-weight:900;font-size:20px">${g.title}</div>
                 <div style="font-size:32px;font-weight:800;color:var(--gold);margin:12px 0">${g.current} / ${g.target}</div>
                 <div class="group-progress"><div class="group-fill" style="width:${progress}%"></div></div>
-                <div style="margin-top:12px;color:#aaa">
-                    Каждый, кто выполнит ежедневную цель — добавляет +1 🔥 в общий счётчик.<br>
-                    Всё по-честному — только реальные пользователи.
-                </div>
+                <div style="margin-top:12px;color:#aaa">Только реальные пользователи добавляют 🔥</div>
             </div>
 
             <div class="referral-section">
-                <div style="font-weight:700">Приглашай друзей — помогай сообществу!</div>
+                <div style="font-weight:700">Приглашай друзей — помогай сообществу</div>
                 <button class="btn btn-primary" style="margin-top:15px" onclick="actions.shareReferral()">Поделиться ссылкой</button>
             </div>
         </div>
     </div>`;
 }
 
-function render() {
-    const nav = [
-        {id:'home',icon:'home',l:'Home'},
-        {id:'tasks',icon:'check',l:'Tasks'},
-        {id:'group',icon:'users',l:'Group'},
-        {id:'shop',icon:'shop',l:'Shop'}
-    ];
+function renderShop() {
+    const inv = state.inventory.map(id => {
+        const i = ITEMS.find(x => x.id === id);
+        const eq = Object.values(state.equipped).includes(id);
+        const color = i.special ? '#FFA500' : (i.rarity === 'legendary' ? 'var(--epic)' : i.rarity === 'rare' ? 'var(--gold)' : 'var(--primary)');
+        return `<div class="section" style="padding:10px;margin:0;display:flex;flex-direction:column;align-items:center;border-color:${eq ? color : 'transparent'}" onclick="actions.equip('${id}')">
+            <div style="font-size:36px;margin-bottom:6px">${i.icon}</div>
+            <div style="font-size:11px;color:#888;text-align:center">${i.name}</div>
+            ${eq ? `<div style="width:8px;height:8px;background:${color};border-radius:50%;margin-top:6px"></div>` : ''}
+        </div>`;
+    }).join('');
 
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
+            <div style="text-align:center;margin-bottom:20px">
+                <div style="font-size:12px;color:#888">БАЛАНС</div>
+                <div style="font-size:36px;font-weight:900;color:var(--gold)">${state.totalPoints}</div>
+            </div>
+
+            <div class="chest-wrapper">
+                <div class="chest-card chest-common" onclick="actions.openChest('common', 150)">
+                    <div style="font-weight:800;font-size:18px;margin-bottom:4px">Базовый</div>
+                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">150 pts</div>
+                </div>
+                <div class="chest-card chest-rare" onclick="actions.openChest('rare', 300)">
+                    <div style="font-weight:800;font-size:18px;margin-bottom:4px;color:var(--gold)">Агент</div>
+                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">300 pts</div>
+                </div>
+                <div class="chest-card chest-legendary" onclick="actions.openChest('legendary', 1000)">
+                    <div style="font-weight:800;font-size:18px;margin-bottom:4px;color:var(--epic)">Мистический</div>
+                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">1000 pts</div>
+                </div>
+            </div>
+
+            <h3 style="margin:25px 0 10px;font-weight:700">ИНВЕНТАРЬ</h3>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+                ${inv || '<div style="grid-column:1/-1;text-align:center;color:#444;padding:30px">Пусто</div>'}
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderProfile() {
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content" style="text-align:center">
+            <h2 style="margin-bottom:30px;font-weight:800">ПРОФИЛЬ</h2>
+            <img src="${state.avatar || 'https://via.placeholder.com/100?text=😊'}" class="profile-avatar" alt="Avatar">
+            <div class="profile-nick">${state.nick || 'Без ника'}</div>
+            <button class="btn btn-primary" style="width:80%;margin:20px auto" onclick="actions.saveNick()">Изменить ник</button>
+
+            <div class="section">
+                <div style="font-weight:bold;margin-bottom:10px">Реферальная ссылка</div>
+                <div class="referral-link">https://t.me/livi_app_bot?start=ref${userId}</div>
+                <button class="btn btn-primary" style="margin:10px 0" onclick="actions.copyReferral()">Копировать</button>
+                <button class="btn btn-ghost" onclick="actions.shareReferral()">Поделиться</button>
+                <div style="margin-top:15px;color:var(--gold)">Приглашено: ${state.referralCount}</div>
+            </div>
+
+            <div class="section">
+                <div>🔥 Огоньков: ${state.totalFire}</div>
+                <div>Стрик: ${state.streak} дней</div>
+                <div>Очков: ${state.totalPoints}</div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function render() {
     let html = '';
     if (state.activeTab === 'home') html = renderHome();
     else if (state.activeTab === 'tasks') html = renderTasks();
@@ -500,22 +697,29 @@ function render() {
 
     document.getElementById('app').innerHTML = html + `
     <div class="bottom-nav">
-        ${nav.map(n=>`<button class="nav-item ${state.activeTab===n.id?'active':''}" onclick="state.activeTab='${n.id}';saveState();render()">${getIcon(n.icon)}<span style="font-size:10px">${n.l}</span></button>`).join('')}
+        <button class="nav-item ${state.activeTab==='home'?'active':''}" onclick="state.activeTab='home';saveState();render()">${getIcon('home')}<span style="font-size:10px">Home</span></button>
+        <button class="nav-item ${state.activeTab==='tasks'?'active':''}" onclick="state.activeTab='tasks';saveState();render()">${getIcon('check')}<span style="font-size:10px">Tasks</span></button>
+        <button class="nav-item ${state.activeTab==='group'?'active':''}" onclick="state.activeTab='group';saveState();render()">${getIcon('users')}<span style="font-size:10px">Group</span></button>
+        <button class="nav-item ${state.activeTab==='shop'?'active':''}" onclick="state.activeTab='shop';saveState();render()">${getIcon('shop')}<span style="font-size:10px">Shop</span></button>
     </div>`;
 }
 
 window.onload = async () => {
     await loadState();
     render();
-    setTimeout(() => document.getElementById('loadingScreen').classList.add('fade-out'), 1000);
+    setTimeout(() => {
+        const ls = document.getElementById('loadingScreen');
+        if (ls) ls.classList.add('fade-out');
+    }, 1000);
 
-    if (tg.initDataUnsafe.start_param?.startsWith('ref')) {
+    // Реферальная обработка
+    if (tg && tg.initDataUnsafe.start_param && tg.initDataUnsafe.start_param.startsWith('ref')) {
         const refId = tg.initDataUnsafe.start_param.slice(3);
-        if (refId != userId) {
+        if (refId != userId.toString()) {
             state.totalPoints += 100;
             state.totalFire += 5;
             saveState();
-            tg.showPopup({title:'Привет!', message:'Ты пришёл по реферальной ссылке!\n+100 очков и +5 🔥', buttons:[{type:'ok'}]});
+            tg.showPopup({title:'Добро пожаловать!', message:'+100 очков и +5 🔥 за переход по ссылке', buttons:[{type:'ok'}]});
         }
     }
 };
