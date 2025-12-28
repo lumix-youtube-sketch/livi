@@ -13,6 +13,8 @@
     --epic: #D45D79;
     --bg: #1a1a1a;
     --glass: rgba(255,255,255,0.05);
+    --danger: #ff4757;
+    --success: #2ed573;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#1a1a1a 0%,#050505 100%);color:white;max-width:428px;margin:0 auto;overflow-x:hidden;-webkit-tap-highlight-color:transparent;padding-bottom:100px;min-height:100vh}
@@ -22,6 +24,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @keyframes pulse-glow{0%,100%{box-shadow:0 0 10px var(--epic)}50%{box-shadow:0 0 25px var(--epic)}}
 @keyframes blink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(0.1)}}
+@keyframes pulse-red {0% {box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4);} 70% {box-shadow: 0 0 0 20px rgba(255, 71, 87, 0);} 100% {box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);}}
+@keyframes wave {0%, 100% {height: 10px;} 50% {height: 30px;}}
 
 .fade-in{animation:fadeIn .4s ease-out}
 .slide-up{animation:slideUp .4s ease-out}
@@ -106,6 +110,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn{width:100%;padding:16px;border-radius:16px;font-weight:700;font-size:16px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;position:relative;overflow:hidden}
 .btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:white}
 .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888}
+.btn-danger{background:rgba(255, 71, 87, 0.2); border:1px solid var(--danger); color: var(--danger)}
 
 .add-btn {
     position: fixed;
@@ -145,6 +150,56 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .p-btn.active {background:#333;color:white;font-weight:bold}
 .heatmap {display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
 .heat-cell {width:10px;height:10px;border-radius:2px;background:#333}
+
+/* Styles for Education Module */
+.mic-btn {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: #333;
+    border: 2px solid #555;
+    display: flex; align-items: center; justify-content: center;
+    margin: 30px auto;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+.mic-btn.recording {
+    background: var(--danger);
+    border-color: var(--danger);
+    animation: pulse-red 1.5s infinite;
+}
+.voice-wave {
+    display: flex; gap: 4px; align-items: center; height: 30px;
+}
+.bar {width: 4px; background: white; border-radius: 2px; animation: wave 1s infinite ease-in-out;}
+.bar:nth-child(2) {animation-delay: 0.1s; height: 20px}
+.bar:nth-child(3) {animation-delay: 0.2s; height: 40px}
+.bar:nth-child(4) {animation-delay: 0.3s; height: 25px}
+.bar:nth-child(5) {animation-delay: 0.4s; height: 15px}
+
+.note-card {
+    background: rgba(255,255,255,0.05);
+    border-left: 4px solid var(--accent);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+.note-date {font-size: 11px; color: #777; margin-bottom: 5px}
+.note-title {font-weight: 700; margin-bottom: 5px; color: white}
+.note-preview {font-size: 13px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis}
+
+.transcript-area {
+    width: 100%; min-height: 200px;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 15px;
+    color: #eee;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
 
 svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
@@ -203,7 +258,9 @@ const icons = {
     trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
     shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
     fire: '<path d="M8 22s3-8 3-13c0-3-2-5-5-5 1-3 5-5 5-8 2 4 6 5 8 5 2 0 6-1 8 5 0 3-4 5-5 5-1 4 3 13 3 13H8z"/>',
-    user: '<circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>'
+    user: '<circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>',
+    book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    mic: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>'
 };
 const getIcon = (n) => `<svg viewBox="0 0 24 24">${icons[n]}</svg>`;
 
@@ -244,6 +301,7 @@ const defaultState = {
         target: 5000,
         personalContributedToday: false
     },
+    notes: [], // Новое: хранилище заметок
     hasStreakInsurance: false,
     referralCount: 0,
     totalFire: 0,
@@ -252,10 +310,22 @@ const defaultState = {
 };
 
 let state = { ...defaultState };
+let recognition = null;
+let isRecording = false;
+let currentTranscript = "";
 
 async function saveToCloud() {
     try {
-        await CloudStorage.setItem(`livi_state_${userId}`, JSON.stringify(state));
+        // Ограничиваем размер сохраняемых заметок для CloudStorage (max 4096 байт)
+        // Сохраняем только последние 5 заметок полностью, или метаданные
+        const stateToSave = { ...state };
+        
+        // Простая защита от переполнения: если заметок много, оставляем только последние
+        if (JSON.stringify(stateToSave.notes).length > 2000) {
+            stateToSave.notes = stateToSave.notes.slice(0, 5); 
+        }
+
+        await CloudStorage.setItem(`livi_state_${userId}`, JSON.stringify(stateToSave));
     } catch (e) {
         console.error('Cloud sync error:', e);
     }
@@ -266,7 +336,9 @@ async function loadFromCloud() {
         const data = await CloudStorage.getItem(`livi_state_${userId}`);
         if (data && data !== 'null' && data !== 'undefined') {
             const parsed = JSON.parse(data);
+            // Мержим заметки аккуратно
             state = { ...defaultState, ...parsed };
+            if (!state.notes) state.notes = [];
         }
         return true;
     } catch (e) {
@@ -316,6 +388,7 @@ async function loadState() {
             if (saved) {
                 const parsed = JSON.parse(saved);
                 state = { ...defaultState, ...parsed };
+                if (!state.notes) state.notes = [];
             }
         } catch (e2) {
             console.error("Local load failed", e2);
@@ -455,8 +528,109 @@ const actions = {
         } else {
             window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, '_blank');
         }
+    },
+    // New Education Actions
+    startRecording: () => {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert("Ваш браузер не поддерживает распознавание речи. Попробуйте Chrome или откройте в Telegram Android.");
+            return;
+        }
+        
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'ru-RU';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onstart = () => {
+            isRecording = true;
+            if (tg) tg.HapticFeedback.impactOccurred('medium');
+            render();
+        };
+
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    currentTranscript += event.results[i][0].transcript + " ";
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+            const el = document.getElementById('liveTranscript');
+            if(el) el.innerText = currentTranscript + interimTranscript;
+        };
+
+        recognition.onerror = (event) => {
+            console.error(event.error);
+            isRecording = false;
+            render();
+        };
+
+        recognition.onend = () => {
+            if (isRecording) {
+                recognition.start(); // Auto restart if silence stops it but user didn't
+            } else {
+                render();
+            }
+        };
+
+        recognition.start();
+    },
+    stopRecording: () => {
+        isRecording = false;
+        if (recognition) recognition.stop();
+        if (tg) tg.HapticFeedback.notificationOccurred('success');
+        
+        // Simulating AI Structuring
+        if (currentTranscript.length > 5) {
+            const structuredText = aiStructureText(currentTranscript);
+            state.notes.unshift({
+                id: Date.now(),
+                date: new Date().toLocaleString('ru-RU'),
+                title: 'Конспект ' + new Date().toLocaleTimeString().slice(0,5),
+                raw: currentTranscript,
+                structured: structuredText
+            });
+            currentTranscript = "";
+            saveState();
+        }
+        render();
+    },
+    viewNote: (id) => {
+        const note = state.notes.find(n => n.id === id);
+        if(!note) return;
+        alert(note.structured); // For simplicity in this view
+    },
+    deleteNote: (id) => {
+        if(confirm("Удалить заметку?")) {
+            state.notes = state.notes.filter(n => n.id !== id);
+            saveState();
+            render();
+        }
     }
 };
+
+// "Simple AI" text structurer (Rule-based)
+function aiStructureText(text) {
+    // 1. Capitalize sentences
+    let formatted = text.replace(/(^\s*\w|[\.\!\?]\s*\w)/g, c => c.toUpperCase());
+    
+    // 2. Add bullet points for key phrases (simple heuristic)
+    const keyphrases = ['во-первых', 'во-вторых', 'например', 'важно', 'запомните', 'итак'];
+    keyphrases.forEach(phrase => {
+        const re = new RegExp(phrase, 'gi');
+        formatted = formatted.replace(re, `\n• ${phrase.toUpperCase()}`);
+    });
+
+    // 3. Simple cleanup
+    formatted = formatted.trim();
+
+    // 4. If short, just return
+    if (formatted.length < 50) return formatted;
+
+    return `🤖 AI КОНСПЕКТ:\n\n${formatted}`;
+}
 
 function startRoulette(type) {
     const modal = document.getElementById('rouletteModal');
@@ -515,7 +689,6 @@ function closeRoulette() {
     render();
 }
 
-// --- ANALYTICS ENGINE (из старого кода без изменений) ---
 function getChartData(period) {
     const days = period === 'week' ? 7 : period === 'month' ? 30 : 365;
     const now = new Date();
@@ -601,7 +774,6 @@ function getAIAdvice(data) {
     return `Ты держишь стабильный темп (${avg} pts/день). Постоянство — признак мастерства.`;
 }
 
-// --- RENDERERS ---
 function renderHeader() {
     return `<div class="header">
         <div class="header-title">livi</div>
@@ -619,7 +791,6 @@ function renderHeader() {
 function renderHome() {
     const done = state.tasks.filter(t => t.completed).length;
     const all = state.tasks.length;
-
     const h = ITEMS.find(i => i.id === state.equipped.head);
     const f = ITEMS.find(i => i.id === state.equipped.face);
     const b = ITEMS.find(i => i.id === state.equipped.body);
@@ -684,14 +855,12 @@ function renderTasks() {
         ${renderHeader()}
         <div class="content">
             <h2 style="margin-bottom:20px;font-weight:800">ЗАДАЧИ И ЦЕЛЬ ДНЯ</h2>
-
             <div class="section" style="border:2px solid var(--gold);box-shadow:0 0 20px rgba(212,175,122,0.1);padding:25px;text-align:center" onclick="actions.completeChallenge()">
                 <div style="font-size:50px;margin-bottom:15px">🎯</div>
                 <h3 style="font-weight:900;font-size:22px">${c.title}</h3>
                 <div style="color:#aaa;margin-bottom:20px">+${c.reward} очков и +1 🔥</div>
                 ${c.completed ? '<div class="btn" style="background:var(--glass);color:var(--accent);width:220px;margin:0 auto">ВЫПОЛНЕНО ✅</div>' : '<button class="btn btn-primary" style="width:220px">ЗАВЕРШИТЬ</button>'}
             </div>
-
             ${list || '<div class="section" style="text-align:center;padding:40px;color:#666">Задач нет. Нажми +</div>'}
         </div>
         <button class="add-btn" onclick="actions.addTask()">+</button>
@@ -701,13 +870,11 @@ function renderTasks() {
 function renderGroupChallenges() {
     const g = state.groupChallenge;
     const progress = Math.min((g.current / g.target) * 100, 100);
-
     return `
     <div class="slide-up">
         ${renderHeader()}
         <div class="content">
             <h2 style="margin-bottom:20px;font-weight:800">ГРУППОВЫЕ ИСПЫТАНИЯ</h2>
-
             <div class="section" style="padding:25px;text-align:center;border:2px solid var(--epic);background:rgba(212,93,121,0.05)">
                 <div style="font-size:44px;margin-bottom:12px">🔥</div>
                 <div style="font-weight:900;font-size:20px">${g.title}</div>
@@ -715,7 +882,6 @@ function renderGroupChallenges() {
                 <div class="group-progress"><div class="group-fill" style="width:${progress}%"></div></div>
                 <div style="margin-top:12px;color:#aaa">Только реальные пользователи добавляют 🔥</div>
             </div>
-
             <div class="referral-section">
                 <div style="font-weight:700">Приглашай друзей — помогай сообществу</div>
                 <button class="btn btn-primary" style="margin-top:15px" onclick="actions.shareReferral()">Поделиться ссылкой</button>
@@ -735,7 +901,6 @@ function renderShop() {
             ${eq ? `<div style="width:8px;height:8px;background:${color};border-radius:50%;margin-top:6px"></div>` : ''}
         </div>`;
     }).join('');
-
     return `
     <div class="slide-up">
         ${renderHeader()}
@@ -744,7 +909,6 @@ function renderShop() {
                 <div style="font-size:12px;color:#888">БАЛАНС</div>
                 <div style="font-size:36px;font-weight:900;color:var(--gold)">${state.totalPoints}</div>
             </div>
-
             <div class="chest-wrapper">
                 <div class="chest-card chest-common" onclick="actions.openChest('common', 150)">
                     <div style="font-weight:800;font-size:18px;margin-bottom:4px">Базовый</div>
@@ -759,11 +923,51 @@ function renderShop() {
                     <div style="font-size:12px;opacity:0.7;margin-bottom:10px">1000 pts</div>
                 </div>
             </div>
-
             <h3 style="margin:25px 0 10px;font-weight:700">ИНВЕНТАРЬ</h3>
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
                 ${inv || '<div style="grid-column:1/-1;text-align:center;color:#444;padding:30px">Пусто</div>'}
             </div>
+        </div>
+    </div>`;
+}
+
+function renderEducation() {
+    const notesList = state.notes.map(n => `
+        <div class="note-card" onclick="actions.viewNote(${n.id})">
+            <div style="display:flex;justify-content:space-between">
+                <div class="note-date">${n.date}</div>
+                <div onclick="event.stopPropagation(); actions.deleteNote(${n.id})" style="color:var(--danger)">${getIcon('trash')}</div>
+            </div>
+            <div class="note-title">${n.title}</div>
+            <div class="note-preview">${n.structured.replace(/\n/g, ' ')}</div>
+        </div>
+    `).join('');
+
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
+            <h2 style="margin-bottom:15px;font-weight:800">УМНЫЙ КОНСПЕКТ</h2>
+            
+            <div class="section" style="text-align:center">
+                <div style="font-size:14px;color:#aaa;margin-bottom:20px">
+                    Нажми, чтобы записать лекцию. <br>Livi структурирует информацию за тебя.
+                </div>
+
+                <div class="transcript-area ${currentTranscript ? '' : 'hidden'}" id="liveTranscript">
+                    ${currentTranscript}
+                </div>
+
+                <button class="mic-btn ${isRecording ? 'recording' : ''}" onclick="${isRecording ? 'actions.stopRecording()' : 'actions.startRecording()'}">
+                    ${isRecording ? '<div class="voice-wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>' : getIcon('mic')}
+                </button>
+                <div style="font-size:12px;color:${isRecording ? 'var(--danger)' : '#666'}">
+                    ${isRecording ? 'Идёт запись... Нажми, чтобы остановить' : 'Нажми для записи'}
+                </div>
+            </div>
+
+            <h3 style="margin:25px 0 10px;font-weight:700">МОИ КОНСПЕКТЫ</h3>
+            ${notesList || '<div style="text-align:center;color:#555;padding:20px">Пока нет записей</div>'}
         </div>
     </div>`;
 }
@@ -775,7 +979,6 @@ function renderAnalysis() {
     const totalTasks = data.reduce((a,b)=>a+b.tasks,0);
     const activeDays = data.filter(d => d.val > 0);
     const avgPts = activeDays.length ? Math.round(totalPts / activeDays.length) : 0;
-
     const completionRate = state.tasks.length > 0 ? Math.round((state.tasks.filter(t=>t.completed).length / state.tasks.length) * 100) : 0;
     const advice = getAIAdvice(data);
     const heatMap = renderStreakCalendar(data);
@@ -785,13 +988,11 @@ function renderAnalysis() {
         ${renderHeader()}
         <div class="content">
             <h2 style="margin-bottom:15px;font-weight:800">АНАЛИТИКА</h2>
-
             <div class="period-switch">
                 <div class="p-btn ${p==='week'?'active':''}" onclick="actions.setPeriod('week')">Неделя</div>
                 <div class="p-btn ${p==='month'?'active':''}" onclick="actions.setPeriod('month')">Месяц</div>
                 <div class="p-btn ${p==='year'?'active':''}" onclick="actions.setPeriod('year')">Год</div>
             </div>
-
             <div class="section">
                 <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">Активность (Очки)</div>
                 <div style="font-size:28px;font-weight:800;margin-bottom:10px">${totalPts} <span style="font-size:14px;font-weight:400;color:#666">за период</span></div>
@@ -799,7 +1000,6 @@ function renderAnalysis() {
                     ${renderChart(data)}
                 </div>
             </div>
-
             <div class="grid-2" style="margin-bottom:15px">
                 <div class="section" style="margin:0">
                     <div style="font-size:12px;color:#888;margin-bottom:8px">Средний балл</div>
@@ -812,7 +1012,6 @@ function renderAnalysis() {
                     <div style="font-size:10px;color:#666;margin-top:4px">задач</div>
                 </div>
             </div>
-
             <div class="section">
                 <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">${getIcon('check')} Выполнено задач</div>
                 <div style="font-size:20px;font-weight:800;margin-bottom:10px">${totalTasks} <span style="font-size:14px;font-weight:400;color:#666">задач</span></div>
@@ -820,12 +1019,10 @@ function renderAnalysis() {
                     ${renderTasksChart(data)}
                 </div>
             </div>
-
             <div class="section">
                 <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">${getIcon('clock')} Календарь активности (28 дней)</div>
                 <div class="heatmap">${heatMap}</div>
             </div>
-
             <div class="section" style="background:linear-gradient(135deg, rgba(40,40,40,0.5), rgba(20,20,20,0.5)); border-color:var(--accent)">
                 <div style="display:flex;gap:10px">
                     <div style="font-size:24px">🧠</div>
@@ -850,7 +1047,6 @@ function renderProfile() {
             </div>
             <div style="font-size:28px;font-weight:800;margin-bottom:20px">${state.nick || 'Без ника'}</div>
             <button class="btn btn-primary" style="width:80%" onclick="actions.saveNick()">Изменить ник</button>
-
             <div class="section" style="margin-top:30px">
                 <div style="font-weight:bold;margin-bottom:10px">Реферальная ссылка</div>
                 <div class="referral-link">https://t.me/livi_app_bot?start=ref${userId}</div>
@@ -866,6 +1062,7 @@ function render() {
     let html = '';
     if (state.activeTab === 'home') html = renderHome();
     else if (state.activeTab === 'tasks') html = renderTasks();
+    else if (state.activeTab === 'education') html = renderEducation(); // New Tab
     else if (state.activeTab === 'group') html = renderGroupChallenges();
     else if (state.activeTab === 'shop') html = renderShop();
     else if (state.activeTab === 'analysis') html = renderAnalysis();
@@ -875,13 +1072,12 @@ function render() {
     <div class="bottom-nav">
         <button class="nav-item ${state.activeTab==='home'?'active':''}" onclick="state.activeTab='home';saveState();render()">${getIcon('home')}<span style="font-size:10px">Home</span></button>
         <button class="nav-item ${state.activeTab==='tasks'?'active':''}" onclick="state.activeTab='tasks';saveState();render()">${getIcon('check')}<span style="font-size:10px">Tasks</span></button>
-        <button class="nav-item ${state.activeTab==='group'?'active':''}" onclick="state.activeTab='group';saveState();render()">${getIcon('users')}<span style="font-size:10px">Group</span></button>
+        <button class="nav-item ${state.activeTab==='education'?'active':''}" onclick="state.activeTab='education';saveState();render()">${getIcon('book')}<span style="font-size:10px">Learn</span></button>
         <button class="nav-item ${state.activeTab==='shop'?'active':''}" onclick="state.activeTab='shop';saveState();render()">${getIcon('shop')}<span style="font-size:10px">Shop</span></button>
         <button class="nav-item ${state.activeTab==='analysis'?'active':''}" onclick="state.activeTab='analysis';saveState();render()">${getIcon('chart')}<span style="font-size:10px">Data</span></button>
     </div>`;
 }
 
-// Инициализация
 async function initApp() {
     try {
         await loadState();
