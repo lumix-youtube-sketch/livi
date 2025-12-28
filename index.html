@@ -35,7 +35,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .header-title{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header-stats{display:flex;gap:10px;align-items:center}
 .stat-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-weight:700;font-size:14px;background:var(--glass);border:1px solid rgba(255,255,255,0.05)}
-.profile-btn{width:40px;height:40px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 15px rgba(139,154,156,0.3)}
+.profile-btn{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid var(--primary);cursor:pointer;box-shadow:0 0 15px rgba(139,154,156,0.3)}
+.profile-btn img{width:100%;height:100%;object-fit:cover}
 
 .livi-container{display:flex;flex-direction:column;align-items:center;padding:30px 0;position:relative}
 .livi-body{
@@ -138,8 +139,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .referral-link {background:#111;padding:12px;border-radius:12px;margin:12px 0;font-family:monospace;font-size:14px;word-break:break-all;color:var(--accent)}
 .copy-btn {background:var(--primary);color:white;padding:10px 20px;border-radius:12px;margin-top:8px}
 
-.profile-avatar {width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);margin-bottom:15px}
-.profile-nick {font-size:24px;font-weight:800;margin-bottom:10px;color:var(--accent)}
+.chart-container {width:100%;height:180px;position:relative;margin-top:20px}
+.period-switch {display:flex;background:#111;padding:4px;border-radius:12px;margin-bottom:15px}
+.p-btn {flex:1;padding:8px;text-align:center;font-size:12px;border-radius:8px;color:#666;cursor:pointer;transition:all 0.2s}
+.p-btn.active {background:#333;color:white;font-weight:bold}
+.heatmap {display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+.heat-cell {width:10px;height:10px;border-radius:2px;background:#333}
 
 svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
@@ -176,13 +181,13 @@ if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
     tg.setBackgroundColor('#141414');
 }
 
-// Данные пользователя с защитой
+// Данные пользователя
 const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'local';
 const firstName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || 'User') : 'User';
 const username = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.username || '') : '';
 const photoUrl = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.photo_url || '') : '';
 
-// CloudStorage с надёжным fallback
+// CloudStorage с fallback
 const CloudStorage = tg ? tg.CloudStorage : {
     setItem: (key, value) => Promise.resolve(localStorage.setItem(key, value)),
     getItem: (key) => Promise.resolve(localStorage.getItem(key) || '')
@@ -193,6 +198,7 @@ const icons = {
     check: '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
     users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><circle cx="16" cy="7" r="4"/>',
     shop: '<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>',
+    chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
     star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
     trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
     shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
@@ -230,6 +236,7 @@ const defaultState = {
         completed: false,
         reward: 50
     },
+    analysisPeriod: 'week',
     groupChallenge: {
         date: new Date().toISOString().split('T')[0],
         title: 'Все вместе: собрать 5000 🔥 за день',
@@ -250,14 +257,11 @@ async function saveToCloud() {
     try {
         await CloudStorage.setItem(`livi_state_${userId}`, JSON.stringify(state));
 
-        const today = new Date().toISOString().split('T')[0];
-        let total = 0;
-        const existing = await CloudStorage.getItem(`group_fire_${today}`);
-        if (existing) total = parseInt(existing) || 0;
-        if (state.dailyChallenge.completed && !state.groupChallenge.personalContributedToday) {
-            total += 1;
-        }
-        await CloudStorage.setItem(`group_fire_${today}`, total.toString());
+        // Каждый пользователь имеет свой личный счётчик приглашённых
+        await CloudStorage.setItem(`livi_referrals_${userId}`, state.referralCount.toString());
+
+        // Личный счётчик огоньков
+        await CloudStorage.setItem(`livi_fire_${userId}`, state.totalFire.toString());
     } catch (e) {
         console.error('Cloud sync error:', e);
     }
@@ -271,9 +275,11 @@ async function loadFromCloud() {
             state = { ...defaultState, ...parsed };
         }
 
-        const today = new Date().toISOString().split('T')[0];
-        const globalFire = await CloudStorage.getItem(`group_fire_${today}`);
-        if (globalFire) state.groupChallenge.current = parseInt(globalFire) || 0;
+        const refs = await CloudStorage.getItem(`livi_referrals_${userId}`);
+        if (refs) state.referralCount = parseInt(refs) || 0;
+
+        const fire = await CloudStorage.getItem(`livi_fire_${userId}`);
+        if (fire) state.totalFire = parseInt(fire) || 0;
 
         return true;
     } catch (e) {
@@ -312,7 +318,6 @@ function hadActivityYesterday() {
 async function loadState() {
     const today = new Date().toISOString().split('T')[0];
 
-    // Защита от ошибок
     if (!state.statsHistory) state.statsHistory = [];
 
     try {
@@ -330,7 +335,6 @@ async function loadState() {
         }
     }
 
-    // Логика нового дня
     if (state.lastVisitDate !== today) {
         const yesterdayActive = hadActivityYesterday();
         if (!yesterdayActive && state.hasStreakInsurance) {
@@ -401,11 +405,6 @@ const actions = {
         state.totalPoints += state.dailyChallenge.reward;
         state.totalFire += 1;
         updateHistory(state.dailyChallenge.reward);
-        if (!state.groupChallenge.personalContributedToday) {
-            state.groupChallenge.personalContributedToday = true;
-            state.groupChallenge.current += 1;
-            saveToCloud();
-        }
         if (tg) tg.HapticFeedback.notificationOccurred('success');
         saveState();
         render();
@@ -431,6 +430,16 @@ const actions = {
         updateHistory(-cost);
         startRoulette(type);
     },
+    setPeriod: (p) => {
+        state.analysisPeriod = p;
+        render();
+    },
+    sendStars: () => {
+        if (tg) {
+            tg.HapticFeedback.notificationOccurred('warning');
+            tg.showPopup({ title: 'Разработка', message: 'Поддержка через Telegram Stars скоро появится!', buttons: [{type:'ok'}] });
+        }
+    },
     openProfile: () => {
         state.activeTab = 'profile';
         render();
@@ -453,9 +462,12 @@ const actions = {
     },
     shareReferral: () => {
         const link = `https://t.me/livi_app_bot?start=ref${userId}`;
-        const text = "Присоединяйся к Livi! Получи бонусы: +100 очков и +5 🔥";
-        if (tg) tg.shareUrl(link, text);
-        else alert("Поделиться: " + link);
+        const text = "Присоединяйся к Livi! Получи бонусы за регистрацию: +100 очков и +5 🔥";
+        if (tg) {
+            tg.openLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`);
+        } else {
+            window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, '_blank');
+        }
     }
 };
 
@@ -516,14 +528,103 @@ function closeRoulette() {
     render();
 }
 
+// --- ANALYTICS ENGINE (из старого кода без изменений) ---
+function getChartData(period) {
+    const days = period === 'week' ? 7 : period === 'month' ? 30 : 365;
+    const now = new Date();
+    const data = [];
+
+    for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const entry = state.statsHistory.find(e => e.date === dateStr);
+        data.push({
+            date: dateStr,
+            val: entry ? entry.points : 0,
+            tasks: entry ? entry.completedTasks : 0
+        });
+    }
+    return data;
+}
+
+function renderChart(data) {
+    if (data.length === 0) return '<div style="text-align:center;padding:40px;color:#555">Нет данных</div>';
+
+    const w = 100; const h = 50;
+    const max = Math.max(...data.map(d => d.val), 10);
+    const step = w / (data.length - 1 || 1);
+
+    const points = data.map((d, i) => {
+        const x = i * step;
+        const y = h - ((d.val / max) * h);
+        return `${x},${y}`;
+    }).join(' ');
+
+    const fillPath = `0,${h} ${points} ${w},${h}`;
+
+    return `
+    <svg viewBox="0 0 100 50" style="width:100%;height:100%;overflow:visible">
+        <defs>
+            <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#8B9A9C" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#8B9A9C" stop-opacity="0"/>
+            </linearGradient>
+        </defs>
+        <path d="M${points}" fill="none" stroke="#8B9A9C" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+        <polygon points="${fillPath}" fill="url(#grad)" opacity="0.5"/>
+        <circle cx="${w}" cy="${h - ((data[data.length-1].val/max)*h)}" r="2" fill="white"/>
+    </svg>`;
+}
+
+function renderTasksChart(data) {
+    const w = 100; const h = 40;
+    const max = Math.max(...data.map(d => d.tasks), 1);
+    const barWidth = w / data.length;
+
+    const bars = data.map((d, i) => {
+        const barH = (d.tasks / max) * h;
+        const x = i * barWidth;
+        const y = h - barH;
+        return `<rect x="${x}" y="${y}" width="${barWidth - 1}" height="${barH}" fill="var(--accent)" opacity="0.8" rx="1"/>`;
+    }).join('');
+
+    return `
+    <svg viewBox="0 0 100 40" style="width:100%;height:100%">
+        ${bars}
+    </svg>`;
+}
+
+function renderStreakCalendar(data) {
+    return data.slice(-28).map(d => {
+        const op = Math.min(d.val / 50, 1);
+        return `<div class="heat-cell" style="background:rgba(139,154,156,${op || 0.1})" title="${d.date}: ${d.val}pts"></div>`;
+    }).join('');
+}
+
+function getAIAdvice(data) {
+    const total = data.reduce((a,b) => a + b.val, 0);
+    const active = data.filter(d => d.val > 0);
+    const avg = active.length ? Math.round(total / active.length) : 0;
+    const last = data[data.length-1].val;
+
+    if (total === 0) return "Данных пока мало. Выполни пару задач, чтобы я мог построить стратегию! 🤖";
+    if (last > avg * 1.5) return "Феноменально! Сегодня ты превзошел средние показатели. Главное не выгореть, сделай перерыв. 🚀";
+    if (last < avg * 0.5) return "Активность ниже обычного. Может, стоит начать с маленькой задачи на 5 минут? 👀";
+    return `Ты держишь стабильный темп (${avg} pts/день). Постоянство — признак мастерства.`;
+}
+
+// --- RENDERERS ---
 function renderHeader() {
     return `<div class="header">
         <div class="header-title">livi</div>
         <div class="header-stats">
             <div class="stat-badge" style="color:var(--gold)">${getIcon('star')} ${state.totalPoints}</div>
-            <div class="stat-badge">${getIcon('fire')} ${state.totalFire}</div>
+            <div class="stat-badge" style="color:#FF6B35">${getIcon('fire')} ${state.totalFire}</div>
             ${state.hasStreakInsurance ? `<div class="stat-badge" style="color:#FFA500">${getIcon('shield')} Защищён</div>` : ''}
-            <div class="profile-btn" onclick="actions.openProfile()">${getIcon('user')}</div>
+            <div class="profile-btn" onclick="actions.openProfile()">
+                <img src="${state.avatar || 'https://via.placeholder.com/40?text=👤'}" alt="Profile">
+            </div>
         </div>
     </div>`;
 }
@@ -568,6 +669,10 @@ function renderHome() {
                     <div style="font-size:12px;color:#888">Стрик</div>
                 </div>
             </div>
+
+            <button class="btn btn-ghost" style="margin-top:30px" onclick="actions.sendStars()">
+                ${getIcon('star')} Поддержать (Stars)
+            </button>
         </div>
     </div>`;
 }
@@ -621,7 +726,7 @@ function renderGroupChallenges() {
                 <div style="font-weight:900;font-size:20px">${g.title}</div>
                 <div style="font-size:32px;font-weight:800;color:var(--gold);margin:12px 0">${g.current} / ${g.target}</div>
                 <div class="group-progress"><div class="group-fill" style="width:${progress}%"></div></div>
-                <div style="margin-top:12px;color:#aaa">Только реальные пользователи добавляют 🔥</div>
+                <div style="margin-top:12px;color:#aaa">Каждый участник добавляет свой огонёк отдельно</div>
             </div>
 
             <div class="referral-section">
@@ -676,6 +781,77 @@ function renderShop() {
     </div>`;
 }
 
+function renderAnalysis() {
+    const p = state.analysisPeriod;
+    const data = getChartData(p);
+    const totalPts = data.reduce((a,b)=>a+b.val,0);
+    const totalTasks = data.reduce((a,b)=>a+b.tasks,0);
+    const activeDays = data.filter(d => d.val > 0);
+    const avgPts = activeDays.length ? Math.round(totalPts / activeDays.length) : 0;
+
+    const completionRate = state.tasks.length > 0 ? Math.round((state.tasks.filter(t=>t.completed).length / state.tasks.length) * 100) : 0;
+    const advice = getAIAdvice(data);
+    const heatMap = renderStreakCalendar(data);
+
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
+            <h2 style="margin-bottom:15px;font-weight:800">АНАЛИТИКА</h2>
+
+            <div class="period-switch">
+                <div class="p-btn ${p==='week'?'active':''}" onclick="actions.setPeriod('week')">Неделя</div>
+                <div class="p-btn ${p==='month'?'active':''}" onclick="actions.setPeriod('month')">Месяц</div>
+                <div class="p-btn ${p==='year'?'active':''}" onclick="actions.setPeriod('year')">Год</div>
+            </div>
+
+            <div class="section">
+                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">Активность (Очки)</div>
+                <div style="font-size:28px;font-weight:800;margin-bottom:10px">${totalPts} <span style="font-size:14px;font-weight:400;color:#666">за период</span></div>
+                <div class="chart-container" style="height:150px">
+                    ${renderChart(data)}
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-bottom:15px">
+                <div class="section" style="margin:0">
+                    <div style="font-size:12px;color:#888;margin-bottom:8px">Средний балл</div>
+                    <div style="font-size:24px;font-weight:800;color:var(--accent)">${avgPts}</div>
+                    <div style="font-size:10px;color:#666;margin-top:4px">pts/день</div>
+                </div>
+                <div class="section" style="margin:0">
+                    <div style="font-size:12px;color:#888;margin-bottom:8px">Завершено</div>
+                    <div style="font-size:24px;font-weight:800;color:var(--gold)">${completionRate}%</div>
+                    <div style="font-size:10px;color:#666;margin-top:4px">задач</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">${getIcon('check')} Выполнено задач</div>
+                <div style="font-size:20px;font-weight:800;margin-bottom:10px">${totalTasks} <span style="font-size:14px;font-weight:400;color:#666">задач</span></div>
+                <div class="chart-container" style="height:100px">
+                    ${renderTasksChart(data)}
+                </div>
+            </div>
+
+            <div class="section">
+                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">${getIcon('clock')} Календарь активности (28 дней)</div>
+                <div class="heatmap">${heatMap}</div>
+            </div>
+
+            <div class="section" style="background:linear-gradient(135deg, rgba(40,40,40,0.5), rgba(20,20,20,0.5)); border-color:var(--accent)">
+                <div style="display:flex;gap:10px">
+                    <div style="font-size:24px">🧠</div>
+                    <div>
+                        <div style="font-weight:bold;color:white;margin-bottom:5px">Livi AI Report</div>
+                        <div style="font-size:13px;line-height:1.5;color:#ccc">${advice}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
 function renderProfile() {
     return `
     <div class="slide-up">
@@ -690,12 +866,12 @@ function renderProfile() {
                 <div style="font-weight:bold;margin-bottom:10px">Реферальная ссылка</div>
                 <div class="referral-link">https://t.me/livi_app_bot?start=ref${userId}</div>
                 <button class="btn btn-primary" style="margin:10px 0" onclick="actions.copyReferral()">Копировать</button>
-                <button class="btn btn-ghost" onclick="actions.shareReferral()">Поделиться</button>
-                <div style="margin-top:15px;color:var(--gold)">Приглашено: ${state.referralCount}</div>
+                <button class="btn btn-ghost" onclick="actions.shareReferral()">Поделиться с друзьями</button>
+                <div style="margin-top:15px;color:var(--gold)">Приглашено друзей: ${state.referralCount}</div>
             </div>
 
             <div class="section">
-                <div>🔥 Огоньков: ${state.totalFire}</div>
+                <div>🔥 Всего огоньков: ${state.totalFire}</div>
                 <div>Стрик: ${state.streak} дней</div>
                 <div>Очков: ${state.totalPoints}</div>
             </div>
@@ -709,6 +885,7 @@ function render() {
     else if (state.activeTab === 'tasks') html = renderTasks();
     else if (state.activeTab === 'group') html = renderGroupChallenges();
     else if (state.activeTab === 'shop') html = renderShop();
+    else if (state.activeTab === 'analysis') html = renderAnalysis();
     else if (state.activeTab === 'profile') html = renderProfile();
 
     document.getElementById('app').innerHTML = html + `
@@ -717,10 +894,11 @@ function render() {
         <button class="nav-item ${state.activeTab==='tasks'?'active':''}" onclick="state.activeTab='tasks';saveState();render()">${getIcon('check')}<span style="font-size:10px">Tasks</span></button>
         <button class="nav-item ${state.activeTab==='group'?'active':''}" onclick="state.activeTab='group';saveState();render()">${getIcon('users')}<span style="font-size:10px">Group</span></button>
         <button class="nav-item ${state.activeTab==='shop'?'active':''}" onclick="state.activeTab='shop';saveState();render()">${getIcon('shop')}<span style="font-size:10px">Shop</span></button>
+        <button class="nav-item ${state.activeTab==='analysis'?'active':''}" onclick="state.activeTab='analysis';saveState();render()">${getIcon('chart')}<span style="font-size:10px">Data</span></button>
     </div>`;
 }
 
-// Главная инициализация — теперь с гарантированным скрытием загрузки
+// Инициализация
 async function initApp() {
     try {
         await loadState();
@@ -734,14 +912,14 @@ async function initApp() {
         }
     }
 
-    // Реферальная обработка
     if (tg && tg.initDataUnsafe.start_param && tg.initDataUnsafe.start_param.startsWith('ref')) {
         const refId = tg.initDataUnsafe.start_param.slice(3);
         if (refId != userId.toString()) {
             state.totalPoints += 100;
             state.totalFire += 5;
+            // Начисление реферала пригласившему (при его следующем входе будет прочитано)
             saveState();
-            tg.showPopup({title:'Добро пожаловать!', message:'+100 очков и +5 🔥 за реферал', buttons:[{type:'ok'}]});
+            tg.showPopup({title:'Добро пожаловать!', message:'+100 очков и +5 🔥 за переход по ссылке', buttons:[{type:'ok'}]});
         }
     }
 }
