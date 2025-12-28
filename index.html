@@ -256,12 +256,6 @@ let state = { ...defaultState };
 async function saveToCloud() {
     try {
         await CloudStorage.setItem(`livi_state_${userId}`, JSON.stringify(state));
-
-        // Каждый пользователь имеет свой личный счётчик приглашённых
-        await CloudStorage.setItem(`livi_referrals_${userId}`, state.referralCount.toString());
-
-        // Личный счётчик огоньков
-        await CloudStorage.setItem(`livi_fire_${userId}`, state.totalFire.toString());
     } catch (e) {
         console.error('Cloud sync error:', e);
     }
@@ -274,13 +268,6 @@ async function loadFromCloud() {
             const parsed = JSON.parse(data);
             state = { ...defaultState, ...parsed };
         }
-
-        const refs = await CloudStorage.getItem(`livi_referrals_${userId}`);
-        if (refs) state.referralCount = parseInt(refs) || 0;
-
-        const fire = await CloudStorage.getItem(`livi_fire_${userId}`);
-        if (fire) state.totalFire = parseInt(fire) || 0;
-
         return true;
     } catch (e) {
         console.error('Load error:', e);
@@ -620,7 +607,7 @@ function renderHeader() {
         <div class="header-title">livi</div>
         <div class="header-stats">
             <div class="stat-badge" style="color:var(--gold)">${getIcon('star')} ${state.totalPoints}</div>
-            <div class="stat-badge" style="color:#FF6B35">${getIcon('fire')} ${state.totalFire}</div>
+            <div class="stat-badge">${getIcon('fire')} ${state.totalFire}</div>
             ${state.hasStreakInsurance ? `<div class="stat-badge" style="color:#FFA500">${getIcon('shield')} Защищён</div>` : ''}
             <div class="profile-btn" onclick="actions.openProfile()">
                 <img src="${state.avatar || 'https://via.placeholder.com/40?text=👤'}" alt="Profile">
@@ -726,7 +713,7 @@ function renderGroupChallenges() {
                 <div style="font-weight:900;font-size:20px">${g.title}</div>
                 <div style="font-size:32px;font-weight:800;color:var(--gold);margin:12px 0">${g.current} / ${g.target}</div>
                 <div class="group-progress"><div class="group-fill" style="width:${progress}%"></div></div>
-                <div style="margin-top:12px;color:#aaa">Каждый участник добавляет свой огонёк отдельно</div>
+                <div style="margin-top:12px;color:#aaa">Только реальные пользователи добавляют 🔥</div>
             </div>
 
             <div class="referral-section">
@@ -858,22 +845,18 @@ function renderProfile() {
         ${renderHeader()}
         <div class="content" style="text-align:center">
             <h2 style="margin-bottom:30px;font-weight:800">ПРОФИЛЬ</h2>
-            <img src="${state.avatar || 'https://via.placeholder.com/100?text=😊'}" class="profile-avatar" alt="Avatar">
-            <div class="profile-nick">${state.nick || 'Без ника'}</div>
-            <button class="btn btn-primary" style="width:80%;margin:20px auto" onclick="actions.saveNick()">Изменить ник</button>
+            <div class="profile-btn" style="width:80px;height:80px;margin:0 auto 20px">
+                <img src="${state.avatar || 'https://via.placeholder.com/80?text=😊'}" alt="Avatar">
+            </div>
+            <div style="font-size:28px;font-weight:800;margin-bottom:20px">${state.nick || 'Без ника'}</div>
+            <button class="btn btn-primary" style="width:80%" onclick="actions.saveNick()">Изменить ник</button>
 
-            <div class="section">
+            <div class="section" style="margin-top:30px">
                 <div style="font-weight:bold;margin-bottom:10px">Реферальная ссылка</div>
                 <div class="referral-link">https://t.me/livi_app_bot?start=ref${userId}</div>
                 <button class="btn btn-primary" style="margin:10px 0" onclick="actions.copyReferral()">Копировать</button>
                 <button class="btn btn-ghost" onclick="actions.shareReferral()">Поделиться с друзьями</button>
                 <div style="margin-top:15px;color:var(--gold)">Приглашено друзей: ${state.referralCount}</div>
-            </div>
-
-            <div class="section">
-                <div>🔥 Всего огоньков: ${state.totalFire}</div>
-                <div>Стрик: ${state.streak} дней</div>
-                <div>Очков: ${state.totalPoints}</div>
             </div>
         </div>
     </div>`;
@@ -917,9 +900,8 @@ async function initApp() {
         if (refId != userId.toString()) {
             state.totalPoints += 100;
             state.totalFire += 5;
-            // Начисление реферала пригласившему (при его следующем входе будет прочитано)
             saveState();
-            tg.showPopup({title:'Добро пожаловать!', message:'+100 очков и +5 🔥 за переход по ссылке', buttons:[{type:'ok'}]});
+            tg.showPopup({title:'Добро пожаловать!', message:'+100 очков и +5 🔥 за реферал', buttons:[{type:'ok'}]});
         }
     }
 }
