@@ -110,7 +110,6 @@ body{
     transition: transform 0.2s, box-shadow 0.2s;
 }
 .section:active { transform: scale(0.99); }
-/* Noise texture for detail */
 .section::before {
     content: ''; position: absolute; inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
@@ -131,7 +130,6 @@ body{
 .nav-item.active{color:var(--primary)}
 .nav-item.active svg {filter: drop-shadow(0 0 8px var(--primary));}
 
-/* Stats Chart CSS - REPLACED WITH CANVAS CONTAINER */
 .chart-wrapper {
     position: relative;
     height: 200px;
@@ -193,6 +191,40 @@ body{
 .particle-container {position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;}
 .particle {position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; opacity: 0; animation: twinkle var(--duration) ease-in-out infinite; animation-delay: var(--delay);}
 
+/* AI Insights Box */
+.ai-insights {
+    background: linear-gradient(135deg, rgba(139,154,156,0.08) 0%, rgba(212,175,122,0.05) 100%);
+    border: 1px solid rgba(139,154,156,0.2);
+    border-radius: 20px;
+    padding: 18px;
+    margin-top: 15px;
+}
+.insight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 10px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 12px;
+}
+.insight-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+.insight-text {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #ccc;
+}
+.insight-title {
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
 svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
@@ -226,6 +258,8 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
         <div class="ai-chip" onclick="actions.enhanceNote()">⚡ AI Структура</div>
         <div class="ai-chip" onclick="actions.addSummary()">🧠 Главная мысль</div>
         <div class="ai-chip" onclick="actions.extractTasks()">✅ Найти задачи</div>
+        <div class="ai-chip" onclick="actions.fixGrammar()">📝 Исправить ошибки</div>
+        <div class="ai-chip" onclick="actions.addNotes()">💡 Доп. заметки</div>
     </div>
     <textarea id="modalText" class="note-textarea" placeholder="Текст заметки..."></textarea>
     <button class="btn btn-primary" onclick="actions.saveAndCloseNote()" style="margin-top: auto;">СОХРАНИТЬ</button>
@@ -251,23 +285,15 @@ const photoUrl = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDat
 
 function appendWithoutDup(base, addition) {
     if (!addition) return base;
-
-    // нормализация
     const b = base.trim();
     const a = addition.trim();
-
     if (!b) return a + " ";
-
-    // если уже есть — не добавляем
     if (b.includes(a)) return base;
-
-    // ищем пересечение хвоста и начала
     for (let i = a.length; i > 0; i--) {
         if (b.endsWith(a.slice(0, i))) {
             return b + a.slice(i) + " ";
         }
     }
-
     return b + " " + a + " ";
 }
 
@@ -287,25 +313,67 @@ function initStars() {
     }
 }
 
-// --- STORAGE ---
+// --- IMPROVED CLOUD STORAGE ---
 const Storage = {
-    save: (key, data) => {
+    save: async (key, data) => {
         try {
+            // Всегда сохраняем в localStorage как fallback
             localStorage.setItem(key, JSON.stringify(data));
-            if (tg && tg.CloudStorage && key.includes('stats')) {
-                tg.CloudStorage.setItem(key, JSON.stringify(data));
+            
+            // Если есть Telegram Cloud Storage - сохраняем туда
+            if (tg && tg.CloudStorage) {
+                await new Promise((resolve, reject) => {
+                    tg.CloudStorage.setItem(key, JSON.stringify(data), (err, success) => {
+                        if (err) {
+                            console.error("Cloud save failed:", err);
+                            reject(err);
+                        } else {
+                            console.log("✅ Cloud saved:", key);
+                            resolve(success);
+                        }
+                    });
+                });
             }
-        } catch (e) { console.error("Save failed", e); }
+        } catch (e) { 
+            console.error("Save failed", e); 
+        }
     },
+    
     load: async (key) => {
         try {
-            if (tg && tg.CloudStorage && key.includes('stats')) {
-                const cloudData = await new Promise(r => tg.CloudStorage.getItem(key, (err, val) => r(val)));
-                if (cloudData) return JSON.parse(cloudData);
+            // Приоритет - Cloud Storage
+            if (tg && tg.CloudStorage) {
+                const cloudData = await new Promise((resolve) => {
+                    tg.CloudStorage.getItem(key, (err, val) => {
+                        if (err || !val) {
+                            console.log("Cloud load failed or empty:", key);
+                            resolve(null);
+                        } else {
+                            console.log("✅ Cloud loaded:", key);
+                            resolve(val);
+                        }
+                    });
+                });
+                
+                if (cloudData) {
+                    try {
+                        const parsed = JSON.parse(cloudData);
+                        // Сохраняем в localStorage для кэша
+                        localStorage.setItem(key, cloudData);
+                        return parsed;
+                    } catch (e) {
+                        console.error("Parse error:", e);
+                    }
+                }
             }
+            
+            // Fallback на localStorage
             const local = localStorage.getItem(key);
             return local ? JSON.parse(local) : null;
-        } catch (e) { return null; }
+        } catch (e) { 
+            console.error("Load failed:", e);
+            return null; 
+        }
     }
 };
 
@@ -364,18 +432,17 @@ let recognition = null;
 let isRecording = false;
 let currentTranscript = "";
 let editingNoteId = null;
-let activityChart = null; // Chart.js instance
-let taskChart = null; // Chart.js instance
+let activityChart = null;
+let taskChart = null;
 let lastFinalTranscript = "";
 let lastUiUpdate = 0;
-
 
 async function loadState() {
     const statsData = await Storage.load(`livi_stats_${userId}`);
     if (statsData) state = { ...defaultState, ...statsData };
 
     const notesData = await Storage.load(`livi_notes_${userId}`);
-    if (notesData) state.notes = notesData;
+    if (notesData && Array.isArray(notesData)) state.notes = notesData;
 
     if(state.statsHistory.length === 0) {
         for(let i=6; i>=0; i--) {
@@ -387,12 +454,19 @@ async function loadState() {
         }
     }
 
+    checkDailyReset();
+}
+
+function checkDailyReset() {
     const today = new Date().toISOString().split('T')[0];
+    
     if (state.lastVisitDate !== today) {
         if (!state.statsHistory.find(e => e.date === today)) {
              state.streak = hadActivityYesterday() ? state.streak + 1 : 1;
         }
         state.lastVisitDate = today;
+        
+        // Новый челлендж
         const challenges = ['Выполнить 3 задачи','Набрать 100 очков','Прочитать лекцию','Сделать конспект','Пройти 5000 шагов'];
         state.dailyChallenge = {
             date: today,
@@ -400,16 +474,24 @@ async function loadState() {
             completed: false,
             reward: 50
         };
+        
+        // Сброс привычек
         state.tasks.forEach(t => { if (t.type === 'habit') t.completed = false; });
         saveAll();
     }
 }
 
-function saveAll() {
+// Проверка полуночи каждую минуту
+setInterval(() => {
+    checkDailyReset();
+    render();
+}, 60000); // Каждую минуту
+
+async function saveAll() {
     const statsToSave = { ...state };
     delete statsToSave.notes;
-    Storage.save(`livi_stats_${userId}`, statsToSave);
-    Storage.save(`livi_notes_${userId}`, state.notes);
+    await Storage.save(`livi_stats_${userId}`, statsToSave);
+    await Storage.save(`livi_notes_${userId}`, state.notes);
 }
 
 function hadActivityYesterday() {
@@ -430,13 +512,81 @@ function updateHistory(pointsDelta) {
     saveAll();
 }
 
-// --- UPGRADED AI ENGINE (HEURISTIC) ---
+// --- SUPER ADVANCED AI ENGINE ---
 const AI = {
     stopWords: ['и', 'в', 'во', 'не', 'на', 'я', 'с', 'со', 'как', 'а', 'то', 'все', 'она', 'так', 'его', 'но', 'да', 'ты', 'к', 'у', 'же', 'вы', 'за', 'бы', 'по', 'только', 'ее', 'мне', 'было', 'вот', 'от', 'меня', 'еще', 'нет', 'о', 'из', 'ему', 'теперь', 'когда', 'даже', 'ну', 'вдруг', 'ли', 'если', 'уже', 'или', 'ни', 'быть', 'был', 'него', 'до', 'вас', 'нибудь', 'опять', 'уж', 'вам', 'ведь', 'там', 'потом', 'себя', 'ничего', 'ей', 'может', 'они', 'тут', 'где', 'есть', 'надо', 'ней', 'для', 'мы', 'тебя', 'их', 'чем', 'была', 'сам', 'чтоб', 'без', 'будто', 'чего', 'раз', 'тоже', 'себе', 'под', 'будет', 'ж', 'тогда', 'кто', 'этот', 'того', 'потому', 'этого', 'какой', 'совсем', 'ним', 'здесь', 'этом', 'один', 'почти', 'мой', 'тем', 'чтобы', 'нее', 'сейчас', 'были', 'куда', 'зачем', 'всех', 'никогда', 'можно', 'при', 'наконец', 'два', 'об', 'другой', 'хоть', 'после', 'над', 'больше', 'тот', 'через', 'эти', 'нас', 'про', 'всего', 'них', 'какая', 'много', 'разве', 'три', 'эту', 'моя', 'впрочем', 'хорошо', 'свою', 'этой', 'перед', 'иногда', 'лучше', 'чуть', 'том', 'нельзя', 'такой', 'им', 'более', 'всегда', 'конечно', 'всю', 'между'],
 
+    // Словарь типичных ошибок
+    commonErrors: {
+        'асвечание': 'освещение',
+        'пратектировать': 'проектировать',
+        'каманда': 'команда',
+        'функциянал': 'функционал',
+        'обязательна': 'обязательно',
+        'вобще': 'вообще',
+        'чтоли': 'что ли',
+        'наверно': 'наверное',
+        'ваще': 'вообще',
+        'прийти': 'прийти',
+        'придти': 'прийти'
+    },
+
     clean: (text) => text.replace(/\s+/g, ' ').trim(),
 
-    // Подсчет частоты слов (TF - Term Frequency)
+    // Исправление грамматических ошибок
+    fixGrammar: (text) => {
+        let fixed = text;
+        
+        // Исправляем известные ошибки
+        Object.keys(AI.commonErrors).forEach(error => {
+            const regex = new RegExp('\\b' + error + '\\b', 'gi');
+            fixed = fixed.replace(regex, AI.commonErrors[error]);
+        });
+        
+        // Двойные пробелы
+        fixed = fixed.replace(/\s+/g, ' ');
+        
+        // Пробелы перед знаками препинания
+        fixed = fixed.replace(/\s+([,.!?;:])/g, '$1');
+        
+        // Пробел после знаков препинания
+        fixed = fixed.replace(/([,.!?;:])([а-яА-ЯёЁa-zA-Z])/g, '$1 $2');
+        
+        // Заглавная после точки
+        fixed = fixed.replace(/\.\s+([а-яё])/g, (match, p1) => '. ' + p1.toUpperCase());
+        
+        // Первая буква заглавная
+        fixed = fixed.charAt(0).toUpperCase() + fixed.slice(1);
+        
+        return fixed;
+    },
+
+    // Добавление контекстных заметок
+    addContextNotes: (text) => {
+        let enhanced = text;
+        const lines = text.split('\n');
+        const additions = [];
+        
+        // Ищем ключевые фразы и добавляем заметки
+        if (text.toLowerCase().includes('проект')) {
+            additions.push('\n\n💡 **Заметка AI:** Не забудьте определить сроки и ресурсы для проекта.');
+        }
+        
+        if (text.toLowerCase().includes('встреч') || text.toLowerCase().includes('собрание')) {
+            additions.push('\n\n📅 **Напоминание:** Подготовьте повестку дня заранее.');
+        }
+        
+        if (text.toLowerCase().includes('задач') || text.toLowerCase().includes('дела')) {
+            additions.push('\n\n✅ **Совет:** Приоритизируйте задачи по важности и срочности.');
+        }
+        
+        if (text.toLowerCase().includes('изучи') || text.toLowerCase().includes('учеб')) {
+            additions.push('\n\n📚 **Рекомендация:** Используйте метод Фейнмана для лучшего понимания.');
+        }
+        
+        return enhanced + additions.join('');
+    },
+
     getWordFrequencies: (text) => {
         const words = text.toLowerCase().replace(/[.,!?;:()]/g, '').split(/\s+/);
         const freqs = {};
@@ -448,7 +598,6 @@ const AI = {
         return freqs;
     },
 
-    // Оценка предложений на основе ключевых слов
     scoreSentences: (text) => {
         const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
         const freqs = AI.getWordFrequencies(text);
@@ -461,20 +610,19 @@ const AI = {
                 const cleanW = w.replace(/[^а-яёa-z]/gi, '');
                 if (freqs[cleanW]) score += freqs[cleanW];
             });
-            // Бонус за "сигнальные слова"
             if (s.match(/(важно|суть|вывод|итак|значит|поэтому|запомнить)/i)) score *= 1.5;
-            // Нормализация по длине (чтобы короткие предложения не страдали)
             return { text: s.trim(), score: score / (words.length || 1) };
         });
     },
 
     structure: (text) => {
-        let processed = text;
-        // Определение определений (Тире)
-        processed = processed.replace(/([а-яА-Яa-zA-Z]+)\s*-\s*([а-яА-Яa-zA-Z].+?)(?=[.!?]|$)/g, "**$1** — $2");
+        let processed = AI.fixGrammar(text);
+        
+        // Определения
+        processed = processed.replace(/([а-яА-ЯёЁa-zA-Z]+)\s*[-–—]\s*([а-яА-ЯёЁa-zA-Z].+?)(?=[.!?]|$)/g, "**$1** — $2");
         // Абзацы
-        processed = processed.replace(/([.!?])\s*(?=[А-Я])/g, "$1\n\n");
-        // Списки: слова "во-первых", "во-вторых", "пункт" или тире в начале строки
+        processed = processed.replace(/([.!?])\s*(?=[А-ЯЁ])/g, "$1\n\n");
+        // Списки
         processed = processed.replace(/(\n|^)\s*-\s*/g, "\n• ");
         processed = processed.replace(/(Во-первых|Во-вторых|В-третьих),?/gi, "\n🔹 $1:");
 
@@ -483,28 +631,22 @@ const AI = {
 
     extractSummary: (text) => {
         const scored = AI.scoreSentences(text);
-        // Сортируем по весу и берем топ-30%
         const count = Math.max(1, Math.ceil(scored.length * 0.3));
         const topSentences = [...scored].sort((a,b) => b.score - a.score).slice(0, count);
 
-        // Восстанавливаем порядок предложений, чтобы текст был связным
-        // Но для summary лучше просто взять самые "жирные" мысли
         const result = topSentences.map(s => "🔸 " + s.text).join('\n');
 
         return "📌 ГЛАВНАЯ МЫСЛЬ:\n" + result;
     },
 
     findTasks: (text) => {
-        // Улучшенный поиск глаголов действия
-        const verbs = ['сделать', 'купить', 'прочитать', 'написать', 'отправить', 'позвонить', 'найти', 'изучить', 'подготовить', 'встретиться'];
+        const verbs = ['сделать', 'купить', 'прочитать', 'написать', 'отправить', 'позвонить', 'найти', 'изучить', 'подготовить', 'встретиться', 'выполнить', 'создать', 'разработать', 'проверить', 'завершить'];
         const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
         let tasks = [];
 
         sentences.forEach(s => {
             const lower = s.toLowerCase();
-            // Проверка на глаголы в повелительном наклонении или инфинитиве (эвристика)
             if (verbs.some(v => lower.includes(v))) {
-                // Очистка от мусора
                 let t = s.trim();
                 if(t.length < 100) tasks.push("◻️ " + t);
             }
@@ -513,11 +655,65 @@ const AI = {
         return tasks.length > 0 ? "\n\n✅ ОБНАРУЖЕННЫЕ ЗАДАЧИ:\n" + tasks.join('\n') : "\n\n✅ Задач не найдено";
     },
 
+    // Детальный анализ для главной страницы
+    getDetailedInsights: (lastNote) => {
+        if (!lastNote || lastNote.length < 20) {
+            return {
+                mood: '🤔',
+                summary: 'Livi ждет твоих мыслей...',
+                topics: [],
+                suggestions: ['Начни записывать идеи голосом', 'Используй AI для структурирования']
+            };
+        }
+
+        const freqs = AI.getWordFrequencies(lastNote);
+        const topWords = Object.entries(freqs)
+            .sort((a,b)=>b[1]-a[1])
+            .slice(0, 5)
+            .map(x=>x[0]);
+
+        const scored = AI.scoreSentences(lastNote);
+        const topSentence = scored.sort((a,b) => b.score - a.score)[0];
+
+        // Определяем настроение
+        let mood = '💭';
+        if (lastNote.match(/хорошо|отлично|супер|класс|круто/i)) mood = '😊';
+        else if (lastNote.match(/плохо|сложно|трудно|проблема/i)) mood = '😟';
+        else if (lastNote.match(/задач|дела|работа|проект/i)) mood = '💼';
+        else if (lastNote.match(/учеб|изучи|курс|лекция/i)) mood = '📚';
+
+        // Категоризация
+        let category = 'Общее';
+        if (lastNote.match(/работа|проект|задач|дела/i)) category = 'Работа';
+        else if (lastNote.match(/учеб|изучи|курс|лекция|конспект/i)) category = 'Обучение';
+        else if (lastNote.match(/здоровье|спорт|тренировка/i)) category = 'Здоровье';
+        else if (lastNote.match(/идея|план|мысл/i)) category = 'Идеи';
+
+        // Генерируем рекомендации
+        const suggestions = [];
+        if (topWords.includes('проект') || topWords.includes('задач')) {
+            suggestions.push('Создай отдельные задачи из этой заметки');
+        }
+        if (lastNote.length > 300) {
+            suggestions.push('Используй AI для выделения главного');
+        }
+        if (!lastNote.match(/[0-9]{1,2}\.[0-9]{1,2}|завтра|сегодня/)) {
+            suggestions.push('Добавь временные рамки для задач');
+        }
+
+        return {
+            mood: mood,
+            summary: topSentence ? topSentence.text.slice(0, 100) + '...' : 'Анализ заметки',
+            topics: topWords.slice(0, 3),
+            category: category,
+            suggestions: suggestions.length > 0 ? suggestions : ['Продолжай в том же духе!']
+        };
+    },
+
     getTip: (text) => {
         if (!text || text.length < 20) return "Livi ждет твоих мыслей...";
-        const freqs = AI.getWordFrequencies(text);
-        const topWords = Object.entries(freqs).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]).join(", ");
-        return `Похоже, речь про: ${topWords}. Стоит выделить это в отдельную категорию.`;
+        const insights = AI.getDetailedInsights(text);
+        return insights.summary;
     }
 };
 
@@ -546,10 +742,8 @@ const actions = {
         }
     },
     addTask: () => {
-        // Простая эмуляция модального окна добавления через prompt для сохранения структуры
         const title = prompt("Название задачи:");
         if (title) {
-            // Эвристика: если есть слово "важно" -> high priority
             const isUrgent = title.toLowerCase().includes('важно') || title.toLowerCase().includes('срочно');
             const priority = isUrgent ? 'high' : 'med';
 
@@ -608,30 +802,30 @@ const actions = {
         recognition.onresult = (event) => {
             let interimText = "";
 
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            const result = event.results[i];
-            const text = result[0].transcript.trim();
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const result = event.results[i];
+                const text = result[0].transcript.trim();
 
-            if (result.isFinal) {
-                currentTranscript = appendWithoutDup(currentTranscript, text);
-            } else {
-            interimText += text + " ";
+                if (result.isFinal) {
+                    currentTranscript = appendWithoutDup(currentTranscript, text);
+                } else {
+                    interimText += text + " ";
+                }
             }
-        }
 
-        const now = Date.now();
-        if (now - lastUiUpdate > 100) {
-            const el = document.getElementById('liveTranscript');
-            if (el) {
-                el.innerText = (currentTranscript + " " + interimText).trim();
+            const now = Date.now();
+            if (now - lastUiUpdate > 100) {
+                const el = document.getElementById('liveTranscript');
+                if (el) {
+                    el.innerText = (currentTranscript + " " + interimText).trim();
+                }
+                lastUiUpdate = now;
             }
-            lastUiUpdate = now;
-        }
-    };
+        };
 
         recognition.onend = () => {
             if (isRecording) {
-            setTimeout(() => recognition.start(), 300);
+                setTimeout(() => recognition.start(), 300);
             }
         };
         recognition.start();
@@ -641,11 +835,14 @@ const actions = {
         if(recognition) recognition.stop();
         if (currentTranscript.length > 0) {
             const cleanText = AI.clean(currentTranscript);
+            const structuredText = AI.structure(cleanText);
+            const enhancedText = AI.addContextNotes(structuredText);
+            
             const newNote = {
                 id: Date.now(),
                 date: new Date().toLocaleString('ru-RU'),
                 title: 'Заметка ' + new Date().toLocaleTimeString().slice(0,5),
-                text: AI.structure(cleanText)
+                text: enhancedText
             };
             state.notes.unshift(newNote);
             currentTranscript = "";
@@ -692,6 +889,24 @@ const actions = {
         const f = document.getElementById('modalText');
         f.value = f.value + AI.findTasks(f.value);
     },
+    fixGrammar: () => {
+        const f = document.getElementById('modalText');
+        const original = f.value;
+        f.value = "⏳ Исправляю ошибки...";
+        setTimeout(() => {
+            f.value = AI.fixGrammar(original);
+            if(tg) tg.HapticFeedback.notificationOccurred('success');
+        }, 500);
+    },
+    addNotes: () => {
+        const f = document.getElementById('modalText');
+        const original = f.value;
+        f.value = "⏳ Добавляю заметки...";
+        setTimeout(() => {
+            f.value = AI.addContextNotes(original);
+            if(tg) tg.HapticFeedback.notificationOccurred('success');
+        }, 500);
+    },
     openProfile: () => { state.activeTab = 'profile'; render(); },
     copyReferral: () => {
         navigator.clipboard.writeText(`https://t.me/livi_app_bot?start=ref${userId}`).then(() => alert("Скопировано!"));
@@ -719,9 +934,9 @@ function renderHome() {
     const b = ITEMS.find(i => i.id === state.equipped.body);
     const s = ITEMS.find(i => i.id === state.equipped.special);
 
-    // AI Tip
+    // Детальный AI анализ
     const lastNote = state.notes.length > 0 ? state.notes[0].text : "";
-    const aiTip = AI.getTip(lastNote);
+    const insights = AI.getDetailedInsights(lastNote);
 
     return `
     <div class="slide-up">
@@ -752,7 +967,7 @@ function renderHome() {
                 </div>
                 <div class="section" style="margin:0;text-align:center">
                     <div style="font-size:24px;font-weight:800;color:var(--gold)">${state.streak}</div>
-                    <div style="font-size:12px;color:#888">Стрик дня</div>
+                    <div style="font-size:12px;color:#888">Стрик дней</div>
                 </div>
             </div>
 
@@ -766,17 +981,60 @@ function renderHome() {
                 </div>
             </div>
 
-            <div class="grid-2">
+            <div class="ai-insights">
+                <div style="font-size:14px; font-weight:800; color:var(--accent); margin-bottom:15px; display:flex; align-items:center; gap:8px">
+                    <span>🤖</span>
+                    <span>AI АНАЛИЗ</span>
+                </div>
+                
+                <div class="insight-item">
+                    <div class="insight-icon">${insights.mood}</div>
+                    <div style="flex:1">
+                        <div class="insight-title">Последняя активность</div>
+                        <div class="insight-text">${insights.summary}</div>
+                    </div>
+                </div>
+
+                ${insights.topics.length > 0 ? `
+                <div class="insight-item">
+                    <div class="insight-icon">🏷️</div>
+                    <div style="flex:1">
+                        <div class="insight-title">Основные темы</div>
+                        <div class="insight-text">${insights.topics.join(', ')}</div>
+                    </div>
+                </div>` : ''}
+
+                <div class="insight-item">
+                    <div class="insight-icon">📂</div>
+                    <div style="flex:1">
+                        <div class="insight-title">Категория</div>
+                        <div class="insight-text">${insights.category}</div>
+                    </div>
+                </div>
+
+                ${insights.suggestions.length > 0 ? `
+                <div class="insight-item" style="margin-bottom:0">
+                    <div class="insight-icon">💡</div>
+                    <div style="flex:1">
+                        <div class="insight-title">Рекомендации</div>
+                        <div class="insight-text">${insights.suggestions.join(' • ')}</div>
+                    </div>
+                </div>` : ''}
+            </div>
+
+            <div class="grid-2" style="margin-top:15px">
                  <div class="section" style="margin:0">
                     <div style="font-size:12px;color:#888;margin-bottom:5px;">Типы задач</div>
                     <div style="height:100px; position:relative">
                         <canvas id="taskDistributionChart"></canvas>
                     </div>
                  </div>
-                 <div class="section" style="margin:0; display:flex; flex-direction:column; justify-content:center; align-items:center; background:linear-gradient(135deg, rgba(139,154,156,0.1), rgba(0,0,0,0))">
-                    <div style="font-size:24px; margin-bottom:5px">🤖</div>
-                    <div style="font-size:11px; line-height:1.4; color:#ccc; text-align:center">
-                        <b>Livi:</b> ${aiTip}
+                 <div class="section" style="margin:0; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                    <div style="font-size:32px; margin-bottom:10px">📊</div>
+                    <div style="font-size:11px; line-height:1.4; color:#ccc; text-align:center; font-weight:600">
+                        ${state.notes.length} заметок<br>
+                        ${state.tasks.length} задач<br>
+                        ${state.inventory.length} предметов
                     </div>
                  </div>
             </div>
@@ -955,20 +1213,47 @@ function initCharts() {
                     label: 'Очки',
                     data: dataPoints,
                     borderColor: '#A8C4C6',
-                    backgroundColor: 'rgba(168, 196, 198, 0.1)',
-                    borderWidth: 2,
+                    backgroundColor: (context) => {
+                        const ctx = context.chart.ctx;
+                        const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+                        gradient.addColorStop(0, 'rgba(168, 196, 198, 0.25)');
+                        gradient.addColorStop(1, 'rgba(168, 196, 198, 0)');
+                        return gradient;
+                    },
+                    borderWidth: 3,
                     tension: 0.4,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
                     pointBackgroundColor: '#fff',
+                    pointBorderColor: '#A8C4C6',
+                    pointBorderWidth: 2,
                     fill: true
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        padding: 12,
+                        titleColor: '#A8C4C6',
+                        bodyColor: '#fff',
+                        borderColor: '#A8C4C6',
+                        borderWidth: 1
+                    }
+                },
                 scales: {
-                    x: { grid: { display: false, color: '#333' }, ticks: { color: '#666', font:{size:10} } },
-                    y: { display: false, grid: { color: '#222' } }
+                    x: { 
+                        grid: { display: false }, 
+                        ticks: { color: '#666', font:{size:11, weight: 'bold'} } 
+                    },
+                    y: { 
+                        display: true,
+                        grid: { color: '#222', drawBorder: false },
+                        ticks: { color: '#666', font:{size:10} }
+                    }
                 },
                 animation: { duration: 1500, easing: 'easeOutQuart' }
             }
@@ -990,15 +1275,37 @@ function initCharts() {
                     data: [habitCount, taskCount],
                     backgroundColor: ['#D4AF7A', '#8B9A9C'],
                     borderWidth: 0,
-                    hoverOffset: 4
+                    hoverOffset: 8,
+                    hoverBorderColor: '#fff',
+                    hoverBorderWidth: 2
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                cutout: '70%',
-                animation: { animateScale: true }
+                plugins: { 
+                    legend: { 
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            color: '#999',
+                            font: { size: 10 },
+                            padding: 10
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        padding: 10,
+                        titleColor: '#fff',
+                        bodyColor: '#fff'
+                    }
+                },
+                cutout: '65%',
+                animation: { 
+                    animateScale: true,
+                    animateRotate: true,
+                    duration: 1000
+                }
             }
         });
     }
@@ -1020,7 +1327,6 @@ function render() {
         <button class="nav-item ${state.activeTab==='shop'?'active':''}" onclick="state.activeTab='shop';saveAll();render()">${getIcon('shop')}</button>
     </div>`;
 
-    // Инициализация графиков, если мы на главной
     if(state.activeTab === 'home') {
         setTimeout(initCharts, 0);
     }
