@@ -35,7 +35,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .header-title{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header-stats{display:flex;gap:10px;align-items:center}
 .stat-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-weight:700;font-size:14px;background:var(--glass);border:1px solid rgba(255,255,255,0.05)}
-.profile-btn{width:40px;height:40px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 15px rgba(139,154,156,0.3);font-size:20px}
+.profile-btn{width:40px;height:40px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 15px rgba(139,154,156,0.3)}
 
 .livi-container{display:flex;flex-direction:column;align-items:center;padding:30px 0;position:relative}
 .livi-body{
@@ -166,25 +166,26 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 <div id="app"></div>
 
 <script>
-// Безопасная работа с Telegram WebApp
-const tg = window.Telegram ? window.Telegram.WebApp : null;
-if (tg) {
+// Защита от ошибок при отсутствии Telegram WebApp
+let tg = null;
+if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+    tg = Telegram.WebApp;
     tg.expand();
     tg.ready();
     tg.setHeaderColor('#141414');
     tg.setBackgroundColor('#141414');
 }
 
-// Данные пользователя
+// Данные пользователя (с fallback)
 const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'local';
-const firstName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name || 'User' : 'User';
-const username = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.username || '' : '';
-const photoUrl = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.photo_url || '' : '';
+const firstName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || 'User') : 'User';
+const username = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.username || '') : '';
+const photoUrl = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.photo_url || '') : '';
 
-// CloudStorage с fallback
+// CloudStorage с fallback на localStorage
 const CloudStorage = tg ? tg.CloudStorage : {
-    setItem: () => Promise.resolve(),
-    getItem: () => Promise.resolve(''),
+    setItem: (key, value) => Promise.resolve(localStorage.setItem(key, value)),
+    getItem: (key) => Promise.resolve(localStorage.getItem(key) || ''),
 };
 
 const icons = {
@@ -244,11 +245,8 @@ const defaultState = {
 };
 
 let state = { ...defaultState };
-let isSyncing = false;
 
 async function saveToCloud() {
-    if (isSyncing) return;
-    isSyncing = true;
     try {
         await CloudStorage.setItem(`livi_state_${userId}`, JSON.stringify(state));
 
@@ -260,21 +258,28 @@ async function saveToCloud() {
             total += 1;
         }
         await CloudStorage.setItem(`group_fire_${today}`, total.toString());
-    } catch (e) { console.error('Cloud sync error:', e); }
-    isSyncing = false;
+    } catch (e) {
+        console.error('Cloud sync error:', e);
+    }
 }
 
 async function loadFromCloud() {
     try {
         const data = await CloudStorage.getItem(`livi_state_${userId}`);
-        if (data) state = { ...defaultState, ...JSON.parse(data) };
+        if (data) {
+            const parsed = JSON.parse(data);
+            state = { ...defaultState, ...parsed };
+        }
 
         const today = new Date().toISOString().split('T')[0];
         const globalFire = await CloudStorage.getItem(`group_fire_${today}`);
         if (globalFire) state.groupChallenge.current = parseInt(globalFire) || 0;
 
         return true;
-    } catch (e) { console.error('Load error:', e); return false; }
+    } catch (e) {
+        console.error('Load error:', e);
+        return false;
+    }
 }
 
 function updateHistory(pointsDelta = 0, completedTask = false) {
@@ -429,21 +434,28 @@ const actions = {
     },
     copyReferral: () => {
         const link = `https://t.me/livi_app_bot?start=ref${userId}`;
-        navigator.clipboard.writeText(link).then(() => {
-            if (tg) tg.HapticFeedback.notificationOccurred('success');
-            alert("Ссылка скопирована!");
-        });
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(link).then(() => {
+                alert("Ссылка скопирована!");
+            });
+        } else {
+            alert("Ссылка: " + link);
+        }
     },
     shareReferral: () => {
         const link = `https://t.me/livi_app_bot?start=ref${userId}`;
         const text = "Присоединяйся к Livi! Получи бонусы за регистрацию: +100 очков и +5 🔥";
-        if (tg) tg.shareUrl(link, text);
-        else location.href = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
+        if (tg) {
+            tg.shareUrl(link, text);
+        } else {
+            alert("Поделиться: " + link);
+        }
     }
 };
 
 function startRoulette(type) {
     const modal = document.getElementById('rouletteModal');
+    if (!modal) return;
     const strip = document.getElementById('rouletteStrip');
     const winMsg = document.getElementById('winMessage');
 
@@ -451,10 +463,10 @@ function startRoulette(type) {
     winMsg.style.opacity = '0';
     strip.innerHTML = '';
     strip.style.transition = 'none';
-    strip.style.transform = 'translateX(0)';
+    strip.style.transform = 'translateX(0px)';
 
     let pool = type === 'common' 
-        ? ITEMS.filter(i => i.rarity !== 'legendary' && !i.special) 
+        ? ITEMS.filter(i => i.rarity !== 'legendary' && i.id !== 'insurance') 
         : ITEMS;
 
     let winner = pool[Math.floor(Math.random() * pool.length)];
@@ -474,8 +486,9 @@ function startRoulette(type) {
         strip.appendChild(el);
     }
 
-    requestAnimationFrame(() => {
+    setTimeout(() => {
         const windowEl = document.querySelector('.roulette-window');
+        if (!windowEl) return;
         const offset = (windowEl.offsetWidth / 2) - (itemW / 2);
         const pos = -(winIdx * itemW) + offset;
         strip.style.transition = 'transform 6s cubic-bezier(0.1, 0.9, 0.2, 1)';
@@ -491,11 +504,12 @@ function startRoulette(type) {
                 saveState();
             }
         }, 6200);
-    });
+    }, 100);
 }
 
 function closeRoulette() {
-    document.getElementById('rouletteModal').classList.add('hidden');
+    const modal = document.getElementById('rouletteModal');
+    if (modal) modal.classList.add('hidden');
     render();
 }
 
@@ -583,7 +597,6 @@ function renderTasks() {
                 ${c.completed ? '<div class="btn" style="background:var(--glass);color:var(--accent);width:220px;margin:0 auto">ВЫПОЛНЕНО ✅</div>' : '<button class="btn btn-primary" style="width:220px">ЗАВЕРШИТЬ</button>'}
             </div>
 
-            <h3 style="margin:20px 0 10px;font-weight:700">Задачи</h3>
             ${list || '<div class="section" style="text-align:center;padding:40px;color:#666">Задач нет. Нажми +</div>'}
         </div>
         <button class="add-btn" onclick="actions.addTask()">+</button>
@@ -704,25 +717,33 @@ function render() {
     </div>`;
 }
 
-window.onload = async () => {
-    await loadState();
-    render();
-    setTimeout(() => {
+// Инициализация — теперь без await в onload, чтобы не зависало
+document.addEventListener('DOMContentLoaded', () => {
+    loadState().then(() => {
+        render();
+        setTimeout(() => {
+            const ls = document.getElementById('loadingScreen');
+            if (ls) ls.classList.add('fade-out');
+        }, 800);
+    }).catch(() => {
+        // Если всё сломалось — показываем базовое
+        state = { ...defaultState };
+        render();
         const ls = document.getElementById('loadingScreen');
         if (ls) ls.classList.add('fade-out');
-    }, 1000);
+    });
 
-    // Реферальная обработка
+    // Реферал
     if (tg && tg.initDataUnsafe.start_param && tg.initDataUnsafe.start_param.startsWith('ref')) {
         const refId = tg.initDataUnsafe.start_param.slice(3);
         if (refId != userId.toString()) {
             state.totalPoints += 100;
             state.totalFire += 5;
             saveState();
-            tg.showPopup({title:'Добро пожаловать!', message:'+100 очков и +5 🔥 за переход по ссылке', buttons:[{type:'ok'}]});
+            tg.showPopup({title:'Добро пожаловать!', message:'+100 очков и +5 🔥 за рефералку', buttons:[{type:'ok'}]});
         }
     }
-};
+});
 </script>
 </body>
 </html>
