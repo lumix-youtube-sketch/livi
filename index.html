@@ -249,6 +249,28 @@ const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUn
 const firstName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || 'User') : 'Друг';
 const photoUrl = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.photo_url || '') : '';
 
+function appendWithoutDup(base, addition) {
+    if (!addition) return base;
+
+    // нормализация
+    const b = base.trim();
+    const a = addition.trim();
+
+    if (!b) return a + " ";
+
+    // если уже есть — не добавляем
+    if (b.includes(a)) return base;
+
+    // ищем пересечение хвоста и начала
+    for (let i = a.length; i > 0; i--) {
+        if (b.endsWith(a.slice(0, i))) {
+            return b + a.slice(i) + " ";
+        }
+    }
+
+    return b + " " + a + " ";
+}
+
 // --- PARTICLE SYSTEM ---
 function initStars() {
     const container = document.getElementById('stars');
@@ -591,23 +613,21 @@ const actions = {
             const text = result[0].transcript.trim();
 
             if (result.isFinal) {
-                if (!lastFinalTranscript.endsWith(text)) {
-                    currentTranscript += text + " ";
-                    lastFinalTranscript = currentTranscript.trim();
-                }
+                currentTranscript = appendWithoutDup(currentTranscript, text);
             } else {
-                interimText += text + " ";
+            interimText += text + " ";
             }
         }
 
-    // ограничиваем обновление UI (анти-лаг)
-    const now = Date.now();
-    if (now - lastUiUpdate > 100) {
-        const el = document.getElementById('liveTranscript');
-        if (el) el.innerText = currentTranscript + interimText;
-        lastUiUpdate = now;
-    }
-};
+        const now = Date.now();
+        if (now - lastUiUpdate > 100) {
+            const el = document.getElementById('liveTranscript');
+            if (el) {
+                el.innerText = (currentTranscript + " " + interimText).trim();
+            }
+            lastUiUpdate = now;
+        }
+    };
 
         recognition.onend = () => {
             if (isRecording) {
