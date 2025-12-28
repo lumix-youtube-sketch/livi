@@ -13,12 +13,14 @@
     --epic: #D45D79;
     --bg: #1a1a1a;
     --glass: rgba(255,255,255,0.05);
+    --glass-high: rgba(255,255,255,0.1);
     --danger: #ff4757;
     --success: #2ed573;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#1a1a1a 0%,#050505 100%);color:white;max-width:428px;margin:0 auto;overflow-x:hidden;-webkit-tap-highlight-color:transparent;padding-bottom:100px;min-height:100vh}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#121212 0%,#000000 100%);color:white;max-width:428px;margin:0 auto;overflow-x:hidden;-webkit-tap-highlight-color:transparent;padding-bottom:100px;min-height:100vh}
 
+/* Animations */
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
@@ -26,11 +28,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 @keyframes blink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(0.1)}}
 @keyframes pulse-red {0% {box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4);} 70% {box-shadow: 0 0 0 20px rgba(255, 71, 87, 0);} 100% {box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);}}
 @keyframes wave {0%, 100% {height: 10px;} 50% {height: 30px;}}
+@keyframes particle {0%{transform:translateY(0);opacity:0} 50%{opacity:0.5} 100%{transform:translateY(-100px);opacity:0}}
 
 .fade-in{animation:fadeIn .4s ease-out}
 .slide-up{animation:slideUp .4s ease-out}
 .hidden{display:none!important}
 
+/* UI Elements */
 .loading-screen{position:fixed;inset:0;background:#1a1a1a;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s}
 .loading-screen.fade-out{opacity:0;pointer-events:none}
 .loading-logo{font-size:64px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px}
@@ -42,7 +46,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .profile-btn{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid var(--primary);cursor:pointer;box-shadow:0 0 15px rgba(139,154,156,0.3)}
 .profile-btn img{width:100%;height:100%;object-fit:cover}
 
-.livi-container{display:flex;flex-direction:column;align-items:center;padding:30px 0;position:relative}
+/* Livi Character (Untouched Logic) */
+.livi-container{display:flex;flex-direction:column;align-items:center;padding:40px 0;position:relative; z-index: 5;}
+.livi-bg-glow {position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 200px; background: radial-gradient(circle, rgba(139,154,156,0.2) 0%, rgba(0,0,0,0) 70%); z-index: 1; pointer-events: none;}
 .livi-body{
     width:130px;height:130px;
     border-radius:50%;
@@ -57,37 +63,46 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .livi-antenna::after{content:'';position:absolute;top:-8px;left:-3px;width:10px;height:10px;background:var(--accent);border-radius:50%;box-shadow:0 0 10px var(--primary)}
 .ant-l{top:-25px;left:25px;transform:rotate(-20deg)}
 .ant-r{top:-25px;right:25px;transform:rotate(20deg)}
-
 .livi-face{position:absolute;inset:0;z-index:10}
 .eye{position:absolute;top:45%;width:14px;height:18px;background:white;border-radius:50%;animation:blink 4s infinite}
 .eye-l{left:35px} .eye-r{right:35px}
 .mouth{position:absolute;bottom:35px;left:50%;transform:translateX(-50%);width:24px;height:12px;border-bottom:3px solid white;border-radius:0 0 15px 15px}
 
+/* Items CSS */
 .item-cap {position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:90px;height:35px;background:linear-gradient(to bottom, #D4AF7A, #C09555);border-radius:20px 20px 0 0;z-index:20;box-shadow:inset 0 2px 5px rgba(255,255,255,0.2)}
 .item-cap::before {content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:12px;height:6px;background:#C09555;border-radius:50%}
 .item-cap::after {content:'';position:absolute;bottom:0;right:-15px;width:40px;height:10px;background:#b08545;border-radius:0 50px 50px 0;transform:rotate(5deg)}
-
 .item-crown {position:absolute;top:-45px;left:50%;transform:translateX(-50%);width:70px;height:50px;z-index:20;background: linear-gradient(to bottom, #FFD700, #DAA520);clip-path: polygon(0% 100%, 20% 40%, 40% 100%, 60% 20%, 80% 100%, 100% 40%, 100% 100%);filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));}
 .item-crown::after {content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:radial-gradient(circle, #ff0000, #800000);border-radius:50%;box-shadow:20px 0 0 #800000, -20px 0 0 #800000}
-
 .item-glasses {position:absolute;top:55px;left:50%;transform:translateX(-50%);width:80px;height:24px;z-index:30;display:flex;justify-content:space-between}
 .g-lens {width:36px;height:24px;background:rgba(0,0,0,0.85);border-radius:6px;border:2px solid #555;position:relative;overflow:hidden}
 .g-lens::after {content:'';position:absolute;top:0;left:0;width:150%;height:40%;background:rgba(255,255,255,0.15);transform:rotate(25deg) translateY(-5px)}
 .g-bridge {position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:3px;background:#555}
-
 .item-scarf {position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);width:100px;height:35px;z-index:25;background: repeating-linear-gradient(45deg, #D45D79, #D45D79 10px, #C04560 10px, #C04560 20px);border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.3);}
-
 .item-monocle {position:absolute;top:55px;right:38px;width:28px;height:28px;border:2px solid #FFD700;border-radius:50%;background:rgba(255,255,255,0.1);z-index:30}
 .item-monocle::before {content:'';position:absolute;bottom:-30px;right:-10px;width:30px;height:30px;border-right:1px solid #FFD700;border-radius:50%}
-
 .item-bowtie {position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:40px;height:20px;z-index:25;background:#D45D79;clip-path:polygon(0 50%, 40% 0, 50% 50%, 40% 100%, 0 50%, 50% 50%, 60% 0, 100% 50%, 60% 100%, 50% 50%)}
+.item-insurance {position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:60px;height:60px;z-index:20;background:radial-gradient(circle, #FFD700, #B8860B);border-radius:50%;border:3px solid #FFA500;box-shadow:0 0 20px rgba(255,215,0,0.6);display:flex;align-items:center;justify-content:center;font-size:28px;}
 
-.item-insurance {
-    position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:60px;height:60px;z-index:20;
-    background:radial-gradient(circle, #FFD700, #B8860B);border-radius:50%;border:3px solid #FFA500;
-    box-shadow:0 0 20px rgba(255,215,0,0.6);display:flex;align-items:center;justify-content:center;font-size:28px;
-}
+/* Main Layout */
+.content{padding:20px}
+.section{background:var(--glass);border:1px solid var(--glass-high);border-radius:24px;padding:20px;margin-bottom:15px;backdrop-filter:blur(10px); position: relative; overflow: hidden;}
+.section::before {content:''; position:absolute; inset:0; background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%); pointer-events: none;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
+.btn{width:100%;padding:16px;border-radius:16px;font-weight:700;font-size:16px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;position:relative;overflow:hidden}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:white; box-shadow: 0 4px 15px rgba(139,154,156,0.3)}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888}
+.btn-danger{background:rgba(255, 71, 87, 0.1); border:1px solid var(--danger); color: var(--danger)}
+
+.add-btn {position: fixed;bottom: 90px;right: 20px;width: 60px;height: 60px;border-radius: 30px;background: linear-gradient(135deg, var(--primary), var(--accent));color: white;font-size: 32px;border: none;box-shadow: 0 4px 20px rgba(139,154,156,0.5);z-index: 80;display: flex;align-items: center;justify-content: center;cursor: pointer;transition: transform 0.2s;}
+.add-btn:active {transform: scale(0.95);}
+
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:428px;margin:0 auto;background:rgba(15,15,15,0.98);backdrop-filter:blur(20px);border-top:1px solid #2a2a2a;display:flex;justify-content:space-around;padding:12px 0 calc(12px + env(safe-area-inset-bottom));z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:none;color:#555;transition:color .2s}
+.nav-item.active{color:var(--primary)}
+
+/* Shop & Items */
 .chest-wrapper {display:grid;gap:15px;margin-bottom:30px}
 .chest-card {position:relative;border-radius:16px;padding:20px;overflow:hidden;cursor:pointer;transition:transform .2s}
 .chest-card:active {transform:scale(0.98)}
@@ -103,103 +118,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .r-item.rare {border-color:var(--gold)}
 .r-marker {position:absolute;top:0;bottom:0;left:50%;width:4px;background:white;z-index:10;transform:translateX(-50%);box-shadow:0 0 10px white}
 
-.content{padding:20px}
-.section{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:20px;padding:20px;margin-bottom:15px;backdrop-filter:blur(10px)}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-
-.btn{width:100%;padding:16px;border-radius:16px;font-weight:700;font-size:16px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;position:relative;overflow:hidden}
-.btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:white}
-.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888}
-.btn-danger{background:rgba(255, 71, 87, 0.2); border:1px solid var(--danger); color: var(--danger)}
-
-.add-btn {
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 30px;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    color: white;
-    font-size: 32px;
-    border: none;
-    box-shadow: 0 4px 20px rgba(139,154,156,0.5);
-    z-index: 80;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-.add-btn:active {transform: scale(0.95);}
-
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:428px;margin:0 auto;background:rgba(15,15,15,0.98);backdrop-filter:blur(20px);border-top:1px solid #2a2a2a;display:flex;justify-content:space-around;padding:12px 0 calc(12px + env(safe-area-inset-bottom));z-index:100}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:none;color:#555;transition:color .2s}
-.nav-item.active{color:var(--primary)}
-
-.group-progress {height:12px;background:#222;border-radius:6px;overflow:hidden;margin-top:12px}
-.group-fill {height:100%;background:linear-gradient(90deg,var(--gold),var(--epic));transition:width .6s}
-
-.referral-section {text-align:center;padding:20px;background:rgba(255,255,255,0.05);border-radius:16px;margin-bottom:20px}
-.referral-link {background:#111;padding:12px;border-radius:12px;margin:12px 0;font-family:monospace;font-size:14px;word-break:break-all;color:var(--accent)}
-.copy-btn {background:var(--primary);color:white;padding:10px 20px;border-radius:12px;margin-top:8px}
-
-.chart-container {width:100%;height:180px;position:relative;margin-top:20px}
-.period-switch {display:flex;background:#111;padding:4px;border-radius:12px;margin-bottom:15px}
-.p-btn {flex:1;padding:8px;text-align:center;font-size:12px;border-radius:8px;color:#666;cursor:pointer;transition:all 0.2s}
-.p-btn.active {background:#333;color:white;font-weight:bold}
-.heatmap {display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
-.heat-cell {width:10px;height:10px;border-radius:2px;background:#333}
-
-/* Styles for Education Module */
-.mic-btn {
-    width: 80px; height: 80px;
-    border-radius: 50%;
-    background: #333;
-    border: 2px solid #555;
-    display: flex; align-items: center; justify-content: center;
-    margin: 30px auto;
-    cursor: pointer;
-    transition: all 0.3s;
-    position: relative;
-}
-.mic-btn.recording {
-    background: var(--danger);
-    border-color: var(--danger);
-    animation: pulse-red 1.5s infinite;
-}
-.voice-wave {
-    display: flex; gap: 4px; align-items: center; height: 30px;
-}
+/* Education Module & Full Screen Modal */
+.mic-btn {width: 80px; height: 80px; border-radius: 50%; background: #333; border: 2px solid #555; display: flex; align-items: center; justify-content: center; margin: 30px auto; cursor: pointer; transition: all 0.3s; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
+.mic-btn.recording {background: var(--danger); border-color: var(--danger); animation: pulse-red 1.5s infinite;}
+.voice-wave {display: flex; gap: 4px; align-items: center; height: 30px;}
 .bar {width: 4px; background: white; border-radius: 2px; animation: wave 1s infinite ease-in-out;}
 .bar:nth-child(2) {animation-delay: 0.1s; height: 20px}
 .bar:nth-child(3) {animation-delay: 0.2s; height: 40px}
 .bar:nth-child(4) {animation-delay: 0.3s; height: 25px}
 .bar:nth-child(5) {animation-delay: 0.4s; height: 15px}
 
-.note-card {
-    background: rgba(255,255,255,0.05);
-    border-left: 4px solid var(--accent);
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    cursor: pointer;
-}
-.note-date {font-size: 11px; color: #777; margin-bottom: 5px}
-.note-title {font-weight: 700; margin-bottom: 5px; color: white}
+.note-card {background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: background .2s;}
+.note-card:active {background: rgba(255,255,255,0.08);}
+.note-date {font-size: 11px; color: #777; margin-bottom: 5px; display: flex; justify-content: space-between;}
+.note-title {font-weight: 700; margin-bottom: 5px; color: white; font-size: 16px;}
 .note-preview {font-size: 13px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis}
 
-.transcript-area {
-    width: 100%; min-height: 200px;
-    background: #111;
-    border: 1px solid #333;
-    border-radius: 12px;
-    padding: 15px;
-    color: #eee;
-    font-size: 14px;
-    line-height: 1.6;
-    margin-bottom: 20px;
-}
+.note-modal {position: fixed; inset: 0; background: #080808; z-index: 3000; display: flex; flex-direction: column; padding: 20px; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); transform: translateY(100%);}
+.note-modal.open {transform: translateY(0);}
+.note-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;}
+.note-textarea {flex: 1; background: transparent; border: none; color: #eee; font-size: 16px; line-height: 1.6; resize: none; outline: none; font-family: inherit; padding-bottom: 100px;}
+.ai-actions {display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px;}
+.ai-chip {background: rgba(139,154,156,0.2); padding: 8px 16px; border-radius: 20px; font-size: 12px; color: var(--accent); white-space: nowrap; border: 1px solid rgba(139,154,156,0.3);}
+
+/* Particles */
+.particle-container {position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;}
+.particle {position: absolute; width: 4px; height: 4px; background: var(--primary); border-radius: 50%; animation: particle 4s infinite;}
 
 svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
@@ -208,6 +152,13 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 
 <div class="loading-screen" id="loadingScreen">
     <div class="loading-logo">livi</div>
+</div>
+
+<div class="particle-container">
+    <div class="particle" style="left: 10%; top: 80%; animation-delay: 0s"></div>
+    <div class="particle" style="left: 80%; top: 70%; animation-delay: 1.5s"></div>
+    <div class="particle" style="left: 40%; top: 90%; animation-delay: 2.5s"></div>
+    <div class="particle" style="left: 70%; top: 50%; animation-delay: 0.5s"></div>
 </div>
 
 <div id="rouletteModal" class="hidden roulette-modal">
@@ -223,44 +174,76 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
     </div>
 </div>
 
+<div id="noteModal" class="note-modal">
+    <div class="note-header">
+        <div style="font-weight: 800; font-size: 20px; color: var(--gold)" id="modalTitle">Заметка</div>
+        <div onclick="actions.closeNote()" style="padding: 10px; cursor: pointer;">✕</div>
+    </div>
+    <div class="ai-actions">
+        <div class="ai-chip" onclick="actions.enhanceNote()">🪄 Улучшить (AI)</div>
+        <div class="ai-chip" onclick="actions.addSummary()">📝 Добавить выводы</div>
+        <div class="ai-chip" onclick="actions.formatList()">📋 В список</div>
+    </div>
+    <textarea id="modalText" class="note-textarea" placeholder="Текст заметки..."></textarea>
+    <button class="btn btn-primary" onclick="actions.saveAndCloseNote()" style="margin-top: auto;">СОХРАНИТЬ</button>
+</div>
+
 <div id="app"></div>
 
 <script>
-// Безопасная инициализация Telegram WebApp
+// --- INITIALIZATION ---
 let tg = null;
 if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
     tg = Telegram.WebApp;
     tg.expand();
     tg.ready();
-    tg.setHeaderColor('#141414');
-    tg.setBackgroundColor('#141414');
+    tg.setHeaderColor('#121212');
+    tg.setBackgroundColor('#121212');
+    tg.enableClosingConfirmation(); // Prevent accidental closing
 }
 
-// Данные пользователя
-const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'local';
-const firstName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || 'User') : 'User';
-const username = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.username || '') : '';
+const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'local_user';
+const firstName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || 'User') : 'Friend';
 const photoUrl = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.photo_url || '') : '';
 
-// CloudStorage с fallback
-const CloudStorage = tg ? tg.CloudStorage : {
-    setItem: (key, value) => Promise.resolve(localStorage.setItem(key, value)),
-    getItem: (key) => Promise.resolve(localStorage.getItem(key) || '')
+// --- STORAGE ENGINE (Dual Layer: Local + Cloud) ---
+// Note: We use localStorage for Heavy Data (Notes) and Cloud for Stats
+const Storage = {
+    save: (key, data) => {
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+            // Sync critical stats to cloud if available, but don't fail if it doesn't work
+            if (tg && tg.CloudStorage && key.includes('stats')) {
+                tg.CloudStorage.setItem(key, JSON.stringify(data));
+            }
+        } catch (e) { console.error("Save failed", e); }
+    },
+    load: async (key) => {
+        try {
+            // Try Cloud first for stats
+            if (tg && tg.CloudStorage && key.includes('stats')) {
+                const cloudData = await new Promise(r => tg.CloudStorage.getItem(key, (err, val) => r(val)));
+                if (cloudData) return JSON.parse(cloudData);
+            }
+            // Fallback to local
+            const local = localStorage.getItem(key);
+            return local ? JSON.parse(local) : null;
+        } catch (e) { return null; }
+    }
 };
 
 const icons = {
     home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
     check: '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
-    users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><circle cx="16" cy="7" r="4"/>',
     shop: '<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>',
     chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
     star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
     trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
     shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
     fire: '<path d="M8 22s3-8 3-13c0-3-2-5-5-5 1-3 5-5 5-8 2 4 6 5 8 5 2 0 6-1 8 5 0 3-4 5-5 5-1 4 3 13 3 13H8z"/>',
-    user: '<circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>',
     book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
-    mic: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>'
+    mic: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>',
+    edit: '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>'
 };
 const getIcon = (n) => `<svg viewBox="0 0 24 24">${icons[n]}</svg>`;
 
@@ -293,19 +276,11 @@ const defaultState = {
         completed: false,
         reward: 50
     },
-    analysisPeriod: 'week',
-    groupChallenge: {
-        date: new Date().toISOString().split('T')[0],
-        title: 'Все вместе: собрать 5000 🔥 за день',
-        current: 0,
-        target: 5000,
-        personalContributedToday: false
-    },
-    notes: [], // Новое: хранилище заметок
+    notes: [], 
     hasStreakInsurance: false,
     referralCount: 0,
     totalFire: 0,
-    nick: username || firstName,
+    nick: firstName,
     avatar: photoUrl
 };
 
@@ -313,474 +288,251 @@ let state = { ...defaultState };
 let recognition = null;
 let isRecording = false;
 let currentTranscript = "";
+let editingNoteId = null;
 
-async function saveToCloud() {
-    try {
-        // Ограничиваем размер сохраняемых заметок для CloudStorage (max 4096 байт)
-        // Сохраняем только последние 5 заметок полностью, или метаданные
-        const stateToSave = { ...state };
-        
-        // Простая защита от переполнения: если заметок много, оставляем только последние
-        if (JSON.stringify(stateToSave.notes).length > 2000) {
-            stateToSave.notes = stateToSave.notes.slice(0, 5); 
-        }
-
-        await CloudStorage.setItem(`livi_state_${userId}`, JSON.stringify(stateToSave));
-    } catch (e) {
-        console.error('Cloud sync error:', e);
-    }
-}
-
-async function loadFromCloud() {
-    try {
-        const data = await CloudStorage.getItem(`livi_state_${userId}`);
-        if (data && data !== 'null' && data !== 'undefined') {
-            const parsed = JSON.parse(data);
-            // Мержим заметки аккуратно
-            state = { ...defaultState, ...parsed };
-            if (!state.notes) state.notes = [];
-        }
-        return true;
-    } catch (e) {
-        console.error('Load error:', e);
-        return false;
-    }
-}
-
-function updateHistory(pointsDelta = 0, completedTask = false) {
-    const today = new Date().toISOString().split('T')[0];
-    let entry = state.statsHistory.find(e => e.date === today);
-    if (!entry) {
-        entry = { date: today, points: 0, completedTasks: 0 };
-        state.statsHistory.push(entry);
-    }
-    entry.points += pointsDelta;
-    if (completedTask) entry.completedTasks += 1;
-    state.statsHistory = state.statsHistory.slice(-400);
-    saveState();
-}
-
-function saveState() {
-    try {
-        localStorage.setItem('livi_v4_pro', JSON.stringify(state));
-    } catch (e) {}
-    saveToCloud();
-}
-
-function hadActivityYesterday() {
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
-    const y = d.toISOString().split('T')[0];
-    return !!state.statsHistory.find(e => e.date === y && (e.points > 0 || e.completedTasks > 0));
-}
-
+// --- STATE MANAGEMENT ---
 async function loadState() {
-    const today = new Date().toISOString().split('T')[0];
-
-    if (!state.statsHistory) state.statsHistory = [];
-
-    try {
-        await loadFromCloud();
-    } catch (e) {
-        console.error("Cloud load failed, using local", e);
-        try {
-            const saved = localStorage.getItem('livi_v4_pro');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                state = { ...defaultState, ...parsed };
-                if (!state.notes) state.notes = [];
-            }
-        } catch (e2) {
-            console.error("Local load failed", e2);
-        }
+    // 1. Load Main Stats
+    const statsData = await Storage.load(`livi_stats_${userId}`);
+    if (statsData) {
+        state = { ...defaultState, ...statsData };
     }
 
+    // 2. Load Notes (Separate Key for safety)
+    const notesData = await Storage.load(`livi_notes_${userId}`);
+    if (notesData) {
+        state.notes = notesData;
+    }
+
+    // 3. Daily Updates
+    const today = new Date().toISOString().split('T')[0];
     if (state.lastVisitDate !== today) {
-        const yesterdayActive = hadActivityYesterday();
-        if (!yesterdayActive && state.hasStreakInsurance) {
-            state.hasStreakInsurance = false;
-            if (state.equipped.special === 'insurance') state.equipped.special = null;
-            if (tg) tg.showPopup({title:'🛡️', message:'Страховка спасла стрик!', buttons:[{type:'ok'}]});
-        } else if (!yesterdayActive) {
-            state.streak = 1;
-        } else {
-            state.streak += 1;
+        if (!state.statsHistory.find(e => e.date === today)) {
+             state.streak = hadActivityYesterday() ? state.streak + 1 : 1;
         }
-
         state.lastVisitDate = today;
-
-        const challenges = ['Выполнить 3 задачи','Набрать 100 очков','Сделать 20 шагов','Пройти 5 км'];
+        const challenges = ['Выполнить 3 задачи','Набрать 100 очков','Прочитать лекцию','Сделать конспект'];
         state.dailyChallenge = {
             date: today,
             title: challenges[Math.floor(Math.random() * challenges.length)],
             completed: false,
             reward: 50
         };
-
-        state.groupChallenge.personalContributedToday = false;
         state.tasks.forEach(t => { if (t.type === 'habit') t.completed = false; });
-
-        saveState();
-    }
-
-    if (!state.statsHistory.find(e => e.date === today)) {
-        state.statsHistory.push({ date: today, points: 0, completedTasks: 0 });
+        saveAll();
     }
 }
 
+function saveAll() {
+    // Split saving to avoid limits
+    const statsToSave = { ...state };
+    delete statsToSave.notes; // Don't save notes in stats
+    
+    Storage.save(`livi_stats_${userId}`, statsToSave);
+    Storage.save(`livi_notes_${userId}`, state.notes);
+}
+
+function hadActivityYesterday() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const y = d.toISOString().split('T')[0];
+    return !!state.statsHistory.find(e => e.date === y);
+}
+
+function updateHistory(pointsDelta) {
+    const today = new Date().toISOString().split('T')[0];
+    if (!state.statsHistory) state.statsHistory = [];
+    let entry = state.statsHistory.find(e => e.date === today);
+    if (!entry) {
+        entry = { date: today, points: 0, completedTasks: 0 };
+        state.statsHistory.push(entry);
+    }
+    entry.points += pointsDelta;
+    saveAll();
+}
+
+// --- AI LOGIC (Simulated Client-Side Processing) ---
+function aiProcessText(text) {
+    if (!text || text.length < 10) return text;
+
+    // 1. Structure Paragraphs (heuristic: split by periods if long)
+    let processed = text.replace(/([.!?])\s*(?=[А-Я])/g, "$1\n\n");
+    
+    // 2. Identify Keywords & Topics
+    const keywords = ['важно', 'однако', 'например', 'во-первых', 'заключение', 'итак'];
+    keywords.forEach(kw => {
+        const re = new RegExp(`(${kw})`, 'gi');
+        processed = processed.replace(re, "\n🔹 $1");
+    });
+
+    // 3. Generate a "Tips" section based on content
+    let tip = "";
+    if (text.includes("математ") || text.includes("числа")) tip = "\n\n💡 Совет Livi: Проверь формулы на практике.";
+    else if (text.includes("истор") || text.includes("год")) tip = "\n\n💡 Совет Livi: Составь таймлайн событий.";
+    else tip = "\n\n💡 Совет Livi: Перечитай этот конспект перед сном для запоминания.";
+
+    return processed + tip;
+}
+
+// --- ACTIONS ---
 const actions = {
     toggleTask: (id) => {
         const task = state.tasks.find(t => t.id === id);
-        if (!task) return;
-        task.completed = !task.completed;
-        if (task.completed) {
-            state.totalPoints += task.points;
-            updateHistory(task.points, true);
-        } else {
-            state.totalPoints -= task.points;
-            updateHistory(-task.points);
+        if (task) {
+            task.completed = !task.completed;
+            state.totalPoints += task.completed ? task.points : -task.points;
+            updateHistory(task.completed ? task.points : -task.points);
+            if(task.completed && tg) tg.HapticFeedback.notificationOccurred('success');
+            saveAll();
+            render();
         }
-        if (tg) tg.HapticFeedback.notificationOccurred('success');
-        saveState();
-        render();
     },
     addTask: () => {
         const title = prompt("Что нужно сделать?");
-        if (title && title.trim()) {
-            state.tasks.push({ id: Date.now(), title: title.trim(), completed: false, type: 'task', points: 15 });
-            saveState();
+        if (title) {
+            state.tasks.push({ id: Date.now(), title, completed: false, type: 'task', points: 15 });
+            saveAll();
             render();
         }
     },
     deleteTask: (id) => {
-        if (confirm("Удалить?")) {
+        if(confirm("Удалить?")) {
             state.tasks = state.tasks.filter(t => t.id !== id);
-            saveState();
+            saveAll();
             render();
         }
-    },
-    completeChallenge: () => {
-        if (state.dailyChallenge.completed) return;
-        state.dailyChallenge.completed = true;
-        state.totalPoints += state.dailyChallenge.reward;
-        state.totalFire += 1;
-        updateHistory(state.dailyChallenge.reward);
-        if (tg) tg.HapticFeedback.notificationOccurred('success');
-        saveState();
-        render();
     },
     equip: (id) => {
         const item = ITEMS.find(i => i.id === id);
-        if (!item) return;
-        if (item.special) {
-            state.equipped.special = state.equipped.special === id ? null : id;
-            state.hasStreakInsurance = !!state.equipped.special;
-        } else {
-            state.equipped[item.type] = state.equipped[item.type] === id ? null : id;
-        }
-        saveState();
-        render();
-    },
-    openChest: (type, cost) => {
-        if (state.totalPoints < cost) {
-            alert("Не хватает очков!");
-            return;
-        }
-        state.totalPoints -= cost;
-        updateHistory(-cost);
-        startRoulette(type);
-    },
-    setPeriod: (p) => {
-        state.analysisPeriod = p;
-        render();
-    },
-    sendStars: () => {
-        if (tg) {
-            tg.HapticFeedback.notificationOccurred('warning');
-            tg.showPopup({ title: 'Разработка', message: 'Поддержка через Telegram Stars скоро появится!', buttons: [{type:'ok'}] });
-        }
-    },
-    openProfile: () => {
-        state.activeTab = 'profile';
-        render();
-    },
-    saveNick: () => {
-        const newNick = prompt("Введите новый ник:", state.nick);
-        if (newNick && newNick.trim()) {
-            state.nick = newNick.trim();
-            saveState();
+        if (item) {
+            const slot = item.special ? 'special' : item.type;
+            state.equipped[slot] = state.equipped[slot] === id ? null : id;
+            if(item.special) state.hasStreakInsurance = !!state.equipped.special;
+            saveAll();
             render();
         }
     },
-    copyReferral: () => {
-        const link = `https://t.me/livi_app_bot?start=ref${userId}`;
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(link).then(() => alert("Ссылка скопирована!"));
-        } else {
-            alert("Ссылка: " + link);
-        }
+    openChest: (type, cost) => {
+        if (state.totalPoints >= cost) {
+            state.totalPoints -= cost;
+            updateHistory(-cost);
+            startRoulette(type);
+        } else alert("Не хватает очков!");
     },
-    shareReferral: () => {
-        const link = `https://t.me/livi_app_bot?start=ref${userId}`;
-        const text = "Присоединяйся к Livi! Получи бонусы за регистрацию: +100 очков и +5 🔥";
-        if (tg) {
-            tg.openLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`);
-        } else {
-            window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, '_blank');
-        }
-    },
-    // New Education Actions
+    
+    // Education Actions
     startRecording: () => {
-        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            alert("Ваш браузер не поддерживает распознавание речи. Попробуйте Chrome или откройте в Telegram Android.");
+        if (!window.webkitSpeechRecognition && !window.SpeechRecognition) {
+            alert("Голосовой ввод не поддерживается (попробуйте Android/Chrome)");
             return;
         }
-        
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
         recognition.lang = 'ru-RU';
         recognition.continuous = true;
-        recognition.interimResults = true;
+        recognition.interimResults = true; // Record every word live
 
-        recognition.onstart = () => {
-            isRecording = true;
-            if (tg) tg.HapticFeedback.impactOccurred('medium');
-            render();
-        };
-
+        recognition.onstart = () => { isRecording = true; render(); };
         recognition.onresult = (event) => {
-            let interimTranscript = '';
+            let interim = '';
             for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    currentTranscript += event.results[i][0].transcript + " ";
-                } else {
-                    interimTranscript += event.results[i][0].transcript;
-                }
+                if (event.results[i].isFinal) currentTranscript += event.results[i][0].transcript + " ";
+                else interim += event.results[i][0].transcript;
             }
             const el = document.getElementById('liveTranscript');
-            if(el) el.innerText = currentTranscript + interimTranscript;
+            if(el) el.innerText = (currentTranscript + interim) || "Слушаю...";
         };
-
-        recognition.onerror = (event) => {
-            console.error(event.error);
-            isRecording = false;
-            render();
-        };
-
-        recognition.onend = () => {
-            if (isRecording) {
-                recognition.start(); // Auto restart if silence stops it but user didn't
-            } else {
-                render();
-            }
-        };
-
+        recognition.onend = () => { if(isRecording) recognition.start(); else render(); };
         recognition.start();
     },
     stopRecording: () => {
         isRecording = false;
-        if (recognition) recognition.stop();
-        if (tg) tg.HapticFeedback.notificationOccurred('success');
+        if(recognition) recognition.stop();
         
-        // Simulating AI Structuring
-        if (currentTranscript.length > 5) {
-            const structuredText = aiStructureText(currentTranscript);
-            state.notes.unshift({
+        if (currentTranscript.length > 0) {
+            // Auto-save logic
+            const newNote = {
                 id: Date.now(),
                 date: new Date().toLocaleString('ru-RU'),
-                title: 'Конспект ' + new Date().toLocaleTimeString().slice(0,5),
-                raw: currentTranscript,
-                structured: structuredText
-            });
+                title: 'Заметка ' + new Date().toLocaleTimeString().slice(0,5),
+                text: aiProcessText(currentTranscript) // Auto structure on save
+            };
+            state.notes.unshift(newNote);
             currentTranscript = "";
-            saveState();
+            saveAll();
         }
         render();
     },
-    viewNote: (id) => {
+    
+    // Full Screen Note Logic
+    openNote: (id) => {
         const note = state.notes.find(n => n.id === id);
-        if(!note) return;
-        alert(note.structured); // For simplicity in this view
+        if (!note) return;
+        editingNoteId = id;
+        document.getElementById('modalTitle').innerText = note.title;
+        document.getElementById('modalText').value = note.text;
+        document.getElementById('noteModal').classList.add('open');
+    },
+    saveAndCloseNote: () => {
+        const text = document.getElementById('modalText').value;
+        const note = state.notes.find(n => n.id === editingNoteId);
+        if (note) {
+            note.text = text;
+            saveAll();
+        }
+        actions.closeNote();
+        render();
+    },
+    closeNote: () => {
+        document.getElementById('noteModal').classList.remove('open');
+        editingNoteId = null;
     },
     deleteNote: (id) => {
-        if(confirm("Удалить заметку?")) {
+        if(confirm("Удалить этот конспект?")) {
             state.notes = state.notes.filter(n => n.id !== id);
-            saveState();
+            saveAll();
             render();
         }
+    },
+    enhanceNote: () => {
+        const field = document.getElementById('modalText');
+        // Simulate "AI Rephrase"
+        let text = field.value;
+        text = text.replace(/\s+/g, ' ').trim(); // Remove excess whitespace
+        text = text.replace(/([.!?])\s*/g, "$1\n\n"); // Fix paragraphs
+        text = "✨ УЛУЧШЕНО AI:\n\n" + text;
+        field.value = text;
+        if(tg) tg.HapticFeedback.notificationOccurred('success');
+    },
+    addSummary: () => {
+        const field = document.getElementById('modalText');
+        const sentences = field.value.split(/[.!?]/);
+        if (sentences.length > 2) {
+             field.value = "📌 ГЛАВНОЕ: " + sentences[0] + ".\n\n" + field.value;
+        }
+    },
+    formatList: () => {
+        const field = document.getElementById('modalText');
+        // Simple heuristic: turn newlines into list items
+        let text = field.value;
+        text = text.replace(/\n(?!\s*•)/g, "\n• ");
+        field.value = text;
+    },
+    
+    openProfile: () => { state.activeTab = 'profile'; render(); },
+    copyReferral: () => {
+        const link = `https://t.me/livi_app_bot?start=ref${userId}`;
+        navigator.clipboard.writeText(link).then(() => alert("Ссылка скопирована!"));
     }
 };
 
-// "Simple AI" text structurer (Rule-based)
-function aiStructureText(text) {
-    // 1. Capitalize sentences
-    let formatted = text.replace(/(^\s*\w|[\.\!\?]\s*\w)/g, c => c.toUpperCase());
-    
-    // 2. Add bullet points for key phrases (simple heuristic)
-    const keyphrases = ['во-первых', 'во-вторых', 'например', 'важно', 'запомните', 'итак'];
-    keyphrases.forEach(phrase => {
-        const re = new RegExp(phrase, 'gi');
-        formatted = formatted.replace(re, `\n• ${phrase.toUpperCase()}`);
-    });
-
-    // 3. Simple cleanup
-    formatted = formatted.trim();
-
-    // 4. If short, just return
-    if (formatted.length < 50) return formatted;
-
-    return `🤖 AI КОНСПЕКТ:\n\n${formatted}`;
-}
-
-function startRoulette(type) {
-    const modal = document.getElementById('rouletteModal');
-    if (!modal) return;
-    const strip = document.getElementById('rouletteStrip');
-    const winMsg = document.getElementById('winMessage');
-
-    modal.classList.remove('hidden');
-    winMsg.style.opacity = '0';
-    strip.innerHTML = '';
-    strip.style.transition = 'none';
-    strip.style.transform = 'translateX(0px)';
-
-    let pool = type === 'common' ? ITEMS.filter(i => i.rarity !== 'legendary' && !i.special) : ITEMS;
-    let winner = pool[Math.floor(Math.random() * pool.length)];
-
-    if (Math.random() < 0.25) winner = ITEMS.find(i => i.id === 'insurance') || winner;
-    else if (type === 'legendary' && Math.random() > 0.5) winner = ITEMS.find(i => i.rarity === 'legendary') || winner;
-
-    const count = 60;
-    const winIdx = 50;
-    const itemW = 128;
-
-    for (let i = 0; i < count; i++) {
-        const item = i === winIdx ? winner : pool[Math.floor(Math.random() * pool.length)];
-        const el = document.createElement('div');
-        el.className = `r-item ${item.rarity}`;
-        el.innerHTML = `<div style="font-size:40px">${item.icon}</div>`;
-        strip.appendChild(el);
-    }
-
-    setTimeout(() => {
-        const windowEl = document.querySelector('.roulette-window');
-        if (!windowEl) return;
-        const offset = (windowEl.offsetWidth / 2) - (itemW / 2);
-        const pos = -(winIdx * itemW) + offset;
-        strip.style.transition = 'transform 6s cubic-bezier(0.1, 0.9, 0.2, 1)';
-        strip.style.transform = `translateX(${pos}px)`;
-
-        setTimeout(() => {
-            if (tg) tg.HapticFeedback.notificationOccurred('success');
-            document.getElementById('winItemName').innerText = winner.name;
-            document.getElementById('winItemName').style.color = winner.special ? '#FFA500' : (winner.rarity === 'legendary' ? '#D45D79' : '#D4AF7A');
-            winMsg.style.opacity = '1';
-            if (!state.inventory.includes(winner.id)) {
-                state.inventory.push(winner.id);
-                saveState();
-            }
-        }, 6200);
-    }, 100);
-}
-
-function closeRoulette() {
-    const modal = document.getElementById('rouletteModal');
-    if (modal) modal.classList.add('hidden');
-    render();
-}
-
-function getChartData(period) {
-    const days = period === 'week' ? 7 : period === 'month' ? 30 : 365;
-    const now = new Date();
-    const data = [];
-
-    for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
-        const entry = state.statsHistory.find(e => e.date === dateStr);
-        data.push({
-            date: dateStr,
-            val: entry ? entry.points : 0,
-            tasks: entry ? entry.completedTasks : 0
-        });
-    }
-    return data;
-}
-
-function renderChart(data) {
-    if (data.length === 0) return '<div style="text-align:center;padding:40px;color:#555">Нет данных</div>';
-
-    const w = 100; const h = 50;
-    const max = Math.max(...data.map(d => d.val), 10);
-    const step = w / (data.length - 1 || 1);
-
-    const points = data.map((d, i) => {
-        const x = i * step;
-        const y = h - ((d.val / max) * h);
-        return `${x},${y}`;
-    }).join(' ');
-
-    const fillPath = `0,${h} ${points} ${w},${h}`;
-
-    return `
-    <svg viewBox="0 0 100 50" style="width:100%;height:100%;overflow:visible">
-        <defs>
-            <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stop-color="#8B9A9C" stop-opacity="0.5"/>
-                <stop offset="100%" stop-color="#8B9A9C" stop-opacity="0"/>
-            </linearGradient>
-        </defs>
-        <path d="M${points}" fill="none" stroke="#8B9A9C" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
-        <polygon points="${fillPath}" fill="url(#grad)" opacity="0.5"/>
-        <circle cx="${w}" cy="${h - ((data[data.length-1].val/max)*h)}" r="2" fill="white"/>
-    </svg>`;
-}
-
-function renderTasksChart(data) {
-    const w = 100; const h = 40;
-    const max = Math.max(...data.map(d => d.tasks), 1);
-    const barWidth = w / data.length;
-
-    const bars = data.map((d, i) => {
-        const barH = (d.tasks / max) * h;
-        const x = i * barWidth;
-        const y = h - barH;
-        return `<rect x="${x}" y="${y}" width="${barWidth - 1}" height="${barH}" fill="var(--accent)" opacity="0.8" rx="1"/>`;
-    }).join('');
-
-    return `
-    <svg viewBox="0 0 100 40" style="width:100%;height:100%">
-        ${bars}
-    </svg>`;
-}
-
-function renderStreakCalendar(data) {
-    return data.slice(-28).map(d => {
-        const op = Math.min(d.val / 50, 1);
-        return `<div class="heat-cell" style="background:rgba(139,154,156,${op || 0.1})" title="${d.date}: ${d.val}pts"></div>`;
-    }).join('');
-}
-
-function getAIAdvice(data) {
-    const total = data.reduce((a,b) => a + b.val, 0);
-    const active = data.filter(d => d.val > 0);
-    const avg = active.length ? Math.round(total / active.length) : 0;
-    const last = data[data.length-1].val;
-
-    if (total === 0) return "Данных пока мало. Выполни пару задач, чтобы я мог построить стратегию! 🤖";
-    if (last > avg * 1.5) return "Феноменально! Сегодня ты превзошел средние показатели. Главное не выгореть, сделай перерыв. 🚀";
-    if (last < avg * 0.5) return "Активность ниже обычного. Может, стоит начать с маленькой задачи на 5 минут? 👀";
-    return `Ты держишь стабильный темп (${avg} pts/день). Постоянство — признак мастерства.`;
-}
-
+// --- RENDERERS ---
 function renderHeader() {
     return `<div class="header">
         <div class="header-title">livi</div>
         <div class="header-stats">
             <div class="stat-badge" style="color:var(--gold)">${getIcon('star')} ${state.totalPoints}</div>
             <div class="stat-badge">${getIcon('fire')} ${state.totalFire}</div>
-            ${state.hasStreakInsurance ? `<div class="stat-badge" style="color:#FFA500">${getIcon('shield')} Защищён</div>` : ''}
             <div class="profile-btn" onclick="actions.openProfile()">
                 <img src="${state.avatar || 'https://via.placeholder.com/40?text=👤'}" alt="Profile">
             </div>
@@ -790,7 +542,6 @@ function renderHeader() {
 
 function renderHome() {
     const done = state.tasks.filter(t => t.completed).length;
-    const all = state.tasks.length;
     const h = ITEMS.find(i => i.id === state.equipped.head);
     const f = ITEMS.find(i => i.id === state.equipped.face);
     const b = ITEMS.find(i => i.id === state.equipped.body);
@@ -801,6 +552,7 @@ function renderHome() {
         ${renderHeader()}
         <div class="content">
             <div class="livi-container">
+                <div class="livi-bg-glow"></div>
                 <div class="livi-body">
                     ${h ? `<div class="${h.css}" style="${h.style || ''}"></div>` : ''}
                     <div class="livi-antenna ant-l"></div>
@@ -814,12 +566,13 @@ function renderHome() {
                     ${s ? `<div class="${s.css}">${s.icon}</div>` : ''}
                 </div>
                 ${b ? `<div style="position:relative;width:0;height:0;top:-10px"><div class="${b.css}"></div></div>` : ''}
-                <div style="margin-top:20px;font-weight:700">Привет, ${firstName}!</div>
+                <div style="margin-top:20px;font-weight:700; font-size: 18px">Привет, ${state.nick}!</div>
+                <div style="font-size: 12px; opacity: 0.7; margin-top: 5px">Всё под контролем.</div>
             </div>
 
             <div class="grid-2">
                 <div class="section" style="margin:0;text-align:center">
-                    <div style="font-size:24px;font-weight:800;color:var(--primary)">${done}/${all}</div>
+                    <div style="font-size:24px;font-weight:800;color:var(--primary)">${done}/${state.tasks.length}</div>
                     <div style="font-size:12px;color:#888">Задачи</div>
                 </div>
                 <div class="section" style="margin:0;text-align:center">
@@ -827,16 +580,57 @@ function renderHome() {
                     <div style="font-size:12px;color:#888">Стрик</div>
                 </div>
             </div>
+            
+             <div class="section" style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between;">
+                 <div>
+                    <div style="font-weight: bold; font-size: 14px; margin-bottom: 2px;">Цель дня</div>
+                    <div style="font-size: 12px; color: #888">${state.dailyChallenge.title}</div>
+                 </div>
+                 <div style="font-size: 20px">${state.dailyChallenge.completed ? '✅' : '🎯'}</div>
+             </div>
+        </div>
+    </div>`;
+}
 
-            <button class="btn btn-ghost" style="margin-top:30px" onclick="actions.sendStars()">
-                ${getIcon('star')} Поддержать (Stars)
-            </button>
+function renderEducation() {
+    const notesList = state.notes.map(n => `
+        <div class="note-card" onclick="actions.openNote(${n.id})">
+            <div class="note-date">
+                <span>${n.date}</span>
+                <span onclick="event.stopPropagation(); actions.deleteNote(${n.id})" style="color:#666">✕</span>
+            </div>
+            <div class="note-title">${n.title}</div>
+            <div class="note-preview">${n.text.slice(0, 60)}...</div>
+        </div>
+    `).join('');
+
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
+            <h2 style="margin-bottom:15px;font-weight:800; text-align: center">УМНЫЙ КОНСПЕКТ</h2>
+            
+            <div class="section" style="text-align:center; position: relative;">
+                <div style="font-size:13px;color:#aaa;margin-bottom:15px; line-height: 1.4;">
+                    Нажми кнопку, я запишу <b>каждое слово</b>,<br>структурирую и сохраню навсегда.
+                </div>
+
+                <div style="background: #111; padding: 15px; border-radius: 12px; min-height: 80px; margin-bottom: 20px; text-align: left; font-size: 14px; color: #ccc; border: 1px solid #333;" id="liveTranscript">
+                    ${currentTranscript || (isRecording ? "Слушаю..." : "Здесь появится текст...")}
+                </div>
+
+                <button class="mic-btn ${isRecording ? 'recording' : ''}" onclick="${isRecording ? 'actions.stopRecording()' : 'actions.startRecording()'}">
+                    ${isRecording ? '<div class="voice-wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>' : getIcon('mic')}
+                </button>
+            </div>
+
+            <h3 style="margin:25px 0 10px;font-weight:700; padding-left: 5px">МОИ ЗАПИСИ</h3>
+            ${notesList || '<div style="text-align:center;color:#555;padding:20px; font-style: italic;">Пусто. Начни запись!</div>'}
         </div>
     </div>`;
 }
 
 function renderTasks() {
-    const c = state.dailyChallenge;
     const list = state.tasks.map(t => `
         <div class="section" style="display:flex;align-items:center;padding:15px;margin-bottom:10px;opacity:${t.completed ? 0.5 : 1}">
             <div style="width:24px;height:24px;border:2px solid var(--primary);border-radius:6px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:${t.completed ? 'var(--primary)' : 'transparent'}" onclick="actions.toggleTask(${t.id})">
@@ -849,44 +643,14 @@ function renderTasks() {
             <div onclick="actions.deleteTask(${t.id})" style="color:#666">${getIcon('trash')}</div>
         </div>
     `).join('');
-
     return `
     <div class="slide-up">
         ${renderHeader()}
         <div class="content">
-            <h2 style="margin-bottom:20px;font-weight:800">ЗАДАЧИ И ЦЕЛЬ ДНЯ</h2>
-            <div class="section" style="border:2px solid var(--gold);box-shadow:0 0 20px rgba(212,175,122,0.1);padding:25px;text-align:center" onclick="actions.completeChallenge()">
-                <div style="font-size:50px;margin-bottom:15px">🎯</div>
-                <h3 style="font-weight:900;font-size:22px">${c.title}</h3>
-                <div style="color:#aaa;margin-bottom:20px">+${c.reward} очков и +1 🔥</div>
-                ${c.completed ? '<div class="btn" style="background:var(--glass);color:var(--accent);width:220px;margin:0 auto">ВЫПОЛНЕНО ✅</div>' : '<button class="btn btn-primary" style="width:220px">ЗАВЕРШИТЬ</button>'}
-            </div>
-            ${list || '<div class="section" style="text-align:center;padding:40px;color:#666">Задач нет. Нажми +</div>'}
+            <h2 style="margin-bottom:20px;font-weight:800">ЗАДАЧИ</h2>
+            ${list}
         </div>
         <button class="add-btn" onclick="actions.addTask()">+</button>
-    </div>`;
-}
-
-function renderGroupChallenges() {
-    const g = state.groupChallenge;
-    const progress = Math.min((g.current / g.target) * 100, 100);
-    return `
-    <div class="slide-up">
-        ${renderHeader()}
-        <div class="content">
-            <h2 style="margin-bottom:20px;font-weight:800">ГРУППОВЫЕ ИСПЫТАНИЯ</h2>
-            <div class="section" style="padding:25px;text-align:center;border:2px solid var(--epic);background:rgba(212,93,121,0.05)">
-                <div style="font-size:44px;margin-bottom:12px">🔥</div>
-                <div style="font-weight:900;font-size:20px">${g.title}</div>
-                <div style="font-size:32px;font-weight:800;color:var(--gold);margin:12px 0">${g.current} / ${g.target}</div>
-                <div class="group-progress"><div class="group-fill" style="width:${progress}%"></div></div>
-                <div style="margin-top:12px;color:#aaa">Только реальные пользователи добавляют 🔥</div>
-            </div>
-            <div class="referral-section">
-                <div style="font-weight:700">Приглашай друзей — помогай сообществу</div>
-                <button class="btn btn-primary" style="margin-top:15px" onclick="actions.shareReferral()">Поделиться ссылкой</button>
-            </div>
-        </div>
     </div>`;
 }
 
@@ -898,7 +662,7 @@ function renderShop() {
         return `<div class="section" style="padding:10px;margin:0;display:flex;flex-direction:column;align-items:center;border-color:${eq ? color : 'transparent'}" onclick="actions.equip('${id}')">
             <div style="font-size:36px;margin-bottom:6px">${i.icon}</div>
             <div style="font-size:11px;color:#888;text-align:center">${i.name}</div>
-            ${eq ? `<div style="width:8px;height:8px;background:${color};border-radius:50%;margin-top:6px"></div>` : ''}
+            ${eq ? `<div style="width:6px;height:6px;background:${color};border-radius:50%;margin-top:6px"></div>` : ''}
         </div>`;
     }).join('');
     return `
@@ -912,125 +676,15 @@ function renderShop() {
             <div class="chest-wrapper">
                 <div class="chest-card chest-common" onclick="actions.openChest('common', 150)">
                     <div style="font-weight:800;font-size:18px;margin-bottom:4px">Базовый</div>
-                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">150 pts</div>
+                    <div style="font-size:12px;opacity:0.7;">150 pts</div>
                 </div>
                 <div class="chest-card chest-rare" onclick="actions.openChest('rare', 300)">
-                    <div style="font-weight:800;font-size:18px;margin-bottom:4px;color:var(--gold)">Агент</div>
-                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">300 pts</div>
-                </div>
-                <div class="chest-card chest-legendary" onclick="actions.openChest('legendary', 1000)">
-                    <div style="font-weight:800;font-size:18px;margin-bottom:4px;color:var(--epic)">Мистический</div>
-                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">1000 pts</div>
+                    <div style="font-weight:800;font-size:18px;margin-bottom:4px;color:var(--gold)">Редкий</div>
+                    <div style="font-size:12px;opacity:0.7;">300 pts</div>
                 </div>
             </div>
-            <h3 style="margin:25px 0 10px;font-weight:700">ИНВЕНТАРЬ</h3>
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-                ${inv || '<div style="grid-column:1/-1;text-align:center;color:#444;padding:30px">Пусто</div>'}
-            </div>
-        </div>
-    </div>`;
-}
-
-function renderEducation() {
-    const notesList = state.notes.map(n => `
-        <div class="note-card" onclick="actions.viewNote(${n.id})">
-            <div style="display:flex;justify-content:space-between">
-                <div class="note-date">${n.date}</div>
-                <div onclick="event.stopPropagation(); actions.deleteNote(${n.id})" style="color:var(--danger)">${getIcon('trash')}</div>
-            </div>
-            <div class="note-title">${n.title}</div>
-            <div class="note-preview">${n.structured.replace(/\n/g, ' ')}</div>
-        </div>
-    `).join('');
-
-    return `
-    <div class="slide-up">
-        ${renderHeader()}
-        <div class="content">
-            <h2 style="margin-bottom:15px;font-weight:800">УМНЫЙ КОНСПЕКТ</h2>
-            
-            <div class="section" style="text-align:center">
-                <div style="font-size:14px;color:#aaa;margin-bottom:20px">
-                    Нажми, чтобы записать лекцию. <br>Livi структурирует информацию за тебя.
-                </div>
-
-                <div class="transcript-area ${currentTranscript ? '' : 'hidden'}" id="liveTranscript">
-                    ${currentTranscript}
-                </div>
-
-                <button class="mic-btn ${isRecording ? 'recording' : ''}" onclick="${isRecording ? 'actions.stopRecording()' : 'actions.startRecording()'}">
-                    ${isRecording ? '<div class="voice-wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>' : getIcon('mic')}
-                </button>
-                <div style="font-size:12px;color:${isRecording ? 'var(--danger)' : '#666'}">
-                    ${isRecording ? 'Идёт запись... Нажми, чтобы остановить' : 'Нажми для записи'}
-                </div>
-            </div>
-
-            <h3 style="margin:25px 0 10px;font-weight:700">МОИ КОНСПЕКТЫ</h3>
-            ${notesList || '<div style="text-align:center;color:#555;padding:20px">Пока нет записей</div>'}
-        </div>
-    </div>`;
-}
-
-function renderAnalysis() {
-    const p = state.analysisPeriod;
-    const data = getChartData(p);
-    const totalPts = data.reduce((a,b)=>a+b.val,0);
-    const totalTasks = data.reduce((a,b)=>a+b.tasks,0);
-    const activeDays = data.filter(d => d.val > 0);
-    const avgPts = activeDays.length ? Math.round(totalPts / activeDays.length) : 0;
-    const completionRate = state.tasks.length > 0 ? Math.round((state.tasks.filter(t=>t.completed).length / state.tasks.length) * 100) : 0;
-    const advice = getAIAdvice(data);
-    const heatMap = renderStreakCalendar(data);
-
-    return `
-    <div class="slide-up">
-        ${renderHeader()}
-        <div class="content">
-            <h2 style="margin-bottom:15px;font-weight:800">АНАЛИТИКА</h2>
-            <div class="period-switch">
-                <div class="p-btn ${p==='week'?'active':''}" onclick="actions.setPeriod('week')">Неделя</div>
-                <div class="p-btn ${p==='month'?'active':''}" onclick="actions.setPeriod('month')">Месяц</div>
-                <div class="p-btn ${p==='year'?'active':''}" onclick="actions.setPeriod('year')">Год</div>
-            </div>
-            <div class="section">
-                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">Активность (Очки)</div>
-                <div style="font-size:28px;font-weight:800;margin-bottom:10px">${totalPts} <span style="font-size:14px;font-weight:400;color:#666">за период</span></div>
-                <div class="chart-container" style="height:150px">
-                    ${renderChart(data)}
-                </div>
-            </div>
-            <div class="grid-2" style="margin-bottom:15px">
-                <div class="section" style="margin:0">
-                    <div style="font-size:12px;color:#888;margin-bottom:8px">Средний балл</div>
-                    <div style="font-size:24px;font-weight:800;color:var(--accent)">${avgPts}</div>
-                    <div style="font-size:10px;color:#666;margin-top:4px">pts/день</div>
-                </div>
-                <div class="section" style="margin:0">
-                    <div style="font-size:12px;color:#888;margin-bottom:8px">Завершено</div>
-                    <div style="font-size:24px;font-weight:800;color:var(--gold)">${completionRate}%</div>
-                    <div style="font-size:10px;color:#666;margin-top:4px">задач</div>
-                </div>
-            </div>
-            <div class="section">
-                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">${getIcon('check')} Выполнено задач</div>
-                <div style="font-size:20px;font-weight:800;margin-bottom:10px">${totalTasks} <span style="font-size:14px;font-weight:400;color:#666">задач</span></div>
-                <div class="chart-container" style="height:100px">
-                    ${renderTasksChart(data)}
-                </div>
-            </div>
-            <div class="section">
-                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">${getIcon('clock')} Календарь активности (28 дней)</div>
-                <div class="heatmap">${heatMap}</div>
-            </div>
-            <div class="section" style="background:linear-gradient(135deg, rgba(40,40,40,0.5), rgba(20,20,20,0.5)); border-color:var(--accent)">
-                <div style="display:flex;gap:10px">
-                    <div style="font-size:24px">🧠</div>
-                    <div>
-                        <div style="font-weight:bold;color:white;margin-bottom:5px">Livi AI Report</div>
-                        <div style="font-size:13px;line-height:1.5;color:#ccc">${advice}</div>
-                    </div>
-                </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:20px">
+                ${inv || '<div style="grid-column:1/-1;text-align:center;color:#444;">Пусто</div>'}
             </div>
         </div>
     </div>`;
@@ -1045,14 +699,12 @@ function renderProfile() {
             <div class="profile-btn" style="width:80px;height:80px;margin:0 auto 20px">
                 <img src="${state.avatar || 'https://via.placeholder.com/80?text=😊'}" alt="Avatar">
             </div>
-            <div style="font-size:28px;font-weight:800;margin-bottom:20px">${state.nick || 'Без ника'}</div>
-            <button class="btn btn-primary" style="width:80%" onclick="actions.saveNick()">Изменить ник</button>
+            <div style="font-size:28px;font-weight:800;margin-bottom:20px">${state.nick}</div>
+            
             <div class="section" style="margin-top:30px">
                 <div style="font-weight:bold;margin-bottom:10px">Реферальная ссылка</div>
-                <div class="referral-link">https://t.me/livi_app_bot?start=ref${userId}</div>
-                <button class="btn btn-primary" style="margin:10px 0" onclick="actions.copyReferral()">Копировать</button>
-                <button class="btn btn-ghost" onclick="actions.shareReferral()">Поделиться с друзьями</button>
-                <div style="margin-top:15px;color:var(--gold)">Приглашено друзей: ${state.referralCount}</div>
+                <div style="background:#111;padding:12px;border-radius:12px;margin:12px 0;font-family:monospace;font-size:12px;color:var(--accent);word-break:break-all">https://t.me/livi_app_bot?start=ref${userId}</div>
+                <button class="btn btn-primary" onclick="actions.copyReferral()">Копировать</button>
             </div>
         </div>
     </div>`;
@@ -1062,47 +714,58 @@ function render() {
     let html = '';
     if (state.activeTab === 'home') html = renderHome();
     else if (state.activeTab === 'tasks') html = renderTasks();
-    else if (state.activeTab === 'education') html = renderEducation(); // New Tab
-    else if (state.activeTab === 'group') html = renderGroupChallenges();
+    else if (state.activeTab === 'education') html = renderEducation();
     else if (state.activeTab === 'shop') html = renderShop();
-    else if (state.activeTab === 'analysis') html = renderAnalysis();
     else if (state.activeTab === 'profile') html = renderProfile();
 
     document.getElementById('app').innerHTML = html + `
     <div class="bottom-nav">
-        <button class="nav-item ${state.activeTab==='home'?'active':''}" onclick="state.activeTab='home';saveState();render()">${getIcon('home')}<span style="font-size:10px">Home</span></button>
-        <button class="nav-item ${state.activeTab==='tasks'?'active':''}" onclick="state.activeTab='tasks';saveState();render()">${getIcon('check')}<span style="font-size:10px">Tasks</span></button>
-        <button class="nav-item ${state.activeTab==='education'?'active':''}" onclick="state.activeTab='education';saveState();render()">${getIcon('book')}<span style="font-size:10px">Learn</span></button>
-        <button class="nav-item ${state.activeTab==='shop'?'active':''}" onclick="state.activeTab='shop';saveState();render()">${getIcon('shop')}<span style="font-size:10px">Shop</span></button>
-        <button class="nav-item ${state.activeTab==='analysis'?'active':''}" onclick="state.activeTab='analysis';saveState();render()">${getIcon('chart')}<span style="font-size:10px">Data</span></button>
+        <button class="nav-item ${state.activeTab==='home'?'active':''}" onclick="state.activeTab='home';saveAll();render()">${getIcon('home')}</button>
+        <button class="nav-item ${state.activeTab==='tasks'?'active':''}" onclick="state.activeTab='tasks';saveAll();render()">${getIcon('check')}</button>
+        <button class="nav-item ${state.activeTab==='education'?'active':''}" onclick="state.activeTab='education';saveAll();render()">${getIcon('book')}</button>
+        <button class="nav-item ${state.activeTab==='shop'?'active':''}" onclick="state.activeTab='shop';saveAll();render()">${getIcon('shop')}</button>
     </div>`;
 }
 
-async function initApp() {
-    try {
-        await loadState();
-    } catch (e) {
-        console.error("Ошибка инициализации", e);
-    } finally {
-        render();
-        const loadingScreen = document.getElementById('loadingScreen');
-        if (loadingScreen) {
-            loadingScreen.classList.add('fade-out');
-        }
+// --- ROULETTE LOGIC ---
+function startRoulette(type) {
+    const modal = document.getElementById('rouletteModal');
+    modal.classList.remove('hidden');
+    const strip = document.getElementById('rouletteStrip');
+    strip.innerHTML = ''; strip.style.transition = 'none'; strip.style.transform = 'translateX(0px)';
+    
+    let pool = type === 'common' ? ITEMS.filter(i => i.rarity !== 'legendary') : ITEMS;
+    let winner = pool[Math.floor(Math.random() * pool.length)];
+    if(type === 'rare' && Math.random() > 0.7) winner = ITEMS.find(i=>i.rarity === 'legendary') || winner;
+
+    for (let i = 0; i < 60; i++) {
+        const item = i === 50 ? winner : pool[Math.floor(Math.random() * pool.length)];
+        const el = document.createElement('div');
+        el.className = `r-item ${item.rarity}`;
+        el.innerHTML = `<div style="font-size:40px">${item.icon}</div>`;
+        strip.appendChild(el);
     }
 
-    if (tg && tg.initDataUnsafe.start_param && tg.initDataUnsafe.start_param.startsWith('ref')) {
-        const refId = tg.initDataUnsafe.start_param.slice(3);
-        if (refId != userId.toString()) {
-            state.totalPoints += 100;
-            state.totalFire += 5;
-            saveState();
-            tg.showPopup({title:'Добро пожаловать!', message:'+100 очков и +5 🔥 за реферал', buttons:[{type:'ok'}]});
-        }
-    }
+    setTimeout(() => {
+        const offset = (document.querySelector('.roulette-window').offsetWidth / 2) - 64;
+        strip.style.transition = 'transform 6s cubic-bezier(0.1, 0.9, 0.2, 1)';
+        strip.style.transform = `translateX(-${(50 * 128) - offset}px)`;
+        setTimeout(() => {
+            if(tg) tg.HapticFeedback.notificationOccurred('success');
+            document.getElementById('winItemName').innerText = winner.name;
+            document.getElementById('winMessage').style.opacity = '1';
+            if (!state.inventory.includes(winner.id)) { state.inventory.push(winner.id); saveAll(); }
+        }, 6200);
+    }, 100);
 }
+function closeRoulette() { document.getElementById('rouletteModal').classList.add('hidden'); render(); }
 
-document.addEventListener('DOMContentLoaded', initApp);
+// --- BOOT ---
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadState();
+    render();
+    document.getElementById('loadingScreen').classList.add('fade-out');
+});
 </script>
 </body>
 </html>
