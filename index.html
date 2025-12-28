@@ -23,7 +23,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @keyframes pulse-glow{0%,100%{box-shadow:0 0 10px var(--epic)}50%{box-shadow:0 0 25px var(--epic)}}
-@keyframes shine{0%{background-position:-100%}100%{background-position:200%}}
 @keyframes blink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(0.1)}}
 
 .fade-in{animation:fadeIn .4s ease-out}
@@ -41,7 +40,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .header-stats{display:flex;gap:10px}
 .stat-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-weight:700;font-size:14px;background:var(--glass);border:1px solid rgba(255,255,255,0.05)}
 
-/* --- LIVI & ITEMS V2 (HIGH DETAIL) --- */
+/* --- LIVI & ITEMS --- */
 .livi-container{display:flex;flex-direction:column;align-items:center;padding:30px 0;position:relative}
 .livi-body{
     width:130px;height:130px;
@@ -90,14 +89,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 .item-bowtie {position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:40px;height:20px;z-index:25;background:#D45D79;clip-path:polygon(0 50%, 40% 0, 50% 50%, 40% 100%, 0 50%, 50% 50%, 60% 0, 100% 50%, 60% 100%, 50% 50%)}
 
-/* Новый предмет — Страховка стриков */
 .item-insurance {
     position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:60px;height:60px;z-index:20;
     background:radial-gradient(circle, #FFD700, #B8860B);border-radius:50%;border:3px solid #FFA500;
     box-shadow:0 0 20px rgba(255,215,0,0.6);display:flex;align-items:center;justify-content:center;font-size:28px;
 }
 
-/* --- CHESTS (VISUALS) --- */
+/* --- CHESTS --- */
 .chest-wrapper {display:grid;gap:15px;margin-bottom:30px}
 .chest-card {position:relative;border-radius:16px;padding:20px;overflow:hidden;cursor:pointer;transition:transform .2s}
 .chest-card:active {transform:scale(0.98)}
@@ -158,23 +156,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:none;color:#555;transition:color .2s}
 .nav-item.active{color:var(--primary)}
 
-/* Chart & Analysis */
-.chart-container {width:100%;height:180px;position:relative;margin-top:20px}
-.chart-tooltip {position:absolute;top:0;right:0;background:#333;padding:4px 8px;border-radius:4px;font-size:10px;display:none}
-.period-switch {display:flex;background:#111;padding:4px;border-radius:12px;margin-bottom:15px}
-.p-btn {flex:1;padding:8px;text-align:center;font-size:12px;border-radius:8px;color:#666;cursor:pointer;transition:all 0.2s}
-.p-btn.active {background:#333;color:white;font-weight:bold}
-.heatmap {display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
-.heat-cell {width:10px;height:10px;border-radius:2px;background:#333}
-
-.progress-bar {width:100%;height:8px;background:#222;border-radius:4px;overflow:hidden;margin-top:10px}
-.progress-fill {height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width 0.3s}
-
-/* Новые стили для групповых испытаний */
-.group-progress {height:12px;background:#222;border-radius:6px;overflow:hidden;margin-top:10px}
+/* Group Challenges Styles */
+.group-progress {height:12px;background:#222;border-radius:6px;overflow:hidden;margin-top:12px}
 .group-fill {height:100%;background:linear-gradient(90deg,var(--gold),var(--epic));transition:width .6s}
-.leaderboard-item {display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
-.rank-num {font-weight:800;color:var(--gold);width:30px}
+.referral-section {text-align:center;padding:20px;background:rgba(255,255,255,0.05);border-radius:16px;margin-bottom:20px}
+.referral-link {background:#111;padding:12px;border-radius:12px;margin:12px 0;font-family:monospace;font-size:14px;word-break:break-all;color:var(--accent)}
+.copy-btn {background:var(--primary);color:white;padding:10px 20px;border-radius:12px;margin-top:8px}
 
 svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
@@ -202,33 +189,27 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 
 <script>
 // --- CORE CONFIG ---
-const tg = window.Telegram?.WebApp;
+const tg = window.Telegram.WebApp;
 if(tg) { tg.expand(); tg.ready(); tg.setHeaderColor('#141414'); tg.setBackgroundColor('#141414'); }
 
-// Привязка к аккаунту Telegram
-const userId = tg?.initDataUnsafe?.user?.id || 'local';
+// Привязка к реальному Telegram-аккаунту
+const userId = tg.initDataUnsafe.user?.id || 'local';
+const username = tg.initDataUnsafe.user?.username || 'user';
+const firstName = tg.initDataUnsafe.user?.first_name || 'User';
 
-// Cloud Storage с префиксом по userId
-const CloudStorage = tg?.CloudStorage || {
-    setItem: (key, value) => Promise.resolve(),
-    getItem: (key) => Promise.resolve(''),
-    getItems: (keys) => Promise.resolve({}),
-    removeItem: (key) => Promise.resolve()
-};
+const CloudStorage = tg.CloudStorage;
 
 // --- ICONS & ASSETS ---
 const icons = {
     home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
-    target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/>',
     check: '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
     users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><circle cx="16" cy="7" r="4"/>',
     shop: '<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>',
     chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
     star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
     trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
-    trendUp: '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
-    clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
-    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'
+    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    fire: '<path d="M8 22s3-8 3-13c0-3-2-5-5-5 1-3 5-5 5-8 2 4 6 5 8 5 2 0 6-1 8 5 0 3-4 5-5 5-1 4 3 13 3 13H8z"/>'
 };
 const getIcon = (n) => `<svg>${icons[n]}</svg>`;
 
@@ -259,17 +240,21 @@ const defaultState = {
     equipped: { head: null, face: null, body: null, special: null },
     dailyChallenge: {
         date: new Date().toISOString().split('T')[0],
-        title: 'Сделать 20 шагов', target: 20, completed: false, reward: 50
+        title: 'Сделать 20 шагов',
+        completed: false,
+        reward: 50
     },
     analysisPeriod: 'week',
     groupChallenge: {
         date: new Date().toISOString().split('T')[0],
-        title: 'Все вместе: 1000 задач за день',
+        title: 'Все вместе: собрать 5000 🔥 за день',
         current: 0,
-        target: 1000,
-        personalContributed: false
+        target: 5000,
+        personalContributedToday: false
     },
-    hasStreakInsurance: false
+    hasStreakInsurance: false,
+    referralCount: 0,
+    totalFire: 0
 };
 
 let state = { ...defaultState };
@@ -281,16 +266,19 @@ async function saveToCloud() {
     isSyncing = true;
     try {
         await CloudStorage.setItem(`livi_state_${userId}`, JSON.stringify(state));
+        await CloudStorage.setItem(`livi_fire_${userId}`, state.totalFire.toString());
+        await CloudStorage.setItem(`livi_referrals_${userId}`, state.referralCount.toString());
+
+        // Обновление глобального счётчика огоньков за день
         const today = new Date().toISOString().split('T')[0];
-        const currentGroup = state.groupChallenge.personalContributed && state.dailyChallenge.completed ? 1 : 0;
-        const existing = await CloudStorage.getItem(`livi_group_progress_${today}`);
+        const key = `group_fire_${today}`;
         let total = 0;
-        if (existing) {
-            total = parseInt(JSON.parse(existing).current || 0);
+        const existing = await CloudStorage.getItem(key);
+        if (existing) total = parseInt(existing) || 0;
+        if (state.dailyChallenge.completed && !state.groupChallenge.personalContributedToday) {
+            total += 1;
         }
-        if (currentGroup) total += 1;
-        await CloudStorage.setItem(`livi_group_progress_${today}`, JSON.stringify({current: total}));
-        console.log('✅ Synced to cloud');
+        await CloudStorage.setItem(key, total.toString());
     } catch (e) {
         console.error('Cloud sync error:', e);
     }
@@ -303,15 +291,18 @@ async function loadFromCloud() {
         if (cloudData) {
             const parsed = JSON.parse(cloudData);
             state = { ...defaultState, ...parsed };
-            console.log('✅ Loaded personal from cloud');
         }
 
+        const fireData = await CloudStorage.getItem(`livi_fire_${userId}`);
+        if (fireData) state.totalFire = parseInt(fireData) || 0;
+
+        const refData = await CloudStorage.getItem(`livi_referrals_${userId}`);
+        if (refData) state.referralCount = parseInt(refData) || 0;
+
         const today = new Date().toISOString().split('T')[0];
-        const groupData = await CloudStorage.getItem(`livi_group_progress_${today}`);
-        if (groupData) {
-            const prog = JSON.parse(groupData);
-            state.groupChallenge.current = prog.current || 0;
-        }
+        const globalFire = await CloudStorage.getItem(`group_fire_${today}`);
+        if (globalFire) state.groupChallenge.current = parseInt(globalFire) || 0;
+
         return true;
     } catch (e) {
         console.error('Cloud load error:', e);
@@ -332,6 +323,7 @@ function updateHistory(pointsDelta = 0, completedTask = false) {
     entry.points += pointsDelta;
     if (completedTask) entry.completedTasks += 1;
 
+    // ограничиваем историю
     state.statsHistory = state.statsHistory.slice(-400);
 
     saveState();
@@ -366,13 +358,14 @@ async function loadState() {
         } catch (e) {}
     }
 
-    // New Day Logic с учётом страховки
+    // Логика нового дня
     if (state.lastVisitDate !== today) {
         const yesterdayActive = hadActivityYesterday();
+
         if (!yesterdayActive && state.hasStreakInsurance) {
             state.hasStreakInsurance = false;
             if (state.equipped.special === 'insurance') state.equipped.special = null;
-            tg?.showPopup({title: '🛡️ Страховка сработала!', message: 'Твой стрик сохранён благодаря страховке!', buttons: [{type:'ok'}]});
+            tg.showPopup({title: '🛡️ Страховка сработала!', message: 'Твой стрик сохранён!', buttons: [{type:'ok'}]});
         } else if (!yesterdayActive) {
             state.streak = 1;
         } else {
@@ -381,24 +374,15 @@ async function loadState() {
 
         state.lastVisitDate = today;
 
-        // Обновление ежедневной цели
-        const challenges = ['Сделать 20 шагов', 'Выполнить 3 задачи', 'Набрать 100 очков', 'Пройти 5 км'];
+        const challenges = ['Выполнить 3 задачи', 'Набрать 100 очков', 'Сделать 20 шагов', 'Пройти 5 км'];
         state.dailyChallenge = {
             date: today,
             title: challenges[Math.floor(Math.random() * challenges.length)],
-            target: 20,
             completed: false,
             reward: 50
         };
 
-        // Сброс группового вклада
-        state.groupChallenge = {
-            date: today,
-            title: 'Все вместе: 1000 задач за день',
-            current: state.groupChallenge.current,
-            target: 1000,
-            personalContributed: false
-        };
+        state.groupChallenge.personalContributedToday = false;
 
         state.tasks.forEach(t => {
             if (t.type === 'habit') t.completed = false;
@@ -418,17 +402,17 @@ const actions = {
         const task = state.tasks.find(t => t.id === id);
         if (!task) return;
 
-        if (!task.completed) {
-            task.completed = true;
+        task.completed = !task.completed;
+
+        if (task.completed) {
             state.totalPoints += task.points;
             updateHistory(task.points, true);
-            tg?.HapticFeedback?.notificationOccurred('success');
         } else {
-            task.completed = false;
             state.totalPoints -= task.points;
-            updateHistory(-task.points, false);
+            updateHistory(-task.points);
         }
 
+        tg.HapticFeedback.notificationOccurred('success');
         saveState();
         render();
     },
@@ -436,35 +420,40 @@ const actions = {
         const title = prompt("Что нужно сделать?");
         if (title && title.trim()) {
             state.tasks.push({ id: Date.now(), title: title.trim(), completed: false, type: 'task', points: 15 });
-            saveState(); render();
+            saveState();
+            render();
         }
     },
     deleteTask: (id) => {
-        if(confirm("Удалить?")) {
+        if (confirm("Удалить задачу?")) {
             state.tasks = state.tasks.filter(t => t.id !== id);
-            saveState(); render();
+            saveState();
+            render();
         }
     },
     completeChallenge: () => {
-        if(!state.dailyChallenge.completed) {
-            state.dailyChallenge.completed = true;
-            state.totalPoints += state.dailyChallenge.reward;
-            updateHistory(state.dailyChallenge.reward);
+        if (state.dailyChallenge.completed) return;
 
-            // Вклад в групповое испытание
-            if (!state.groupChallenge.personalContributed) {
-                state.groupChallenge.personalContributed = true;
-                state.groupChallenge.current += 1;
-                saveToCloud();
-            }
+        state.dailyChallenge.completed = true;
+        state.totalPoints += state.dailyChallenge.reward;
+        state.totalFire += 1; // +1 личный огонёк
 
-            tg?.HapticFeedback?.notificationOccurred('success');
-            saveState(); render();
+        updateHistory(state.dailyChallenge.reward);
+
+        // Вклад в групповое
+        if (!state.groupChallenge.personalContributedToday) {
+            state.groupChallenge.personalContributedToday = true;
+            state.groupChallenge.current += 1;
+            saveToCloud();
         }
+
+        tg.HapticFeedback.notificationOccurred('success');
+        saveState();
+        render();
     },
     equip: (id) => {
         const item = ITEMS.find(i => i.id === id);
-        if(!item) return;
+        if (!item) return;
 
         if (item.special) {
             if (state.equipped.special === id) {
@@ -486,7 +475,10 @@ const actions = {
         render();
     },
     openChest: (type, cost) => {
-        if (state.totalPoints < cost) return alert("Не хватает очков!");
+        if (state.totalPoints < cost) {
+            alert("Не хватает очков!");
+            return;
+        }
         state.totalPoints -= cost;
         updateHistory(-cost);
         startRoulette(type);
@@ -496,8 +488,15 @@ const actions = {
         render();
     },
     sendStars: () => {
-        tg?.HapticFeedback?.notificationOccurred('warning');
-        tg?.showPopup({ title: 'Разработка', message: 'Эта функция скоро появится!', buttons: [{type:'ok'}] });
+        tg.HapticFeedback.notificationOccurred('warning');
+        tg.showPopup({ title: 'Разработка', message: 'Функция поддержки через Stars скоро появится!', buttons: [{type:'ok'}] });
+    },
+    copyReferral: () => {
+        const link = `https://t.me/livi_app_bot?start=ref${userId}`;
+        navigator.clipboard.writeText(link).then(() => {
+            tg.HapticFeedback.notificationOccurred('success');
+            alert("Реферальная ссылка скопирована в буфер обмена!");
+        });
     }
 };
 
@@ -513,13 +512,16 @@ function startRoulette(type) {
     strip.style.transition = 'none';
     strip.style.transform = 'translateX(0)';
 
-    let pool = type === 'common' ? ITEMS.filter(i=>i.rarity!=='legendary' && i.id !== 'insurance') : ITEMS;
+    let pool = type === 'common' 
+        ? ITEMS.filter(i => i.rarity !== 'legendary' && i.id !== 'insurance') 
+        : ITEMS;
+
     let winner = pool[Math.floor(Math.random() * pool.length)];
 
-    // Повышенный шанс на страховку (25% в любом боксе)
+    // Повышенный шанс на страховку
     if (Math.random() < 0.25) {
         winner = ITEMS.find(i => i.id === 'insurance');
-    } else if(type === 'legendary' && Math.random() > 0.5) {
+    } else if (type === 'legendary' && Math.random() > 0.5) {
         winner = ITEMS.find(i => i.rarity === 'legendary') || winner;
     }
 
@@ -527,11 +529,11 @@ function startRoulette(type) {
     const winIdx = 50;
     const itemW = 128;
 
-    for(let i=0; i<count; i++) {
-        const item = i === winIdx ? winner : pool[Math.floor(Math.random()*pool.length)];
+    for (let i = 0; i < count; i++) {
+        const item = i === winIdx ? winner : pool[Math.floor(Math.random() * pool.length)];
         const el = document.createElement('div');
         el.className = `r-item ${item.rarity}`;
-        el.innerHTML = `<div style="font-size:40px">${item.icon}</div><div style="font-size:10px;margin-top:4px">${item.rarity === 'rare' && item.special ? 'SPECIAL' : ''}</div>`;
+        el.innerHTML = `<div style="font-size:40px">${item.icon}</div>`;
         strip.appendChild(el);
     }
 
@@ -543,11 +545,12 @@ function startRoulette(type) {
         strip.style.transform = `translateX(${pos}px)`;
 
         setTimeout(() => {
-            tg?.HapticFeedback?.notificationOccurred('success');
+            tg.HapticFeedback.notificationOccurred('success');
             document.getElementById('winItemName').innerText = winner.name;
             document.getElementById('winItemName').style.color = winner.special ? '#FFA500' : (winner.rarity === 'legendary' ? '#D45D79' : '#D4AF7A');
             winMsg.style.opacity = '1';
-            if(!state.inventory.includes(winner.id)) {
+
+            if (!state.inventory.includes(winner.id)) {
                 state.inventory.push(winner.id);
                 saveState();
             }
@@ -560,102 +563,26 @@ function closeRoulette() {
     render();
 }
 
-// --- ANALYTICS ENGINE ---
-function getChartData(period) {
-    const days = period === 'week' ? 7 : period === 'month' ? 30 : 365;
-    const now = new Date();
-    const data = [];
-
-    for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
-        const entry = state.statsHistory.find(e => e.date === dateStr);
-        data.push({
-            date: dateStr,
-            val: entry ? entry.points : 0,
-            tasks: entry ? entry.completedTasks : 0
-        });
-    }
-    return data;
-}
-
-function renderChart(data) {
-    if (data.length === 0) return '<div style="text-align:center;padding:40px;color:#555">Нет данных</div>';
-
-    const w = 100; const h = 50;
-    const max = Math.max(...data.map(d => d.val), 10);
-    const step = w / (data.length - 1 || 1);
-
-    const points = data.map((d, i) => {
-        const x = i * step;
-        const y = h - ((d.val / max) * h);
-        return `${x},${y}`;
-    }).join(' ');
-
-    const fillPath = `0,${h} ${points} ${w},${h}`;
-
-    return `
-    <svg viewBox="0 0 100 50" style="width:100%;height:100%;overflow:visible">
-        <defs>
-            <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stop-color="#8B9A9C" stop-opacity="0.5"/>
-                <stop offset="100%" stop-color="#8B9A9C" stop-opacity="0"/>
-            </linearGradient>
-        </defs>
-        <path d="M${points}" fill="none" stroke="#8B9A9C" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
-        <polygon points="${fillPath}" fill="url(#grad)" opacity="0.5"/>
-        <circle cx="${w}" cy="${h - ((data[data.length-1].val/max)*h)}" r="2" fill="white"/>
-    </svg>`;
-}
-
-function renderTasksChart(data) {
-    const w = 100; const h = 40;
-    const max = Math.max(...data.map(d => d.tasks), 1);
-    const barWidth = w / data.length;
-
-    const bars = data.map((d, i) => {
-        const barH = (d.tasks / max) * h;
-        const x = i * barWidth;
-        const y = h - barH;
-        return `<rect x="${x}" y="${y}" width="${barWidth - 1}" height="${barH}" fill="var(--accent)" opacity="0.8" rx="1"/>`;
-    }).join('');
-
-    return `
-    <svg viewBox="0 0 100 40" style="width:100%;height:100%">
-        ${bars}
-    </svg>`;
-}
-
-function renderStreakCalendar(data) {
-    return data.slice(-28).map(d => {
-        const op = Math.min(d.val / 50, 1);
-        return `<div class="heat-cell" style="background:rgba(139,154,156,${op || 0.1})" title="${d.date}: ${d.val}pts"></div>`;
-    }).join('');
-}
-
-function getAIAdvice(data) {
-    const total = data.reduce((a,b) => a + b.val, 0);
-    const active = data.filter(d => d.val > 0);
-    const avg = active.length ? Math.round(total / active.length) : 0;
-    const last = data[data.length-1].val;
-
-    if (total === 0) return "Данных пока мало. Выполни пару задач, чтобы я мог построить стратегию! 🤖";
-    if (last > avg * 1.5) return "Феноменально! Сегодня ты превзошел средние показатели. Главное не выгореть, сделай перерыв. 🚀";
-    if (last < avg * 0.5) return "Активность ниже обычного. Может, стоит начать с маленькой задачи на 5 минут? 👀";
-    return `Ты держишь стабильный темп (${avg} pts/день). Постоянство — признак мастерства.`;
-}
-
 // --- RENDERERS ---
+function renderHeader() {
+    return `<div class="header">
+        <div class="header-title">livi</div>
+        <div class="header-stats">
+            <div class="stat-badge" style="color:var(--gold)">${getIcon('star')} ${state.totalPoints}</div>
+            <div class="stat-badge">${getIcon('fire')} ${state.totalFire}</div>
+            ${state.hasStreakInsurance ? `<div class="stat-badge" style="color:#FFA500">${getIcon('shield')} Защищён</div>` : ''}
+        </div>
+    </div>`;
+}
 
 function renderHome() {
-    const done = state.tasks.filter(t=>t.completed).length;
+    const done = state.tasks.filter(t => t.completed).length;
     const all = state.tasks.length;
 
-    const h = ITEMS.find(i=>i.id===state.equipped.head);
-    const f = ITEMS.find(i=>i.id===state.equipped.face);
-    const b = ITEMS.find(i=>i.id===state.equipped.body);
-    const s = ITEMS.find(i=>i.id===state.equipped.special);
+    const h = ITEMS.find(i => i.id === state.equipped.head);
+    const f = ITEMS.find(i => i.id === state.equipped.face);
+    const b = ITEMS.find(i => i.id === state.equipped.body);
+    const s = ITEMS.find(i => i.id === state.equipped.special);
 
     return `
     <div class="slide-up">
@@ -663,7 +590,7 @@ function renderHome() {
         <div class="content">
             <div class="livi-container">
                 <div class="livi-body">
-                    ${h ? `<div class="${h.css}" style="${h.style||''}"></div>` : ''}
+                    ${h ? `<div class="${h.css}" style="${h.style || ''}"></div>` : ''}
                     <div class="livi-antenna ant-l"></div>
                     <div class="livi-antenna ant-r"></div>
                     <div class="livi-face">
@@ -675,7 +602,7 @@ function renderHome() {
                     ${s ? `<div class="${s.css}">${s.icon}</div>` : ''}
                 </div>
                 ${b ? `<div style="position:relative;width:0;height:0;top:-10px"><div class="${b.css}"></div></div>` : ''}
-                <div style="margin-top:20px;font-weight:700;letter-spacing:0.5px">Привет, User!</div>
+                <div style="margin-top:20px;font-weight:700;letter-spacing:0.5px">Привет, ${firstName}!</div>
             </div>
 
             <div class="grid-2">
@@ -698,13 +625,14 @@ function renderHome() {
 
 function renderTasks() {
     const c = state.dailyChallenge;
+
     const list = state.tasks.map(t => `
-        <div class="section" style="display:flex;align-items:center;padding:15px;margin-bottom:10px;opacity:${t.completed?0.5:1}">
-            <div style="width:24px;height:24px;border:2px solid var(--primary);border-radius:6px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:${t.completed?'var(--primary)':'transparent'}" onclick="actions.toggleTask(${t.id})">
-                ${t.completed?'<svg width="14" height="14" stroke="white"><polyline points="20 6 9 17 4 12"/></svg>':''}
+        <div class="section" style="display:flex;align-items:center;padding:15px;margin-bottom:10px;opacity:${t.completed ? 0.5 : 1}">
+            <div style="width:24px;height:24px;border:2px solid var(--primary);border-radius:6px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:${t.completed ? 'var(--primary)' : 'transparent'}" onclick="actions.toggleTask(${t.id})">
+                ${t.completed ? '<svg width="14" height="14" stroke="white"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
             </div>
             <div style="flex:1">
-                <div style="font-weight:500;text-decoration:${t.completed?'line-through':''}">${t.title}</div>
+                <div style="font-weight:500;text-decoration:${t.completed ? 'line-through' : 'none'}">${t.title}</div>
                 <div style="font-size:11px;color:#666">${t.points} pts</div>
             </div>
             <div onclick="actions.deleteTask(${t.id})" style="color:#666">${getIcon('trash')}</div>
@@ -720,14 +648,14 @@ function renderTasks() {
             <div class="section" style="border:2px solid var(--gold);box-shadow:0 0 20px rgba(212,175,122,0.1);padding:25px;text-align:center" onclick="actions.completeChallenge()">
                 <div style="font-size:50px;margin-bottom:15px">🎯</div>
                 <h3 style="font-weight:900;font-size:22px;margin-bottom:8px">${c.title}</h3>
-                <div style="color:#aaa;margin-bottom:20px">+${c.reward} очков за выполнение</div>
+                <div style="color:#aaa;margin-bottom:20px">+${c.reward} очков и +1 🔥 за выполнение</div>
                 ${c.completed 
                     ? '<div class="btn" style="background:var(--glass);color:var(--accent);width:220px;margin:0 auto">ВЫПОЛНЕНО ✅</div>'
                     : '<button class="btn btn-primary" style="width:220px">ЗАВЕРШИТЬ ЦЕЛЬ</button>'}
             </div>
 
             <h3 style="margin:20px 0 10px;font-weight:700">Обычные задачи</h3>
-            ${list || '<div class="section" style="text-align:center;color:#666;padding:40px">Задач пока нет. Нажми + чтобы добавить</div>'}
+            ${list || '<div class="section" style="text-align:center;padding:40px;color:#666">Задач пока нет. Нажми кнопку +</div>'}
         </div>
         <button class="add-btn" onclick="actions.addTask()">+</button>
     </div>`;
@@ -736,21 +664,6 @@ function renderTasks() {
 function renderGroupChallenges() {
     const g = state.groupChallenge;
     const progressPercent = Math.min((g.current / g.target) * 100, 100);
-
-    // Примерные лидерборды (в реальном приложении можно расширить)
-    const personalLeaderboard = [
-        {rank: 1, name: "Алексей", points: 8420},
-        {rank: 2, name: "Марина", points: 8190},
-        {rank: 3, name: "Ты", points: state.totalPoints},
-        {rank: 4, name: "Дмитрий", points: 7650}
-    ];
-
-    const groupProgressLeaderboard = [
-        {rank: 1, name: "Команда Огня", progress: 984},
-        {rank: 2, name: "Ночные Волки", progress: 912},
-        {rank: 3, name: "Все вместе", progress: g.current},
-        {rank: 4, name: "Звёздные Стрелки", progress: 789}
-    ];
 
     return `
     <div class="slide-up">
@@ -764,32 +677,22 @@ function renderGroupChallenges() {
                 <div style="font-size:32px;font-weight:800;color:var(--gold);margin-bottom:8px">${g.current} / ${g.target}</div>
                 <div class="group-progress"><div class="group-fill" style="width:${progressPercent}%"></div></div>
                 <div style="margin-top:12px;color:#aaa;font-size:14px">
-                    Твой вклад сегодня: ${state.dailyChallenge.completed ? '✅ Да' : '❌ Пока нет'}
+                    Только реальные пользователи! Каждый выполненный ежедневный челлендж добавляет +1 🔥 в общий котёл.
                 </div>
             </div>
 
-            <h3 style="margin:25px 0 12px;font-weight:700">Лидерборды</h3>
-
-            <div class="section" style="padding:15px">
-                <div style="font-weight:bold;margin-bottom:12px;color:var(--primary)">🏆 Личный зачёт (очки)</div>
-                ${personalLeaderboard.map(p => `
-                    <div class="leaderboard-item">
-                        <div class="rank-num">${p.rank}.</div>
-                        <div style="flex:1">${p.name}${p.name === "Ты" ? ' (ты)' : ''}</div>
-                        <div style="color:var(--gold);font-weight:bold">${p.points} pts</div>
-                    </div>
-                `).join('')}
+            <div class="referral-section">
+                <div style="font-weight:700;margin-bottom:8px">Приглашай друзей и получай бонусы</div>
+                <div style="font-size:12px;color:#888;margin-bottom:12px">За каждого приглашённого друга: +100 очков и +5 🔥</div>
+                <div class="referral-link">https://t.me/livi_app_bot?start=ref${userId}</div>
+                <button class="copy-btn" onclick="actions.copyReferral()">СКОПИРОВАТЬ ССЫЛКУ</button>
+                <div style="margin-top:12px;color:var(--gold);font-weight:bold">Приглашено друзей: ${state.referralCount}</div>
             </div>
 
-            <div class="section" style="padding:15px">
-                <div style="font-weight:bold;margin-bottom:12px;color:var(--epic)">👥 Групповой прогресс сегодня</div>
-                ${groupProgressLeaderboard.map(g => `
-                    <div class="leaderboard-item">
-                        <div class="rank-num">${g.rank}.</div>
-                        <div style="flex:1">${g.name}</div>
-                        <div style="color:var(--epic);font-weight:bold">${g.progress}</div>
-                    </div>
-                `).join('')}
+            <div class="section">
+                <div style="font-weight:bold;margin-bottom:8px">Твои накопленные 🔥 огоньки</div>
+                <div style="font-size:28px;color:var(--gold);text-align:center;margin:10px 0">${state.totalFire}</div>
+                <div style="font-size:13px;color:#aaa">За каждое выполнение ежедневной цели ты получаешь +1 🔥 навсегда</div>
             </div>
         </div>
     </div>`;
@@ -797,13 +700,13 @@ function renderGroupChallenges() {
 
 function renderShop() {
     const inv = state.inventory.map(id => {
-        const i = ITEMS.find(x=>x.id===id);
+        const i = ITEMS.find(x => x.id === id);
         const eq = Object.values(state.equipped).includes(id);
         const color = i.special ? '#FFA500' : (i.rarity === 'legendary' ? 'var(--epic)' : i.rarity === 'rare' ? 'var(--gold)' : 'var(--primary)');
-        return `<div class="section" style="padding:10px;margin:0;display:flex;flex-direction:column;align-items:center;border-color:${eq?color:'transparent'}" onclick="actions.equip('${id}')">
+        return `<div class="section" style="padding:10px;margin:0;display:flex;flex-direction:column;align-items:center;border-color:${eq ? color : 'transparent'}" onclick="actions.equip('${id}')">
             <div style="font-size:36px;margin-bottom:6px">${i.icon}</div>
             <div style="font-size:11px;color:#888;text-align:center">${i.name}</div>
-            ${eq?'<div style="width:8px;height:8px;background:${color};border-radius:50%;margin-top:6px"></div>':''}
+            ${eq ? `<div style="width:8px;height:8px;background:${color};border-radius:50%;margin-top:6px"></div>` : ''}
         </div>`;
     }).join('');
 
@@ -812,25 +715,25 @@ function renderShop() {
         ${renderHeader()}
         <div class="content">
             <div style="text-align:center;margin-bottom:20px">
-                <div style="font-size:12px;color:#888">БАЛАНС</div>
+                <div style="font-size:12px;color:#888">БАЛАНС ОЧКОВ</div>
                 <div style="font-size:36px;font-weight:900;color:var(--gold);text-shadow:0 0 20px rgba(212,175,122,0.2)">${state.totalPoints}</div>
             </div>
 
-            <div class="chest-wrapper grid-2">
+            <div class="chest-wrapper">
                 <div class="chest-card chest-common" onclick="actions.openChest('common', 150)">
                     <div style="font-weight:800;font-size:18px;margin-bottom:4px">Базовый Набор</div>
-                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">Кепки и бабочки</div>
-                    <div style="background:rgba(0,0,0,0.3);display:inline-block;padding:4px 10px;border-radius:8px;font-weight:bold">150 pts</div>
+                    <div style="font-size:12px;opacity:0.7;margin-bottom:10px">Кепки, бабочки</div>
+                    <div style="background:rgba(0,0,0,0.3);padding:4px 10px;border-radius:8px;font-weight:bold">150 pts</div>
                 </div>
                 <div class="chest-card chest-rare" onclick="actions.openChest('rare', 300)">
                     <div style="font-weight:800;font-size:18px;margin-bottom:4px;color:var(--gold)">Кейс Агента</div>
                     <div style="font-size:12px;opacity:0.7;margin-bottom:10px">Очки, шарфы + шанс на страховку</div>
-                    <div style="background:rgba(212,175,122,0.2);color:var(--gold);display:inline-block;padding:4px 10px;border-radius:8px;font-weight:bold">300 pts</div>
+                    <div style="background:rgba(212,175,122,0.2);color:var(--gold);padding:4px 10px;border-radius:8px;font-weight:bold">300 pts</div>
                 </div>
                 <div class="chest-card chest-legendary" onclick="actions.openChest('legendary', 1000)">
                     <div style="font-weight:800;font-size:18px;margin-bottom:4px;color:var(--epic)">Мистический Куб</div>
                     <div style="font-size:12px;opacity:0.7;margin-bottom:10px">Короны и реликвии</div>
-                    <div style="background:rgba(212,93,121,0.2);color:var(--epic);display:inline-block;padding:4px 10px;border-radius:8px;font-weight:bold">1000 pts</div>
+                    <div style="background:rgba(212,93,121,0.2);color:var(--epic);padding:4px 10px;border-radius:8px;font-weight:bold">1000 pts</div>
                 </div>
             </div>
 
@@ -851,76 +754,20 @@ function renderAnalysis() {
     const avgPts = activeDays.length ? Math.round(totalPts / activeDays.length) : 0;
 
     const completionRate = state.tasks.length > 0 ? Math.round((state.tasks.filter(t=>t.completed).length / state.tasks.length) * 100) : 0;
-    const advice = getAIAdvice(data);
-    const heatMap = renderStreakCalendar(data);
 
     return `
     <div class="slide-up">
         ${renderHeader()}
         <div class="content">
             <h2 style="margin-bottom:15px;font-weight:800">АНАЛИТИКА</h2>
-
-            <div class="period-switch">
-                <div class="p-btn ${p==='week'?'active':''}" onclick="actions.setPeriod('week')">Неделя</div>
-                <div class="p-btn ${p==='month'?'active':''}" onclick="actions.setPeriod('month')">Месяц</div>
-                <div class="p-btn ${p==='year'?'active':''}" onclick="actions.setPeriod('year')">Год</div>
-            </div>
-
-            <div class="section">
-                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">Активность (Очки)</div>
-                <div style="font-size:28px;font-weight:800;margin-bottom:10px">${totalPts} <span style="font-size:14px;font-weight:400;color:#666">за период</span></div>
-                <div class="chart-container" style="height:150px">
-                    ${renderChart(data)}
-                </div>
-            </div>
-
-            <div class="grid-2" style="margin-bottom:15px">
-                <div class="section" style="margin:0">
-                    <div style="font-size:12px;color:#888;margin-bottom:8px">Средний балл</div>
-                    <div style="font-size:24px;font-weight:800;color:var(--accent)">${avgPts}</div>
-                    <div style="font-size:10px;color:#666;margin-top:4px">pts/день</div>
-                </div>
-                <div class="section" style="margin:0">
-                    <div style="font-size:12px;color:#888;margin-bottom:8px">Завершено</div>
-                    <div style="font-size:24px;font-weight:800;color:var(--gold)">${completionRate}%</div>
-                    <div style="font-size:10px;color:#666;margin-top:4px">задач</div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">${getIcon('check')} Выполнено задач</div>
-                <div style="font-size:20px;font-weight:800;margin-bottom:10px">${totalTasks} <span style="font-size:14px;font-weight:400;color:#666">задач</span></div>
-                <div class="chart-container" style="height:100px">
-                    ${renderTasksChart(data)}
-                </div>
-            </div>
-
-            <div class="section">
-                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase">${getIcon('clock')} Календарь активности (28 дней)</div>
-                <div class="heatmap">${heatMap}</div>
-            </div>
-
-            <div class="section" style="background:linear-gradient(135deg, rgba(40,40,40,0.5), rgba(20,20,20,0.5)); border-color:var(--accent)">
-                <div style="display:flex;gap:10px">
-                    <div style="font-size:24px">🧠</div>
-                    <div>
-                        <div style="font-weight:bold;color:white;margin-bottom:5px">Livi AI Report</div>
-                        <div style="font-size:13px;line-height:1.5;color:#ccc">${advice}</div>
-                    </div>
-                </div>
-            </div>
+            <div style="text-align:center;padding:40px;color:#888">Функция в разработке. Скоро здесь будет красивая статистика!</div>
         </div>
     </div>`;
 }
 
-function renderHeader() {
-    return `<div class="header">
-        <div class="header-title">livi</div>
-        <div class="header-stats">
-            <div class="stat-badge" style="color:var(--gold)">${getIcon('star')} ${state.totalPoints}</div>
-            ${state.hasStreakInsurance ? `<div class="stat-badge" style="color:#FFA500">${getIcon('shield')} Защищён</div>` : ''}
-        </div>
-    </div>`;
+function getChartData(period) {
+    // Заглушка, так как аналитика упрощена
+    return [];
 }
 
 function render() {
@@ -951,6 +798,24 @@ window.onload = async () => {
     await loadState();
     render();
     setTimeout(() => document.getElementById('loadingScreen').classList.add('fade-out'), 1000);
+
+    // Обработка реферального перехода
+    if (tg.initDataUnsafe.start_param && tg.initDataUnsafe.start_param.startsWith('ref')) {
+        const referrerId = tg.initDataUnsafe.start_param.substring(3);
+        if (referrerId !== userId.toString()) {
+            // Начисление бонусов новому пользователю
+            state.totalPoints += 100;
+            state.totalFire += 5;
+            state.referralCount += 1; // для реферера будет начислено при его входе
+            saveState();
+
+            tg.showPopup({
+                title: '🎉 Добро пожаловать!',
+                message: 'Вы перешли по реферальной ссылке!\n\nВам начислено:\n+100 очков\n+5 🔥 огоньков',
+                buttons: [{type: 'ok'}]
+            });
+        }
+    }
 };
 </script>
 </body>
