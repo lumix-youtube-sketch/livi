@@ -294,7 +294,7 @@ const icons = {
     chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
     star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
     trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
-    spark: '<path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5z"/>', 
+    spark: '<path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5z"/>',
     book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
     mic: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>',
 };
@@ -329,7 +329,7 @@ const defaultState = {
         completed: false,
         reward: 50
     },
-    notes: [], 
+    notes: [],
     hasStreakInsurance: false,
     referralCount: 0,
     totalFire: 0,
@@ -344,11 +344,14 @@ let currentTranscript = "";
 let editingNoteId = null;
 let activityChart = null; // Chart.js instance
 let taskChart = null; // Chart.js instance
+let lastFinalTranscript = "";
+let lastUiUpdate = 0;
+
 
 async function loadState() {
     const statsData = await Storage.load(`livi_stats_${userId}`);
     if (statsData) state = { ...defaultState, ...statsData };
-    
+
     const notesData = await Storage.load(`livi_notes_${userId}`);
     if (notesData) state.notes = notesData;
 
@@ -357,7 +360,7 @@ async function loadState() {
             const d = new Date(); d.setDate(d.getDate() - i);
             state.statsHistory.push({
                 date: d.toISOString().split('T')[0],
-                points: Math.floor(Math.random() * 50) 
+                points: Math.floor(Math.random() * 50)
             });
         }
     }
@@ -410,7 +413,7 @@ const AI = {
     stopWords: ['и', 'в', 'во', 'не', 'на', 'я', 'с', 'со', 'как', 'а', 'то', 'все', 'она', 'так', 'его', 'но', 'да', 'ты', 'к', 'у', 'же', 'вы', 'за', 'бы', 'по', 'только', 'ее', 'мне', 'было', 'вот', 'от', 'меня', 'еще', 'нет', 'о', 'из', 'ему', 'теперь', 'когда', 'даже', 'ну', 'вдруг', 'ли', 'если', 'уже', 'или', 'ни', 'быть', 'был', 'него', 'до', 'вас', 'нибудь', 'опять', 'уж', 'вам', 'ведь', 'там', 'потом', 'себя', 'ничего', 'ей', 'может', 'они', 'тут', 'где', 'есть', 'надо', 'ней', 'для', 'мы', 'тебя', 'их', 'чем', 'была', 'сам', 'чтоб', 'без', 'будто', 'чего', 'раз', 'тоже', 'себе', 'под', 'будет', 'ж', 'тогда', 'кто', 'этот', 'того', 'потому', 'этого', 'какой', 'совсем', 'ним', 'здесь', 'этом', 'один', 'почти', 'мой', 'тем', 'чтобы', 'нее', 'сейчас', 'были', 'куда', 'зачем', 'всех', 'никогда', 'можно', 'при', 'наконец', 'два', 'об', 'другой', 'хоть', 'после', 'над', 'больше', 'тот', 'через', 'эти', 'нас', 'про', 'всего', 'них', 'какая', 'много', 'разве', 'три', 'эту', 'моя', 'впрочем', 'хорошо', 'свою', 'этой', 'перед', 'иногда', 'лучше', 'чуть', 'том', 'нельзя', 'такой', 'им', 'более', 'всегда', 'конечно', 'всю', 'между'],
 
     clean: (text) => text.replace(/\s+/g, ' ').trim(),
-    
+
     // Подсчет частоты слов (TF - Term Frequency)
     getWordFrequencies: (text) => {
         const words = text.toLowerCase().replace(/[.,!?;:()]/g, '').split(/\s+/);
@@ -428,7 +431,7 @@ const AI = {
         const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
         const freqs = AI.getWordFrequencies(text);
         const maxFreq = Math.max(...Object.values(freqs), 1);
-        
+
         return sentences.map(s => {
             let score = 0;
             const words = s.toLowerCase().split(/\s+/);
@@ -452,7 +455,7 @@ const AI = {
         // Списки: слова "во-первых", "во-вторых", "пункт" или тире в начале строки
         processed = processed.replace(/(\n|^)\s*-\s*/g, "\n• ");
         processed = processed.replace(/(Во-первых|Во-вторых|В-третьих),?/gi, "\n🔹 $1:");
-        
+
         return processed;
     },
 
@@ -461,7 +464,7 @@ const AI = {
         // Сортируем по весу и берем топ-30%
         const count = Math.max(1, Math.ceil(scored.length * 0.3));
         const topSentences = [...scored].sort((a,b) => b.score - a.score).slice(0, count);
-        
+
         // Восстанавливаем порядок предложений, чтобы текст был связным
         // Но для summary лучше просто взять самые "жирные" мысли
         const result = topSentences.map(s => "🔸 " + s.text).join('\n');
@@ -474,7 +477,7 @@ const AI = {
         const verbs = ['сделать', 'купить', 'прочитать', 'написать', 'отправить', 'позвонить', 'найти', 'изучить', 'подготовить', 'встретиться'];
         const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
         let tasks = [];
-        
+
         sentences.forEach(s => {
             const lower = s.toLowerCase();
             // Проверка на глаголы в повелительном наклонении или инфинитиве (эвристика)
@@ -484,10 +487,10 @@ const AI = {
                 if(t.length < 100) tasks.push("◻️ " + t);
             }
         });
-        
+
         return tasks.length > 0 ? "\n\n✅ ОБНАРУЖЕННЫЕ ЗАДАЧИ:\n" + tasks.join('\n') : "\n\n✅ Задач не найдено";
     },
-    
+
     getTip: (text) => {
         if (!text || text.length < 20) return "Livi ждет твоих мыслей...";
         const freqs = AI.getWordFrequencies(text);
@@ -527,12 +530,12 @@ const actions = {
             // Эвристика: если есть слово "важно" -> high priority
             const isUrgent = title.toLowerCase().includes('важно') || title.toLowerCase().includes('срочно');
             const priority = isUrgent ? 'high' : 'med';
-            
-            state.tasks.push({ 
-                id: Date.now(), 
-                title, 
-                completed: false, 
-                type: 'task', 
+
+            state.tasks.push({
+                id: Date.now(),
+                title,
+                completed: false,
+                type: 'task',
                 points: 15,
                 priority: priority,
                 tag: 'Общее'
@@ -566,6 +569,9 @@ const actions = {
         } else alert("Не хватает очков!");
     },
     startRecording: () => {
+        currentTranscript = "";
+        lastFinalTranscript = "";
+        lastUiUpdate = 0;
         if (!window.webkitSpeechRecognition && !window.SpeechRecognition) {
             alert("Нужен Chrome или Android");
             return;
@@ -578,15 +584,36 @@ const actions = {
 
         recognition.onstart = () => { isRecording = true; render(); };
         recognition.onresult = (event) => {
-            let interim = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) currentTranscript += event.results[i][0].transcript + " ";
-                else interim += event.results[i][0].transcript;
+            let interimText = "";
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const result = event.results[i];
+            const text = result[0].transcript.trim();
+
+            if (result.isFinal) {
+                if (!lastFinalTranscript.endsWith(text)) {
+                    currentTranscript += text + " ";
+                    lastFinalTranscript = currentTranscript.trim();
+                }
+            } else {
+                interimText += text + " ";
             }
-            const el = document.getElementById('liveTranscript');
-            if(el) el.innerText = (currentTranscript + interim) || "Слушаю...";
+        }
+
+    // ограничиваем обновление UI (анти-лаг)
+    const now = Date.now();
+    if (now - lastUiUpdate > 100) {
+        const el = document.getElementById('liveTranscript');
+        if (el) el.innerText = currentTranscript + interimText;
+        lastUiUpdate = now;
+    }
+};
+
+        recognition.onend = () => {
+            if (isRecording) {
+            setTimeout(() => recognition.start(), 300);
+            }
         };
-        recognition.onend = () => { if(isRecording) recognition.start(); else render(); };
         recognition.start();
     },
     stopRecording: () => {
@@ -671,7 +698,7 @@ function renderHome() {
     const f = ITEMS.find(i => i.id === state.equipped.face);
     const b = ITEMS.find(i => i.id === state.equipped.body);
     const s = ITEMS.find(i => i.id === state.equipped.special);
-    
+
     // AI Tip
     const lastNote = state.notes.length > 0 ? state.notes[0].text : "";
     const aiTip = AI.getTip(lastNote);
@@ -718,7 +745,7 @@ function renderHome() {
                     <canvas id="activityChartCanvas"></canvas>
                 </div>
             </div>
-            
+
             <div class="grid-2">
                  <div class="section" style="margin:0">
                     <div style="font-size:12px;color:#888;margin-bottom:5px;">Типы задач</div>
@@ -781,7 +808,7 @@ function renderTasks() {
                 </div>
                 <div style="flex:1">
                     <div style="font-weight:600; font-size:15px; text-decoration:${t.completed ? 'line-through' : 'none'}; color:${t.completed?'#777':'#eee'}">${t.title}</div>
-                    
+
                     <div style="display:flex; gap:8px; margin-top:6px; flex-wrap:wrap">
                         <span style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; color:#aaa">${t.tag || 'Общее'}</span>
                         <span style="font-size:10px; color:#666; display:flex; align-items:center">
@@ -800,7 +827,7 @@ function renderTasks() {
         ${renderHeader()}
         <div class="content">
             <h2 style="margin-bottom:15px;font-weight:800">ЗАДАЧИ</h2>
-            
+
             <div class="section challenge-card" onclick="actions.completeChallenge()">
                 <div class="challenge-header">
                     <div style="color:var(--gold); font-weight:800; font-size:12px; letter-spacing:1px">ЧЕЛЛЕНДЖ ДНЯ</div>
@@ -877,7 +904,7 @@ function renderProfile() {
             </div>
             <div style="font-size:28px;font-weight:800;margin-bottom:5px">${state.nick}</div>
             <div style="font-size:14px;color:#888;margin-bottom:30px">Уровень: Новичок</div>
-            
+
             <div class="section" style="margin-top:20px; text-align:left">
                 <div style="font-weight:bold;margin-bottom:10px; color:var(--accent)">Пригласить друга</div>
                 <div style="font-size:13px; color:#999; margin-bottom:15px">Получи 500 очков за каждого друга.</div>
@@ -893,7 +920,7 @@ function initCharts() {
     const ctxActivity = document.getElementById('activityChartCanvas');
     if (ctxActivity) {
         if (activityChart) activityChart.destroy();
-        
+
         const labels = state.statsHistory.map(h => {
              const d = new Date(h.date);
              return `${d.getDate()}.${d.getMonth()+1}`;
@@ -931,7 +958,7 @@ function initCharts() {
     const ctxTask = document.getElementById('taskDistributionChart');
     if (ctxTask) {
         if (taskChart) taskChart.destroy();
-        
+
         const habitCount = state.tasks.filter(t => t.type === 'habit').length;
         const taskCount = state.tasks.filter(t => t.type === 'task').length;
 
@@ -985,7 +1012,7 @@ function startRoulette(type) {
     modal.classList.remove('hidden');
     const strip = document.getElementById('rouletteStrip');
     strip.innerHTML = ''; strip.style.transition = 'none'; strip.style.transform = 'translateX(0px)';
-    
+
     let pool = type === 'common' ? ITEMS.filter(i => i.rarity !== 'legendary') : ITEMS;
     let winner = pool[Math.floor(Math.random() * pool.length)];
     if(type === 'rare' && Math.random() > 0.7) winner = ITEMS.find(i=>i.rarity === 'legendary') || winner;
