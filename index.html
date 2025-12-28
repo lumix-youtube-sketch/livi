@@ -166,7 +166,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 <div id="app"></div>
 
 <script>
-// Защита от ошибок при отсутствии Telegram WebApp
+// Безопасная инициализация Telegram WebApp
 let tg = null;
 if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
     tg = Telegram.WebApp;
@@ -176,16 +176,16 @@ if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
     tg.setBackgroundColor('#141414');
 }
 
-// Данные пользователя (с fallback)
+// Данные пользователя с защитой
 const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'local';
 const firstName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || 'User') : 'User';
 const username = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.username || '') : '';
 const photoUrl = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.photo_url || '') : '';
 
-// CloudStorage с fallback на localStorage
+// CloudStorage с надёжным fallback
 const CloudStorage = tg ? tg.CloudStorage : {
     setItem: (key, value) => Promise.resolve(localStorage.setItem(key, value)),
-    getItem: (key) => Promise.resolve(localStorage.getItem(key) || ''),
+    getItem: (key) => Promise.resolve(localStorage.getItem(key) || '')
 };
 
 const icons = {
@@ -266,7 +266,7 @@ async function saveToCloud() {
 async function loadFromCloud() {
     try {
         const data = await CloudStorage.getItem(`livi_state_${userId}`);
-        if (data) {
+        if (data && data !== 'null' && data !== 'undefined') {
             const parsed = JSON.parse(data);
             state = { ...defaultState, ...parsed };
         }
@@ -312,14 +312,25 @@ function hadActivityYesterday() {
 async function loadState() {
     const today = new Date().toISOString().split('T')[0];
 
-    const loaded = await loadFromCloud();
-    if (!loaded) {
+    // Защита от ошибок
+    if (!state.statsHistory) state.statsHistory = [];
+
+    try {
+        await loadFromCloud();
+    } catch (e) {
+        console.error("Cloud load failed, using local", e);
         try {
             const saved = localStorage.getItem('livi_v4_pro');
-            if (saved) state = { ...defaultState, ...JSON.parse(saved) };
-        } catch (e) {}
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state = { ...defaultState, ...parsed };
+            }
+        } catch (e2) {
+            console.error("Local load failed", e2);
+        }
     }
 
+    // Логика нового дня
     if (state.lastVisitDate !== today) {
         const yesterdayActive = hadActivityYesterday();
         if (!yesterdayActive && state.hasStreakInsurance) {
@@ -435,21 +446,16 @@ const actions = {
     copyReferral: () => {
         const link = `https://t.me/livi_app_bot?start=ref${userId}`;
         if (navigator.clipboard) {
-            navigator.clipboard.writeText(link).then(() => {
-                alert("Ссылка скопирована!");
-            });
+            navigator.clipboard.writeText(link).then(() => alert("Ссылка скопирована!"));
         } else {
             alert("Ссылка: " + link);
         }
     },
     shareReferral: () => {
         const link = `https://t.me/livi_app_bot?start=ref${userId}`;
-        const text = "Присоединяйся к Livi! Получи бонусы за регистрацию: +100 очков и +5 🔥";
-        if (tg) {
-            tg.shareUrl(link, text);
-        } else {
-            alert("Поделиться: " + link);
-        }
+        const text = "Присоединяйся к Livi! Получи бонусы: +100 очков и +5 🔥";
+        if (tg) tg.shareUrl(link, text);
+        else alert("Поделиться: " + link);
     }
 };
 
@@ -465,10 +471,7 @@ function startRoulette(type) {
     strip.style.transition = 'none';
     strip.style.transform = 'translateX(0px)';
 
-    let pool = type === 'common' 
-        ? ITEMS.filter(i => i.rarity !== 'legendary' && i.id !== 'insurance') 
-        : ITEMS;
-
+    let pool = type === 'common' ? ITEMS.filter(i => i.rarity !== 'legendary' && !i.special) : ITEMS;
     let winner = pool[Math.floor(Math.random() * pool.length)];
 
     if (Math.random() < 0.25) winner = ITEMS.find(i => i.id === 'insurance') || winner;
@@ -717,33 +720,33 @@ function render() {
     </div>`;
 }
 
-// Инициализация — теперь без await в onload, чтобы не зависало
-document.addEventListener('DOMContentLoaded', () => {
-    loadState().then(() => {
+// Главная инициализация — теперь с гарантированным скрытием загрузки
+async function initApp() {
+    try {
+        await loadState();
+    } catch (e) {
+        console.error("Ошибка инициализации", e);
+    } finally {
         render();
-        setTimeout(() => {
-            const ls = document.getElementById('loadingScreen');
-            if (ls) ls.classList.add('fade-out');
-        }, 800);
-    }).catch(() => {
-        // Если всё сломалось — показываем базовое
-        state = { ...defaultState };
-        render();
-        const ls = document.getElementById('loadingScreen');
-        if (ls) ls.classList.add('fade-out');
-    });
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.classList.add('fade-out');
+        }
+    }
 
-    // Реферал
+    // Реферальная обработка
     if (tg && tg.initDataUnsafe.start_param && tg.initDataUnsafe.start_param.startsWith('ref')) {
         const refId = tg.initDataUnsafe.start_param.slice(3);
         if (refId != userId.toString()) {
             state.totalPoints += 100;
             state.totalFire += 5;
             saveState();
-            tg.showPopup({title:'Добро пожаловать!', message:'+100 очков и +5 🔥 за рефералку', buttons:[{type:'ok'}]});
+            tg.showPopup({title:'Добро пожаловать!', message:'+100 очков и +5 🔥 за реферал', buttons:[{type:'ok'}]});
         }
     }
-});
+}
+
+document.addEventListener('DOMContentLoaded', initApp);
 </script>
 </body>
 </html>
