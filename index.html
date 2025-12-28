@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>livi - AI OS</title>
+<title>livi</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root {
     --primary: #8B9A9C;
@@ -17,8 +18,7 @@
     --glass-highlight: rgba(255,255,255,0.15);
     --danger: #ff4757;
     --success: #2ed573;
-    --anim-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --anim-slow: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    --warning: #ffa502;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -36,16 +36,17 @@ body{
 
 /* Animations */
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
-@keyframes float{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-10px) rotate(2deg)}}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 10px var(--epic)}50%{box-shadow:0 0 25px var(--epic)}}
 @keyframes blink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(0.1)}}
 @keyframes pulse-red {0% {box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4);} 70% {box-shadow: 0 0 0 20px rgba(255, 71, 87, 0);} 100% {box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);}}
-@keyframes wave {0%, 100% {height: 10px;} 50% {height: 35px;}}
-@keyframes twinkle {0%, 100% {opacity: 0.2;} 50% {opacity: 0.7;}}
-@keyframes drawPath { from { stroke-dashoffset: 300; } to { stroke-dashoffset: 0; } }
+@keyframes wave {0%, 100% {height: 10px;} 50% {height: 30px;}}
+@keyframes twinkle {0%, 100% {opacity: 0.2; transform: scale(1);} 50% {opacity: 0.8; transform: scale(1.5);}}
+@keyframes shimmer {0% {background-position: -200% 0;} 100% {background-position: 200% 0;}}
 
-.fade-in{animation:fadeIn .5s ease-out}
-.slide-up{animation:slideUp .5s var(--anim-slow) forwards}
+.fade-in{animation:fadeIn .4s ease-out}
+.slide-up{animation:slideUp .4s ease-out}
 .hidden{display:none!important}
 
 /* UI Elements */
@@ -53,107 +54,144 @@ body{
 .loading-screen.fade-out{opacity:0;pointer-events:none}
 .loading-logo{font-size:64px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px}
 
-.header{padding:20px;display:flex;align-items:center;justify-content:space-between;background:rgba(15,15,15,0.7);backdrop-filter:blur(25px);border-bottom:1px solid rgba(255,255,255,0.05);position:sticky;top:0;z-index:50}
+.header{padding:20px;display:flex;align-items:center;justify-content:space-between;background:rgba(15,15,15,0.6);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05);position:sticky;top:0;z-index:50}
 .header-title{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header-stats{display:flex;gap:10px;align-items:center}
-.stat-badge{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:22px;font-weight:700;font-size:14px;background:var(--glass);border:1px solid var(--glass-border);box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);}
-.profile-btn{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid var(--primary);cursor:pointer}
+.stat-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-weight:700;font-size:14px;background:var(--glass);border:1px solid var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);}
+.profile-btn{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid var(--primary);cursor:pointer;box-shadow:0 0 15px rgba(139,154,156,0.3)}
+.profile-btn img{width:100%;height:100%;object-fit:cover}
 
 /* Livi Character */
-.livi-container{display:flex;flex-direction:column;align-items:center;padding:40px 0;position:relative; z-index: 5;}
-.livi-bg-glow {position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 280px; background: radial-gradient(circle, rgba(139,154,156,0.1) 0%, rgba(0,0,0,0) 75%); pointer-events: none;}
+.livi-container{display:flex;flex-direction:column;align-items:center;padding:30px 0;position:relative; z-index: 5;}
+.livi-bg-glow {position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 220px; height: 220px; background: radial-gradient(circle, rgba(139,154,156,0.15) 0%, rgba(0,0,0,0) 70%); z-index: 1; pointer-events: none;}
 .livi-body{
-    width:130px;height:130px;
+    width:120px;height:120px;
     border-radius:50%;
-    background:radial-gradient(circle at 35% 35%, #444, #111);
-    border:2px solid rgba(139,154,156,0.4);
+    background:radial-gradient(circle at 30% 30%, #3a3a3a, #1a1a1a);
+    border:2px solid rgba(139,154,156,0.5);
     position:relative;
-    box-shadow:0 20px 50px rgba(0,0,0,0.7);
-    animation:float 5s ease-in-out infinite;
+    box-shadow:0 15px 40px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,0,0,0.8);
+    animation:float 6s ease-in-out infinite;
+    z-index:5;
 }
-.livi-antenna{position:absolute;width:3px;height:35px;background:var(--primary);border-radius:4px;}
-.livi-antenna::after{content:'';position:absolute;top:-6px;left:-2px;width:7px;height:7px;background:var(--accent);border-radius:50%;box-shadow:0 0 10px var(--primary)}
-.ant-l{top:-25px;left:30px;transform:rotate(-25deg)}
-.ant-r{top:-25px;right:30px;transform:rotate(25deg)}
-.eye{position:absolute;top:45%;width:12px;height:18px;background:white;border-radius:50%;animation:blink 4s infinite;box-shadow: 0 0 15px rgba(255,255,255,0.4);}
-.eye-l{left:35px} .eye-r{right:35px}
-.mouth{position:absolute;bottom:35px;left:50%;transform:translateX(-50%);width:25px;height:12px;border-bottom:3px solid white;border-radius:0 0 20px 20px;opacity:0.8}
+.livi-antenna{position:absolute;width:3px;height:30px;background:var(--primary);border-radius:4px;z-index:1; opacity: 0.8}
+.livi-antenna::after{content:'';position:absolute;top:-6px;left:-2px;width:7px;height:7px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px var(--primary)}
+.ant-l{top:-20px;left:25px;transform:rotate(-20deg)}
+.ant-r{top:-20px;right:25px;transform:rotate(20deg)}
+.livi-face{position:absolute;inset:0;z-index:10}
+.eye{position:absolute;top:45%;width:12px;height:16px;background:white;border-radius:50%;animation:blink 4s infinite; box-shadow: 0 0 10px rgba(255,255,255,0.5);}
+.eye-l{left:32px} .eye-r{right:32px}
+.mouth{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);width:20px;height:10px;border-bottom:2px solid white;border-radius:0 0 15px 15px}
 
-/* Items */
-.item-cap {position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:90px;height:35px;background:linear-gradient(to bottom, #D4AF7A, #C09555);border-radius:25px 25px 0 0;z-index:20;box-shadow:inset 0 2px 5px rgba(255,255,255,0.3)}
-.item-crown {position:absolute;top:-45px;left:50%;transform:translateX(-50%);width:70px;height:50px;z-index:20;background: linear-gradient(to bottom, #FFD700, #DAA520);clip-path: polygon(0% 100%, 20% 30%, 40% 100%, 50% 10%, 60% 100%, 80% 30%, 100% 100%);filter: drop-shadow(0 0 10px rgba(212,175,122,0.6));}
-.item-glasses {position:absolute;top:52px;left:50%;transform:translateX(-50%);width:80px;height:22px;z-index:30;display:flex;justify-content:space-between}
-.g-lens {width:35px;height:22px;background:rgba(0,0,0,0.9);border-radius:8px;border:1px solid #444}
-.g-bridge {position:absolute;top:10px;left:50%;transform:translateX(-50%);width:12px;height:2px;background:#444}
-.item-insurance {position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:55px;height:55px;z-index:20;background:radial-gradient(circle, #FFD700, #B8860B);border-radius:50%;border:2px solid #FFA500;box-shadow:0 0 25px rgba(255,215,0,0.6);display:flex;align-items:center;justify-content:center;font-size:28px;}
+/* Items CSS */
+.item-cap {position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:80px;height:30px;background:linear-gradient(to bottom, #D4AF7A, #C09555);border-radius:20px 20px 0 0;z-index:20;box-shadow:inset 0 2px 5px rgba(255,255,255,0.2)}
+.item-crown {position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:60px;height:45px;z-index:20;background: linear-gradient(to bottom, #FFD700, #DAA520);clip-path: polygon(0% 100%, 20% 40%, 40% 100%, 60% 20%, 80% 100%, 100% 40%, 100% 100%);filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));}
+.item-glasses {position:absolute;top:50px;left:50%;transform:translateX(-50%);width:70px;height:20px;z-index:30;display:flex;justify-content:space-between}
+.g-lens {width:30px;height:20px;background:rgba(0,0,0,0.85);border-radius:6px;border:1px solid #555;position:relative;overflow:hidden}
+.g-bridge {position:absolute;top:8px;left:50%;transform:translateX(-50%);width:10px;height:2px;background:#555}
+.item-scarf {position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);width:90px;height:30px;z-index:25;background: repeating-linear-gradient(45deg, #D45D79, #D45D79 10px, #C04560 10px, #C04560 20px);border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.3);}
+.item-monocle {position:absolute;top:50px;right:35px;width:24px;height:24px;border:1px solid #FFD700;border-radius:50%;background:rgba(255,255,255,0.1);z-index:30}
+.item-bowtie {position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:36px;height:18px;z-index:25;background:#D45D79;clip-path:polygon(0 50%, 40% 0, 50% 50%, 40% 100%, 0 50%, 50% 50%, 60% 0, 100% 50%, 60% 100%, 50% 50%)}
+.item-insurance {position:absolute;top:-25px;left:50%;transform:translateX(-50%);width:50px;height:50px;z-index:20;background:radial-gradient(circle, #FFD700, #B8860B);border-radius:50%;border:2px solid #FFA500;box-shadow:0 0 20px rgba(255,215,0,0.6);display:flex;align-items:center;justify-content:center;font-size:24px;}
 
-/* Dashboard Charts */
-.dashboard-grid {display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;}
-.chart-box {background: var(--glass); border-radius: 24px; padding: 15px; border: 1px solid var(--glass-border); position: relative; overflow: hidden;}
-.activity-chart {height: 60px; width: 100%; display: flex; align-items: flex-end; gap: 4px;}
-.activity-bar {flex: 1; background: var(--primary); opacity: 0.3; border-radius: 4px 4px 2px 2px; transition: height 1s var(--anim-slow), opacity 0.3s;}
-.activity-bar.active {opacity: 1; background: linear-gradient(to top, var(--primary), var(--accent));}
-.chart-svg {width: 100%; height: 100px; stroke-dasharray: 300; stroke-dashoffset: 300; animation: drawPath 2s ease-out forwards;}
-
-.progress-circle {position: relative; width: 60px; height: 60px; transform: rotate(-90deg);}
-.progress-circle circle {fill: none; stroke-width: 6; stroke-linecap: round;}
-.circle-bg {stroke: rgba(255,255,255,0.05);}
-.circle-val {stroke: var(--primary); transition: stroke-dashoffset 1s var(--anim-slow);}
-
-/* Section */
+/* Main Layout & Beautiful Boxes */
+.content{padding:20px}
 .section {
-    background: linear-gradient(160deg, rgba(30,30,30,0.5) 0%, rgba(10,10,10,0.8) 100%);
+    background: linear-gradient(160deg, rgba(30,30,30,0.6) 0%, rgba(10,10,10,0.8) 100%);
     border: 1px solid var(--glass-border);
     border-top: 1px solid var(--glass-highlight);
-    border-radius: 28px;
-    padding: 22px;
-    margin-bottom: 18px;
-    backdrop-filter: blur(20px);
-}
-
-/* Shop Detailed Boxes */
-.chest-card {
-    position: relative;
-    border-radius: 20px;
-    padding: 24px;
+    border-radius: 24px;
+    padding: 20px;
     margin-bottom: 15px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background-size: 200% 200%;
-    transition: transform 0.3s, border-color 0.3s;
+    backdrop-filter: blur(15px);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
-.chest-card:active {transform: scale(0.97);}
-.chest-common {background: linear-gradient(135deg, #2c1e1a 0%, #111 100%);}
-.chest-rare {
-    background: linear-gradient(135deg, #1a2525 0%, #0a0e0e 100%);
-    border-color: rgba(212, 175, 122, 0.4);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(212,175,122,0.05);
+.section:active { transform: scale(0.99); }
+/* Noise texture for detail */
+.section::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; mix-blend-mode: overlay;
 }
-.chest-rare::after {
-    content: 'BEST VALUE'; position: absolute; top: 12px; right: 12px;
-    background: var(--gold); color: #000; font-size: 9px; font-weight: 900;
-    padding: 2px 8px; border-radius: 10px;
-}
-.rarity-tag {font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;}
+.section > * { position: relative; z-index: 1; }
 
-/* Voice & Notes */
-.mic-btn {width: 80px; height: 80px; border-radius: 50%; background: #111; border: 1px solid #333; display: flex; align-items: center; justify-content: center; margin: 30px auto; cursor: pointer; transition: all 0.3s;}
-.mic-btn.recording {border-color: var(--danger); animation: pulse-red 1.5s infinite; background: rgba(255,71,87,0.05);}
-.voice-wave {display: flex; gap: 4px; align-items: center; height: 35px;}
-.bar {width: 4px; background: var(--danger); border-radius: 2px; animation: wave 1s infinite ease-in-out;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
-.note-modal {position: fixed; inset: 0; background: #080808; z-index: 3000; display: flex; flex-direction: column; padding: 25px; transition: transform 0.4s var(--anim-slow); transform: translateY(100%);}
-.note-modal.open {transform: translateY(0);}
-.note-textarea {flex: 1; background: transparent; border: none; color: #eee; font-size: 17px; line-height: 1.7; resize: none; outline: none;}
+.btn{width:100%;padding:16px;border-radius:16px;font-weight:700;font-size:16px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;position:relative;overflow:hidden}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:white; box-shadow: 0 4px 15px rgba(139,154,156,0.3)}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888}
+.add-btn {position: fixed;bottom: 90px;right: 20px;width: 60px;height: 60px;border-radius: 30px;background: linear-gradient(135deg, var(--primary), var(--accent));color: white;font-size: 32px;border: none;box-shadow: 0 4px 20px rgba(139,154,156,0.5);z-index: 80;display: flex;align-items: center;justify-content: center;cursor: pointer;transition: transform 0.2s;}
+.add-btn:active {transform: scale(0.95);}
 
-/* Navigation */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:428px;margin:0 auto;background:rgba(10,10,10,0.9);backdrop-filter:blur(30px);border-top:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-around;padding:15px 0 calc(15px + env(safe-area-inset-bottom));z-index:100}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;border:none;background:none;color:#444;transition:color 0.3s}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:428px;margin:0 auto;background:rgba(10,10,10,0.95);backdrop-filter:blur(20px);border-top:1px solid #222;display:flex;justify-content:space-around;padding:12px 0 calc(12px + env(safe-area-inset-bottom));z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:none;color:#555;transition:color .2s}
 .nav-item.active{color:var(--primary)}
+.nav-item.active svg {filter: drop-shadow(0 0 8px var(--primary));}
 
-.roulette-modal {position:fixed;inset:0;background:rgba(0,0,0,0.98);z-index:4000;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.roulette-strip {display:flex;align-items:center;position:absolute;left:0;will-change:transform}
-.r-item {width:130px;height:130px;margin:0 5px;background:#111;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #222;flex-shrink:0;}
-.r-item.legendary {border-color:var(--epic);box-shadow:inset 0 0 20px rgba(212,93,121,0.2)}
+/* Stats Chart CSS - REPLACED WITH CANVAS CONTAINER */
+.chart-wrapper {
+    position: relative;
+    height: 200px;
+    width: 100%;
+}
+
+/* Challenge Card Styles */
+.challenge-card {
+    background: linear-gradient(135deg, rgba(212,175,122,0.1) 0%, rgba(0,0,0,0) 100%);
+    border: 1px solid rgba(212,175,122,0.3);
+}
+.challenge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+
+/* Shop & Items */
+.chest-wrapper {display:grid;gap:15px;margin-bottom:30px}
+.chest-card {position:relative;border-radius:16px;padding:20px;overflow:hidden;cursor:pointer;transition:transform .2s; border: 1px solid rgba(255,255,255,0.05);}
+.chest-card:active {transform:scale(0.98)}
+.chest-common {background:linear-gradient(135deg, #3e2723 0%, #1a100e 100%); border-color: #5D4037}
+.chest-rare {background:linear-gradient(135deg, #1e2424 0%, #0f1212 100%);border-color: var(--gold); box-shadow: inset 0 0 30px rgba(212,175,122,0.05)}
+
+.roulette-modal {position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.roulette-window {width:100%;height:140px;background:#050505;border-block:2px solid #333;position:relative;overflow:hidden;margin:30px 0}
+.roulette-strip {display:flex;height:100%;align-items:center;position:absolute;left:0;will-change:transform}
+.r-item {width:120px;height:110px;margin:0 4px;background:#151515;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #333;flex-shrink:0;position:relative}
+.r-item.legendary {border-color:var(--epic);box-shadow:inset 0 0 15px rgba(212,93,121,0.2)}
+.r-item.rare {border-color:var(--gold)}
+.r-marker {position:absolute;top:0;bottom:0;left:50%;width:2px;background:var(--primary);z-index:10;transform:translateX(-50%);box-shadow:0 0 10px var(--primary)}
+
+/* Education */
+.mic-btn {width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(145deg, #222, #111); border: 1px solid #333; display: flex; align-items: center; justify-content: center; margin: 20px auto; cursor: pointer; transition: all 0.3s; position: relative; box-shadow: 5px 5px 15px #050505, -5px -5px 15px #222;}
+.mic-btn:active {transform: scale(0.95);}
+.mic-btn.recording {background: rgba(255, 71, 87, 0.1); border-color: var(--danger); animation: pulse-red 1.5s infinite;}
+.voice-wave {display: flex; gap: 3px; align-items: center; height: 30px;}
+.bar {width: 3px; background: var(--danger); border-radius: 2px; animation: wave 1s infinite ease-in-out;}
+.bar:nth-child(2) {animation-delay: 0.1s; height: 15px}
+.bar:nth-child(3) {animation-delay: 0.2s; height: 25px}
+.bar:nth-child(4) {animation-delay: 0.3s; height: 15px}
+
+.note-card {background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: background .2s;}
+.note-card:active {background: rgba(255,255,255,0.05);}
+.note-date {font-size: 11px; color: #777; margin-bottom: 5px; display: flex; justify-content: space-between;}
+.note-title {font-weight: 700; margin-bottom: 5px; color: #eee; font-size: 16px;}
+.note-preview {font-size: 13px; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis}
+
+.note-modal {position: fixed; inset: 0; background: #080808; z-index: 3000; display: flex; flex-direction: column; padding: 20px; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); transform: translateY(100%);}
+.note-modal.open {transform: translateY(0);}
+.note-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;}
+.note-textarea {flex: 1; background: transparent; border: none; color: #eee; font-size: 16px; line-height: 1.6; resize: none; outline: none; font-family: inherit; padding-bottom: 100px;}
+.ai-actions {display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px;}
+.ai-chip {background: rgba(139,154,156,0.1); padding: 8px 16px; border-radius: 20px; font-size: 12px; color: var(--accent); white-space: nowrap; border: 1px solid rgba(139,154,156,0.2); cursor: pointer;}
+
+/* Task Details */
+.priority-dot {width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px;}
+.p-high {background: var(--danger); box-shadow: 0 0 5px var(--danger);}
+.p-med {background: var(--warning); box-shadow: 0 0 5px var(--warning);}
+.p-low {background: var(--success);}
+
+/* Particles */
+.particle-container {position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;}
+.particle {position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; opacity: 0; animation: twinkle var(--duration) ease-in-out infinite; animation-delay: var(--delay);}
 
 svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
@@ -164,365 +202,781 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
     <div class="loading-logo">livi</div>
 </div>
 
+<div class="particle-container" id="stars"></div>
+
 <div id="rouletteModal" class="hidden roulette-modal">
-    <h2 style="margin-bottom:30px; color:#fff; font-weight:800; letter-spacing:2px">ОТКРЫТИЕ КЕЙСА</h2>
-    <div style="width:100%;height:150px;background:#050505;border-block:1px solid #222;position:relative;overflow:hidden">
-        <div style="position:absolute;top:0;bottom:0;left:50%;width:2px;background:var(--primary);z-index:10;transform:translateX(-50%);box-shadow:0 0 15px var(--primary)"></div>
+    <h2 style="margin-bottom:10px; color:#fff; font-weight:800; letter-spacing:1px">ОТКРЫТИЕ...</h2>
+    <div class="roulette-window">
+        <div class="r-marker"></div>
         <div class="roulette-strip" id="rouletteStrip"></div>
     </div>
-    <div id="winMessage" style="opacity:0; text-align:center; transition:opacity .8s; margin-top:40px">
-        <div style="font-size:12px; color:#666; text-transform:uppercase; letter-spacing:2px">Получен предмет:</div>
-        <div id="winItemName" style="font-size:36px; font-weight:900; color:var(--gold); margin:15px 0">Предмет</div>
-        <button class="btn-primary" style="padding:16px 40px; border-radius:30px; border:none; background:var(--gold); color:#000; font-weight:800" onclick="closeRoulette()">В ИНВЕНТАРЬ</button>
+    <div id="winMessage" style="opacity:0; text-align:center; transition:opacity .5s">
+        <div style="font-size:14px; color:#888; text-transform:uppercase; letter-spacing:1px">Вы получили</div>
+        <div id="winItemName" style="font-size:32px; font-weight:800; color:var(--gold); margin:10px 0; text-shadow:0 0 20px rgba(212,175,122,0.3)">Предмет</div>
+        <button class="btn btn-primary" style="width:200px; margin:0 auto" onclick="closeRoulette()">ЗАБРАТЬ</button>
     </div>
 </div>
 
 <div id="noteModal" class="note-modal">
-    <div style="display:flex; justify-content:space-between; margin-bottom:25px">
-        <div style="font-weight:800; font-size:22px; color:var(--primary)" id="modalTitle">Заметка</div>
-        <div onclick="actions.closeNote()" style="font-size:24px">✕</div>
+    <div class="note-header">
+        <div style="font-weight: 800; font-size: 20px; color: var(--gold)" id="modalTitle">Заметка</div>
+        <div onclick="actions.closeNote()" style="padding: 10px; cursor: pointer;">✕</div>
     </div>
-    <div style="display:flex; gap:8px; margin-bottom:20px; overflow-x:auto; padding-bottom:5px">
-        <button onclick="actions.enhanceNote()" style="background:rgba(168,196,198,0.1); border:1px solid var(--accent); color:var(--accent); padding:8px 15px; border-radius:20px; font-size:12px; white-space:nowrap">✨ Умная структура</button>
-        <button onclick="actions.addSummary()" style="background:rgba(212,175,122,0.1); border:1px solid var(--gold); color:var(--gold); padding:8px 15px; border-radius:20px; font-size:12px; white-space:nowrap">🧠 Главная мысль</button>
-        <button onclick="actions.extractTasks()" style="background:rgba(46,213,115,0.1); border:1px solid var(--success); color:var(--success); padding:8px 15px; border-radius:20px; font-size:12px; white-space:nowrap">✅ Список дел</button>
+    <div class="ai-actions">
+        <div class="ai-chip" onclick="actions.enhanceNote()">⚡ AI Структура</div>
+        <div class="ai-chip" onclick="actions.addSummary()">🧠 Главная мысль</div>
+        <div class="ai-chip" onclick="actions.extractTasks()">✅ Найти задачи</div>
     </div>
-    <textarea id="modalText" class="note-textarea" placeholder="Начните писать..."></textarea>
-    <button onclick="actions.saveAndCloseNote()" style="background:var(--primary); color:white; border:none; padding:18px; border-radius:20px; font-weight:800; margin-top:20px">СОХРАНИТЬ</button>
+    <textarea id="modalText" class="note-textarea" placeholder="Текст заметки..."></textarea>
+    <button class="btn btn-primary" onclick="actions.saveAndCloseNote()" style="margin-top: auto;">СОХРАНИТЬ</button>
 </div>
 
 <div id="app"></div>
 
 <script>
-let tg = window.Telegram ? window.Telegram.WebApp : null;
-if(tg) { tg.expand(); tg.ready(); }
+// --- INITIALIZATION ---
+let tg = null;
+if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+    tg = Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+    tg.setHeaderColor('#000000');
+    tg.setBackgroundColor('#000000');
+    tg.enableClosingConfirmation();
+}
 
-const userId = tg?.initDataUnsafe?.user?.id || 'local_user';
-const firstName = tg?.initDataUnsafe?.user?.first_name || 'Друг';
+const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'local_user';
+const firstName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || 'User') : 'Друг';
+const photoUrl = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.photo_url || '') : '';
+
+// --- PARTICLE SYSTEM ---
+function initStars() {
+    const container = document.getElementById('stars');
+    const count = 50;
+    for(let i=0; i<count; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = Math.random() * 100 + '%';
+        p.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+        p.style.setProperty('--delay', (Math.random() * 5) + 's');
+        p.style.opacity = Math.random() * 0.5 + 0.1;
+        container.appendChild(p);
+    }
+}
+
+// --- STORAGE ---
+const Storage = {
+    save: (key, data) => {
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+            if (tg && tg.CloudStorage && key.includes('stats')) {
+                tg.CloudStorage.setItem(key, JSON.stringify(data));
+            }
+        } catch (e) { console.error("Save failed", e); }
+    },
+    load: async (key) => {
+        try {
+            if (tg && tg.CloudStorage && key.includes('stats')) {
+                const cloudData = await new Promise(r => tg.CloudStorage.getItem(key, (err, val) => r(val)));
+                if (cloudData) return JSON.parse(cloudData);
+            }
+            const local = localStorage.getItem(key);
+            return local ? JSON.parse(local) : null;
+        } catch (e) { return null; }
+    }
+};
+
+const icons = {
+    home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    check: '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+    shop: '<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>',
+    chart: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+    star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+    trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+    spark: '<path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5z"/>', 
+    book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    mic: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>',
+};
+const getIcon = (n) => `<svg viewBox="0 0 24 24">${icons[n]}</svg>`;
 
 const ITEMS = [
     { id: 'c_cap', name: 'Кепка', type: 'head', rarity: 'common', icon: '🧢', css: 'item-cap' },
+    { id: 'c_beanie', name: 'Шапка', type: 'head', rarity: 'common', icon: '🧶', css: 'item-cap', style: 'background:#555' },
     { id: 'c_bowtie', name: 'Бабочка', type: 'body', rarity: 'common', icon: '🎀', css: 'item-bowtie' },
     { id: 'r_glasses', name: 'Рейбаны', type: 'face', rarity: 'rare', icon: '🕶️', css: 'item-glasses' },
+    { id: 'r_scarf', name: 'Шарф', type: 'body', rarity: 'rare', icon: '🧣', css: 'item-scarf' },
     { id: 'l_crown', name: 'Корона', type: 'head', rarity: 'legendary', icon: '👑', css: 'item-crown' },
-    { id: 'insurance', name: 'Щит стрика', type: 'special', rarity: 'rare', icon: '🛡️', css: 'item-insurance' }
+    { id: 'l_monocle', name: 'Монокль', type: 'face', rarity: 'legendary', icon: '🧐', css: 'item-monocle' },
+    { id: 'insurance', name: 'Щит стрика', type: 'special', rarity: 'rare', icon: '🛡️', css: 'item-insurance', special: true }
 ];
 
-let state = {
+const defaultState = {
     activeTab: 'home',
-    totalPoints: 200,
     streak: 1,
-    lastVisit: new Date().toISOString().split('T')[0],
-    inventory: [],
-    equipped: {head: null, face: null, body: null, special: null},
+    totalPoints: 200,
+    lastVisitDate: new Date().toISOString().split('T')[0],
+    statsHistory: [],
     tasks: [
-        {id: 1, title: 'Зайти в Livi', completed: true, points: 10},
-        {id: 2, title: 'Создать AI заметку', completed: false, points: 25}
+        { id: 1, title: 'Забрать награду', completed: false, type: 'habit', points: 10, priority: 'low', tag: 'Рутина' },
+        { id: 2, title: 'Запустить Livi', completed: true, type: 'task', points: 5, priority: 'high', tag: 'Развитие' }
     ],
-    notes: [],
-    history: [20, 45, 10, 65, 30, 80, 40] // Последние 7 дней
+    inventory: [],
+    equipped: { head: null, face: null, body: null, special: null },
+    dailyChallenge: {
+        date: new Date().toISOString().split('T')[0],
+        title: 'Сделать 20 приседаний',
+        completed: false,
+        reward: 50
+    },
+    notes: [], 
+    hasStreakInsurance: false,
+    referralCount: 0,
+    totalFire: 0,
+    nick: firstName,
+    avatar: photoUrl
 };
 
-// --- AI CORE ---
+let state = { ...defaultState };
+let recognition = null;
+let isRecording = false;
+let currentTranscript = "";
+let editingNoteId = null;
+let activityChart = null; // Chart.js instance
+let taskChart = null; // Chart.js instance
+
+async function loadState() {
+    const statsData = await Storage.load(`livi_stats_${userId}`);
+    if (statsData) state = { ...defaultState, ...statsData };
+    
+    const notesData = await Storage.load(`livi_notes_${userId}`);
+    if (notesData) state.notes = notesData;
+
+    if(state.statsHistory.length === 0) {
+        for(let i=6; i>=0; i--) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            state.statsHistory.push({
+                date: d.toISOString().split('T')[0],
+                points: Math.floor(Math.random() * 50) 
+            });
+        }
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    if (state.lastVisitDate !== today) {
+        if (!state.statsHistory.find(e => e.date === today)) {
+             state.streak = hadActivityYesterday() ? state.streak + 1 : 1;
+        }
+        state.lastVisitDate = today;
+        const challenges = ['Выполнить 3 задачи','Набрать 100 очков','Прочитать лекцию','Сделать конспект','Пройти 5000 шагов'];
+        state.dailyChallenge = {
+            date: today,
+            title: challenges[Math.floor(Math.random() * challenges.length)],
+            completed: false,
+            reward: 50
+        };
+        state.tasks.forEach(t => { if (t.type === 'habit') t.completed = false; });
+        saveAll();
+    }
+}
+
+function saveAll() {
+    const statsToSave = { ...state };
+    delete statsToSave.notes;
+    Storage.save(`livi_stats_${userId}`, statsToSave);
+    Storage.save(`livi_notes_${userId}`, state.notes);
+}
+
+function hadActivityYesterday() {
+    const d = new Date(); d.setDate(d.getDate() - 1);
+    const y = d.toISOString().split('T')[0];
+    return !!state.statsHistory.find(e => e.date === y);
+}
+
+function updateHistory(pointsDelta) {
+    const today = new Date().toISOString().split('T')[0];
+    let entry = state.statsHistory.find(e => e.date === today);
+    if (!entry) {
+        entry = { date: today, points: 0 };
+        state.statsHistory.push(entry);
+    }
+    entry.points += pointsDelta;
+    if (state.statsHistory.length > 7) state.statsHistory.shift();
+    saveAll();
+}
+
+// --- UPGRADED AI ENGINE (HEURISTIC) ---
 const AI = {
-    process: (text) => {
-        const clean = text.trim().replace(/\s+/g, ' ');
-        if (clean.length < 5) return clean;
+    stopWords: ['и', 'в', 'во', 'не', 'на', 'я', 'с', 'со', 'как', 'а', 'то', 'все', 'она', 'так', 'его', 'но', 'да', 'ты', 'к', 'у', 'же', 'вы', 'за', 'бы', 'по', 'только', 'ее', 'мне', 'было', 'вот', 'от', 'меня', 'еще', 'нет', 'о', 'из', 'ему', 'теперь', 'когда', 'даже', 'ну', 'вдруг', 'ли', 'если', 'уже', 'или', 'ни', 'быть', 'был', 'него', 'до', 'вас', 'нибудь', 'опять', 'уж', 'вам', 'ведь', 'там', 'потом', 'себя', 'ничего', 'ей', 'может', 'они', 'тут', 'где', 'есть', 'надо', 'ней', 'для', 'мы', 'тебя', 'их', 'чем', 'была', 'сам', 'чтоб', 'без', 'будто', 'чего', 'раз', 'тоже', 'себе', 'под', 'будет', 'ж', 'тогда', 'кто', 'этот', 'того', 'потому', 'этого', 'какой', 'совсем', 'ним', 'здесь', 'этом', 'один', 'почти', 'мой', 'тем', 'чтобы', 'нее', 'сейчас', 'были', 'куда', 'зачем', 'всех', 'никогда', 'можно', 'при', 'наконец', 'два', 'об', 'другой', 'хоть', 'после', 'над', 'больше', 'тот', 'через', 'эти', 'нас', 'про', 'всего', 'них', 'какая', 'много', 'разве', 'три', 'эту', 'моя', 'впрочем', 'хорошо', 'свою', 'этой', 'перед', 'иногда', 'лучше', 'чуть', 'том', 'нельзя', 'такой', 'им', 'более', 'всегда', 'конечно', 'всю', 'между'],
+
+    clean: (text) => text.replace(/\s+/g, ' ').trim(),
+    
+    // Подсчет частоты слов (TF - Term Frequency)
+    getWordFrequencies: (text) => {
+        const words = text.toLowerCase().replace(/[.,!?;:()]/g, '').split(/\s+/);
+        const freqs = {};
+        words.forEach(w => {
+            if (w.length > 3 && !AI.stopWords.includes(w)) {
+                freqs[w] = (freqs[w] || 0) + 1;
+            }
+        });
+        return freqs;
+    },
+
+    // Оценка предложений на основе ключевых слов
+    scoreSentences: (text) => {
+        const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+        const freqs = AI.getWordFrequencies(text);
+        const maxFreq = Math.max(...Object.values(freqs), 1);
         
-        // Интеллектуальное структурирование
-        let processed = clean
-            .replace(/([.!?])\s+([А-Я])/g, '$1\n\n$2') // Абзацы
-            .replace(/(во-первых|сначала|прежде всего)/gi, '1️⃣ $1')
-            .replace(/(во-вторых|затем|после этого)/gi, '2️⃣ $1')
-            .replace(/(в-третьих|наконец|в итоге)/gi, '3️⃣ $1');
-            
+        return sentences.map(s => {
+            let score = 0;
+            const words = s.toLowerCase().split(/\s+/);
+            words.forEach(w => {
+                const cleanW = w.replace(/[^а-яёa-z]/gi, '');
+                if (freqs[cleanW]) score += freqs[cleanW];
+            });
+            // Бонус за "сигнальные слова"
+            if (s.match(/(важно|суть|вывод|итак|значит|поэтому|запомнить)/i)) score *= 1.5;
+            // Нормализация по длине (чтобы короткие предложения не страдали)
+            return { text: s.trim(), score: score / (words.length || 1) };
+        });
+    },
+
+    structure: (text) => {
+        let processed = text;
+        // Определение определений (Тире)
+        processed = processed.replace(/([а-яА-Яa-zA-Z]+)\s*-\s*([а-яА-Яa-zA-Z].+?)(?=[.!?]|$)/g, "**$1** — $2");
+        // Абзацы
+        processed = processed.replace(/([.!?])\s*(?=[А-Я])/g, "$1\n\n");
+        // Списки: слова "во-первых", "во-вторых", "пункт" или тире в начале строки
+        processed = processed.replace(/(\n|^)\s*-\s*/g, "\n• ");
+        processed = processed.replace(/(Во-первых|Во-вторых|В-третьих),?/gi, "\n🔹 $1:");
+        
         return processed;
     },
-    
-    getSummary: (text) => {
-        const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-        if (sentences.length <= 1) return "Недостаточно данных для анализа.";
+
+    extractSummary: (text) => {
+        const scored = AI.scoreSentences(text);
+        // Сортируем по весу и берем топ-30%
+        const count = Math.max(1, Math.ceil(scored.length * 0.3));
+        const topSentences = [...scored].sort((a,b) => b.score - a.score).slice(0, count);
         
-        // Поиск смысловых триггеров
-        const weights = sentences.map(s => {
-            let w = 0;
-            if (s.match(/(важно|суть|главное|вывод|нужно|запомнить)/gi)) w += 10;
-            if (s.length > 40 && s.length < 100) w += 5;
-            return w;
+        // Восстанавливаем порядок предложений, чтобы текст был связным
+        // Но для summary лучше просто взять самые "жирные" мысли
+        const result = topSentences.map(s => "🔸 " + s.text).join('\n');
+
+        return "📌 ГЛАВНАЯ МЫСЛЬ:\n" + result;
+    },
+
+    findTasks: (text) => {
+        // Улучшенный поиск глаголов действия
+        const verbs = ['сделать', 'купить', 'прочитать', 'написать', 'отправить', 'позвонить', 'найти', 'изучить', 'подготовить', 'встретиться'];
+        const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+        let tasks = [];
+        
+        sentences.forEach(s => {
+            const lower = s.toLowerCase();
+            // Проверка на глаголы в повелительном наклонении или инфинитиве (эвристика)
+            if (verbs.some(v => lower.includes(v))) {
+                // Очистка от мусора
+                let t = s.trim();
+                if(t.length < 100) tasks.push("◻️ " + t);
+            }
         });
         
-        const bestIdx = weights.indexOf(Math.max(...weights));
-        return "💡 ГЛАВНОЕ: " + sentences[bestIdx].trim();
+        return tasks.length > 0 ? "\n\n✅ ОБНАРУЖЕННЫЕ ЗАДАЧИ:\n" + tasks.join('\n') : "\n\n✅ Задач не найдено";
     },
     
-    extractTasks: (text) => {
-        const verbs = ['сделать', 'написать', 'купить', 'сходить', 'позвонить', 'подготовить', 'изучить'];
-        const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-        const found = sentences
-            .filter(s => verbs.some(v => s.toLowerCase().includes(v)))
-            .map(s => "• " + s.trim());
-            
-        return found.length ? "\n\n📋 ПЛАН ДЕЙСТВИЙ:\n" + found.join('\n') : "";
+    getTip: (text) => {
+        if (!text || text.length < 20) return "Livi ждет твоих мыслей...";
+        const freqs = AI.getWordFrequencies(text);
+        const topWords = Object.entries(freqs).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]).join(", ");
+        return `Похоже, речь про: ${topWords}. Стоит выделить это в отдельную категорию.`;
     }
 };
 
 const actions = {
-    save: () => localStorage.setItem(`livi_data_${userId}`, JSON.stringify(state)),
-    load: () => {
-        const d = localStorage.getItem(`livi_data_${userId}`);
-        if(d) state = JSON.parse(d);
-    },
-    
     toggleTask: (id) => {
-        const t = state.tasks.find(x => x.id === id);
-        if(t) {
-            t.completed = !t.completed;
-            state.totalPoints += t.completed ? t.points : -t.points;
-            if(tg) tg.HapticFeedback.impactOccurred('medium');
-            render(); actions.save();
+        const task = state.tasks.find(t => t.id === id);
+        if (task) {
+            task.completed = !task.completed;
+            const delta = task.completed ? task.points : -task.points;
+            state.totalPoints += delta;
+            updateHistory(delta);
+            if(task.completed && tg) tg.HapticFeedback.notificationOccurred('success');
+            saveAll();
+            render();
         }
     },
-
-    openChest: (type, cost) => {
-        if(state.totalPoints < cost) return alert("Недостаточно очков!");
-        state.totalPoints -= cost;
-        startRoulette(type);
+    completeChallenge: () => {
+        if (!state.dailyChallenge.completed) {
+            state.dailyChallenge.completed = true;
+            state.totalPoints += state.dailyChallenge.reward;
+            state.totalFire += 1;
+            updateHistory(state.dailyChallenge.reward);
+            if(tg) tg.HapticFeedback.notificationOccurred('success');
+            saveAll();
+            render();
+        }
     },
-
+    addTask: () => {
+        // Простая эмуляция модального окна добавления через prompt для сохранения структуры
+        const title = prompt("Название задачи:");
+        if (title) {
+            // Эвристика: если есть слово "важно" -> high priority
+            const isUrgent = title.toLowerCase().includes('важно') || title.toLowerCase().includes('срочно');
+            const priority = isUrgent ? 'high' : 'med';
+            
+            state.tasks.push({ 
+                id: Date.now(), 
+                title, 
+                completed: false, 
+                type: 'task', 
+                points: 15,
+                priority: priority,
+                tag: 'Общее'
+            });
+            saveAll();
+            render();
+        }
+    },
+    deleteTask: (id) => {
+        if(confirm("Удалить задачу?")) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            saveAll();
+            render();
+        }
+    },
+    equip: (id) => {
+        const item = ITEMS.find(i => i.id === id);
+        if (item) {
+            const slot = item.special ? 'special' : item.type;
+            state.equipped[slot] = state.equipped[slot] === id ? null : id;
+            if(item.special) state.hasStreakInsurance = !!state.equipped.special;
+            saveAll();
+            render();
+        }
+    },
+    openChest: (type, cost) => {
+        if (state.totalPoints >= cost) {
+            state.totalPoints -= cost;
+            updateHistory(-cost);
+            startRoulette(type);
+        } else alert("Не хватает очков!");
+    },
     startRecording: () => {
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        if (!window.webkitSpeechRecognition && !window.SpeechRecognition) {
+            alert("Нужен Chrome или Android");
+            return;
+        }
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
         recognition.lang = 'ru-RU';
-        recognition.onstart = () => { window.isRec = true; render(); };
-        recognition.onresult = (e) => {
-            const text = e.results[0][0].transcript;
-            const note = {
-                id: Date.now(),
-                title: 'Запись ' + new Date().toLocaleTimeString().slice(0,5),
-                text: AI.process(text),
-                date: new Date().toLocaleDateString()
-            };
-            state.notes.unshift(note);
-            window.isRec = false;
-            render(); actions.save();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onstart = () => { isRecording = true; render(); };
+        recognition.onresult = (event) => {
+            let interim = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) currentTranscript += event.results[i][0].transcript + " ";
+                else interim += event.results[i][0].transcript;
+            }
+            const el = document.getElementById('liveTranscript');
+            if(el) el.innerText = (currentTranscript + interim) || "Слушаю...";
         };
+        recognition.onend = () => { if(isRecording) recognition.start(); else render(); };
         recognition.start();
     },
-
+    stopRecording: () => {
+        isRecording = false;
+        if(recognition) recognition.stop();
+        if (currentTranscript.length > 0) {
+            const cleanText = AI.clean(currentTranscript);
+            const newNote = {
+                id: Date.now(),
+                date: new Date().toLocaleString('ru-RU'),
+                title: 'Заметка ' + new Date().toLocaleTimeString().slice(0,5),
+                text: AI.structure(cleanText)
+            };
+            state.notes.unshift(newNote);
+            currentTranscript = "";
+            saveAll();
+        }
+        render();
+    },
     openNote: (id) => {
-        const n = state.notes.find(x => x.id === id);
-        window.editingId = id;
-        document.getElementById('modalTitle').innerText = n.title;
-        document.getElementById('modalText').value = n.text;
+        const note = state.notes.find(n => n.id === id);
+        if (!note) return;
+        editingNoteId = id;
+        document.getElementById('modalTitle').innerText = note.title;
+        document.getElementById('modalText').value = note.text;
         document.getElementById('noteModal').classList.add('open');
     },
-
-    enhanceNote: () => {
-        const area = document.getElementById('modalText');
-        area.value = AI.process(area.value);
-    },
-
-    addSummary: () => {
-        const area = document.getElementById('modalText');
-        area.value = AI.getSummary(area.value) + "\n\n" + area.value;
-    },
-
-    extractTasks: () => {
-        const area = document.getElementById('modalText');
-        area.value = area.value + AI.extractTasks(area.value);
-    },
-
     saveAndCloseNote: () => {
-        const n = state.notes.find(x => x.id === window.editingId);
-        n.text = document.getElementById('modalText').value;
-        actions.closeNote(); render(); actions.save();
+        const text = document.getElementById('modalText').value;
+        const note = state.notes.find(n => n.id === editingNoteId);
+        if (note) { note.text = text; saveAll(); }
+        actions.closeNote(); render();
     },
-
-    closeNote: () => document.getElementById('noteModal').classList.remove('open'),
-    
-    equip: (id) => {
-        const item = ITEMS.find(x => x.id === id);
-        const slot = item.type === 'special' ? 'special' : item.type;
-        state.equipped[slot] = state.equipped[slot] === id ? null : id;
-        render(); actions.save();
+    closeNote: () => { document.getElementById('noteModal').classList.remove('open'); editingNoteId = null; },
+    deleteNote: (id) => {
+        if(confirm("Удалить?")) {
+            state.notes = state.notes.filter(n => n.id !== id);
+            saveAll(); render();
+        }
+    },
+    enhanceNote: () => {
+        const f = document.getElementById('modalText');
+        const original = f.value;
+        f.value = "⏳ Анализирую...";
+        setTimeout(() => {
+            f.value = AI.structure(AI.clean(original));
+        }, 500);
+        if(tg) tg.HapticFeedback.notificationOccurred('selection');
+    },
+    addSummary: () => {
+        const f = document.getElementById('modalText');
+        const summary = AI.extractSummary(f.value);
+        f.value = summary + "\n\n---\n" + f.value;
+    },
+    extractTasks: () => {
+        const f = document.getElementById('modalText');
+        f.value = f.value + AI.findTasks(f.value);
+    },
+    openProfile: () => { state.activeTab = 'profile'; render(); },
+    copyReferral: () => {
+        navigator.clipboard.writeText(`https://t.me/livi_app_bot?start=ref${userId}`).then(() => alert("Скопировано!"));
     }
 };
 
 // --- RENDERERS ---
+function renderHeader() {
+    return `<div class="header">
+        <div class="header-title">livi</div>
+        <div class="header-stats">
+            <div class="stat-badge" style="color:var(--gold)">${getIcon('star')} ${state.totalPoints}</div>
+            <div class="stat-badge" style="color:#ff6b81">${getIcon('spark')} ${state.totalFire}</div>
+            <div class="profile-btn" onclick="actions.openProfile()">
+                <img src="${state.avatar || 'https://via.placeholder.com/40?text=👤'}" alt="Profile">
+            </div>
+        </div>
+    </div>`;
+}
+
 function renderHome() {
-    const completedTasks = state.tasks.filter(t => t.completed).length;
-    const progress = (completedTasks / state.tasks.length) * 188.4; // 2 * PI * 30
-    
+    const done = state.tasks.filter(t => t.completed).length;
     const h = ITEMS.find(i => i.id === state.equipped.head);
     const f = ITEMS.find(i => i.id === state.equipped.face);
     const b = ITEMS.find(i => i.id === state.equipped.body);
     const s = ITEMS.find(i => i.id === state.equipped.special);
+    
+    // AI Tip
+    const lastNote = state.notes.length > 0 ? state.notes[0].text : "";
+    const aiTip = AI.getTip(lastNote);
 
     return `
-    <div class="fade-in">
-        <div class="header">
-            <div class="header-title">livi</div>
-            <div class="header-stats">
-                <div class="stat-badge" style="color:var(--gold)">⭐ ${state.totalPoints}</div>
-                <div class="profile-btn" style="background:var(--primary)"></div>
-            </div>
-        </div>
-        
-        <div class="content" style="padding:20px">
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
             <div class="livi-container">
                 <div class="livi-bg-glow"></div>
                 <div class="livi-body">
-                    ${h ? `<div class="${h.css}"></div>` : ''}
+                    ${h ? `<div class="${h.css}" style="${h.style || ''}"></div>` : ''}
                     <div class="livi-antenna ant-l"></div>
                     <div class="livi-antenna ant-r"></div>
-                    <div class="eye eye-l"></div>
-                    <div class="eye eye-r"></div>
-                    ${f ? `<div class="${f.css}"><div class="g-lens"></div><div class="g-lens"></div><div class="g-bridge"></div></div>` : ''}
-                    <div class="mouth"></div>
+                    <div class="livi-face">
+                        <div class="eye eye-l"></div>
+                        <div class="eye eye-r"></div>
+                        ${f ? `<div class="${f.css}"><div class="g-lens"></div><div class="g-lens"></div><div class="g-bridge"></div></div>` : ''}
+                        <div class="mouth"></div>
+                    </div>
                     ${s ? `<div class="${s.css}">${s.icon}</div>` : ''}
                 </div>
+                ${b ? `<div style="position:relative;width:0;height:0;top:-10px"><div class="${b.css}"></div></div>` : ''}
+                <div style="margin-top:20px;font-weight:700; font-size: 18px">Привет, ${state.nick}!</div>
             </div>
 
-            <div class="dashboard-grid">
-                <div class="chart-box">
-                    <div style="font-size:10px; color:#888; margin-bottom:10px">АКТИВНОСТЬ (7Д)</div>
-                    <div class="activity-chart">
-                        ${state.history.map((v, i) => `<div class="activity-bar ${i===6?'active':''}" style="height:${v}%"></div>`).join('')}
-                    </div>
+            <div class="grid-2">
+                <div class="section" style="margin:0;text-align:center">
+                    <div style="font-size:24px;font-weight:800;color:var(--primary)">${done}/${state.tasks.length}</div>
+                    <div style="font-size:12px;color:#888">Задачи</div>
                 </div>
-                <div class="chart-box" style="display:flex; align-items:center; gap:12px">
-                    <div class="progress-circle">
-                        <svg width="60" height="60">
-                            <circle class="circle-bg" cx="30" cy="30" r="26"/>
-                            <circle class="circle-val" cx="30" cy="30" r="26" style="stroke-dasharray:163; stroke-dashoffset:${163 - (completedTasks/state.tasks.length)*163}"/>
-                        </svg>
-                        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; transform:rotate(90deg)">${Math.round((completedTasks/state.tasks.length)*100)}%</div>
-                    </div>
-                    <div>
-                        <div style="font-size:18px; font-weight:800">${completedTasks}/${state.tasks.length}</div>
-                        <div style="font-size:10px; color:#666">ЗАДАЧИ</div>
-                    </div>
+                <div class="section" style="margin:0;text-align:center">
+                    <div style="font-size:24px;font-weight:800;color:var(--gold)">${state.streak}</div>
+                    <div style="font-size:12px;color:#888">Стрик дня</div>
                 </div>
             </div>
 
-            <div class="section" style="background:linear-gradient(135deg, rgba(139,154,156,0.1), transparent)">
-                <div style="display:flex; gap:15px">
-                    <div style="font-size:24px">🧠</div>
-                    <div style="font-size:13px; color:#ccc; line-height:1.4">
-                        <b>AI Совет:</b> Похоже, ты наиболее продуктивен вечером. Оставь важные заметки на это время.
-                    </div>
+            <div class="section" style="margin-top: 15px; padding-bottom: 10px;">
+                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px; display:flex; justify-content:space-between">
+                    <span>Активность</span>
+                    <span style="color:var(--accent)">7 дней</span>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="activityChartCanvas"></canvas>
                 </div>
             </div>
+            
+            <div class="grid-2">
+                 <div class="section" style="margin:0">
+                    <div style="font-size:12px;color:#888;margin-bottom:5px;">Типы задач</div>
+                    <div style="height:100px; position:relative">
+                        <canvas id="taskDistributionChart"></canvas>
+                    </div>
+                 </div>
+                 <div class="section" style="margin:0; display:flex; flex-direction:column; justify-content:center; align-items:center; background:linear-gradient(135deg, rgba(139,154,156,0.1), rgba(0,0,0,0))">
+                    <div style="font-size:24px; margin-bottom:5px">🤖</div>
+                    <div style="font-size:11px; line-height:1.4; color:#ccc; text-align:center">
+                        <b>Livi:</b> ${aiTip}
+                    </div>
+                 </div>
+            </div>
+
         </div>
     </div>`;
 }
 
 function renderEducation() {
-    return `
-    <div class="fade-in" style="padding:20px">
-        <h2 style="text-align:center; font-weight:900; margin-bottom:10px">AI ЛЕКЦИЯ</h2>
-        <div class="section" style="text-align:center">
-            <div style="font-size:13px; color:#888; margin-bottom:20px">Нажми и говори. Я структурирую мысли и выделю главное.</div>
-            <button class="mic-btn ${window.isRec ? 'recording' : ''}" onclick="actions.startRecording()">
-                ${window.isRec ? '<div class="voice-wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>' : '🎤'}
-            </button>
+    const notesList = state.notes.map(n => `
+        <div class="note-card" onclick="actions.openNote(${n.id})">
+            <div class="note-date">
+                <span>${n.date}</span>
+                <span onclick="event.stopPropagation(); actions.deleteNote(${n.id})" style="color:#666">✕</span>
+            </div>
+            <div class="note-title">${n.title}</div>
+            <div class="note-preview">${n.text.slice(0, 60)}...</div>
         </div>
-        
-        <div style="margin-top:30px">
-            <div style="font-size:11px; color:#555; letter-spacing:1px; margin-bottom:15px">НЕДАВНИЕ ЗАПИСИ</div>
-            ${state.notes.map(n => `
-                <div class="section" style="padding:15px; margin-bottom:10px" onclick="actions.openNote(${n.id})">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px">
-                        <span style="font-weight:800">${n.title}</span>
-                        <span style="font-size:10px; color:#555">${n.date}</span>
-                    </div>
-                    <div style="font-size:13px; color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${n.text}</div>
+    `).join('');
+
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
+            <h2 style="margin-bottom:15px;font-weight:800; text-align: center">УМНЫЙ КОНСПЕКТ 2.0</h2>
+            <div class="section" style="text-align:center;">
+                <div style="font-size:13px;color:#aaa;margin-bottom:15px; line-height: 1.4;">
+                    Нажми на микрофон. Я структурирую мысли,<br>выделю главное и найду задачи.
                 </div>
-            `).join('')}
+                <div style="background: #111; padding: 15px; border-radius: 12px; min-height: 80px; margin-bottom: 20px; text-align: left; font-size: 14px; color: #ccc; border: 1px solid #333;" id="liveTranscript">
+                    ${currentTranscript || (isRecording ? "Слушаю..." : "Текст появится здесь...")}
+                </div>
+                <button class="mic-btn ${isRecording ? 'recording' : ''}" onclick="${isRecording ? 'actions.stopRecording()' : 'actions.startRecording()'}">
+                    ${isRecording ? '<div class="voice-wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>' : getIcon('mic')}
+                </button>
+            </div>
+            <h3 style="margin:25px 0 10px;font-weight:700; padding-left: 5px; color:#666; font-size:12px">СОХРАНЕННЫЕ ЗАПИСИ</h3>
+            ${notesList || '<div style="text-align:center;color:#555;padding:20px; font-style: italic;">Пусто</div>'}
         </div>
     </div>`;
 }
 
 function renderTasks() {
-    return `
-    <div class="fade-in" style="padding:20px">
-        <h2 style="font-weight:900; margin-bottom:20px">ЗАДАЧИ</h2>
-        ${state.tasks.map(t => `
-            <div class="section" style="display:flex; align-items:center; gap:15px; opacity:${t.completed?0.5:1}">
-                <div onclick="actions.toggleTask(${t.id})" style="width:26px; height:26px; border:2px solid var(--primary); border-radius:8px; background:${t.completed?'var(--primary)':'transparent'}; display:flex; align-items:center; justify-content:center">
-                    ${t.completed ? '✓' : ''}
+    const list = state.tasks.map(t => `
+        <div class="section" style="padding:15px;margin-bottom:10px;opacity:${t.completed ? 0.6 : 1}; border-left: 4px solid ${t.priority === 'high' ? 'var(--danger)' : t.priority === 'med' ? 'var(--warning)' : 'var(--success)'}">
+            <div style="display:flex;align-items:center;">
+                <div style="width:24px;height:24px;border:2px solid var(--primary);border-radius:8px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:${t.completed ? 'var(--primary)' : 'transparent'}; transition:background 0.2s; flex-shrink:0" onclick="actions.toggleTask(${t.id})">
+                    ${t.completed ? '<svg width="14" height="14" stroke="white"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
                 </div>
                 <div style="flex:1">
-                    <div style="font-weight:700; text-decoration:${t.completed?'line-through':''}">${t.title}</div>
-                    <div style="font-size:11px; color:var(--gold)">+${t.points} PTS</div>
+                    <div style="font-weight:600; font-size:15px; text-decoration:${t.completed ? 'line-through' : 'none'}; color:${t.completed?'#777':'#eee'}">${t.title}</div>
+                    
+                    <div style="display:flex; gap:8px; margin-top:6px; flex-wrap:wrap">
+                        <span style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; color:#aaa">${t.tag || 'Общее'}</span>
+                        <span style="font-size:10px; color:#666; display:flex; align-items:center">
+                            <span class="priority-dot p-${t.priority||'low'}"></span> ${t.points} pts
+                        </span>
+                    </div>
+                </div>
+                <div onclick="actions.deleteTask(${t.id})" style="color:#444; padding:5px; margin-left:10px">${getIcon('trash')}</div>
+            </div>
+        </div>
+    `).join('');
+
+    const challenge = state.dailyChallenge;
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
+            <h2 style="margin-bottom:15px;font-weight:800">ЗАДАЧИ</h2>
+            
+            <div class="section challenge-card" onclick="actions.completeChallenge()">
+                <div class="challenge-header">
+                    <div style="color:var(--gold); font-weight:800; font-size:12px; letter-spacing:1px">ЧЕЛЛЕНДЖ ДНЯ</div>
+                    <div style="color:var(--gold); font-weight:bold">+${challenge.reward} pts</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:15px">
+                    <div style="font-size:28px; filter: grayscale(${challenge.completed?1:0})">🔥</div>
+                    <div style="flex:1">
+                        <div style="font-size:18px; font-weight:700; text-decoration: ${challenge.completed?'line-through':''}">${challenge.title}</div>
+                        <div style="font-size:12px; color:#aaa; margin-top:4px">${challenge.completed ? 'Выполнено!' : 'Нажми, чтобы завершить'}</div>
+                    </div>
+                    ${challenge.completed ? '<div style="background:var(--success); color:black; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px">DONE</div>' : ''}
                 </div>
             </div>
-        `).join('')}
+
+            <div style="margin-top:20px">
+                ${list}
+            </div>
+        </div>
+        <button class="add-btn" onclick="actions.addTask()">+</button>
     </div>`;
 }
 
 function renderShop() {
+    const inv = state.inventory.map(id => {
+        const i = ITEMS.find(x => x.id === id);
+        const eq = Object.values(state.equipped).includes(id);
+        const color = i.special ? '#FFA500' : (i.rarity === 'legendary' ? 'var(--epic)' : i.rarity === 'rare' ? 'var(--gold)' : 'var(--primary)');
+        return `<div class="section" style="padding:15px 10px;margin:0;display:flex;flex-direction:column;align-items:center; border-color:${eq ? color : 'var(--glass-border)'}; box-shadow:${eq?'0 0 15px '+color+'40':'none'}" onclick="actions.equip('${id}')">
+            <div style="font-size:42px;margin-bottom:10px; filter:drop-shadow(0 5px 5px rgba(0,0,0,0.5))">${i.icon}</div>
+            <div style="font-size:11px;color:#aaa;text-align:center;font-weight:600">${i.name}</div>
+            ${eq ? `<div style="width:6px;height:6px;background:${color};border-radius:50%;margin-top:8px"></div>` : ''}
+        </div>`;
+    }).join('');
     return `
-    <div class="fade-in" style="padding:20px">
-        <div style="text-align:center; margin-bottom:30px">
-            <div style="font-size:12px; color:#666">ТВОЙ БАЛАНС</div>
-            <div style="font-size:48px; font-weight:900; color:var(--gold)">${state.totalPoints}</div>
-        </div>
-
-        <div class="chest-card chest-common" onclick="actions.openChest('common', 100)">
-            <span class="rarity-tag" style="color:#888">Обычный</span>
-            <div style="display:flex; justify-content:space-between; align-items:center">
-                <div>
-                    <div style="font-size:20px; font-weight:800">БАЗОВЫЙ КЕЙС</div>
-                    <div style="font-size:12px; color:#666">Шанс на редкий предмет: 15%</div>
-                </div>
-                <div style="font-weight:900; color:var(--primary)">100 ⭐</div>
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content">
+            <div style="text-align:center;margin-bottom:25px">
+                <div style="font-size:12px;color:#888; letter-spacing:1px; margin-bottom:5px">БАЛАНС</div>
+                <div style="font-size:42px;font-weight:900;color:var(--gold); text-shadow: 0 0 20px rgba(212,175,122,0.2)">${state.totalPoints}</div>
             </div>
-        </div>
-
-        <div class="chest-card chest-rare" onclick="actions.openChest('rare', 250)">
-            <span class="rarity-tag" style="color:var(--gold)">Элитный</span>
-            <div style="display:flex; justify-content:space-between; align-items:center">
-                <div>
-                    <div style="font-size:20px; font-weight:800; color:var(--gold)">ЗОЛОТОЙ КЕЙС</div>
-                    <div style="font-size:12px; color:rgba(212,175,122,0.6)">Гарантировано Rare+</div>
-                </div>
-                <div style="font-weight:900; color:var(--gold)">250 ⭐</div>
-            </div>
-        </div>
-
-        <div style="margin-top:30px; display:grid; grid-template-columns: repeat(3, 1fr); gap:10px">
-            ${state.inventory.map(id => {
-                const item = ITEMS.find(x => x.id === id);
-                const isEq = Object.values(state.equipped).includes(id);
-                return `
-                    <div onclick="actions.equip('${id}')" class="section" style="padding:10px; text-align:center; border-color:${isEq?'var(--gold)':'rgba(255,255,255,0.05)'}">
-                        <div style="font-size:32px; margin-bottom:5px">${item.icon}</div>
-                        <div style="font-size:10px; color:#888">${item.name}</div>
+            <div class="chest-wrapper">
+                <div class="chest-card chest-common" onclick="actions.openChest('common', 150)">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div style="font-weight:800;font-size:18px;">Базовый ящик</div>
+                        <div style="font-size:14px;color:#bbb">150 pts</div>
                     </div>
-                `;
-            }).join('')}
+                    <div style="font-size:12px;opacity:0.6;margin-top:5px">Обычные предметы и аксессуары</div>
+                </div>
+                <div class="chest-card chest-rare" onclick="actions.openChest('rare', 300)">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div style="font-weight:800;font-size:18px;color:var(--gold)">Редкий ящик</div>
+                        <div style="font-size:14px;color:var(--gold)">300 pts</div>
+                    </div>
+                    <div style="font-size:12px;opacity:0.6;margin-top:5px; color:var(--gold)">Повышенный шанс легендарки</div>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px">
+                ${inv || '<div style="grid-column:1/-1;text-align:center;color:#444;padding:20px">Инвентарь пуст</div>'}
+            </div>
         </div>
     </div>`;
 }
 
-function render() {
-    const app = document.getElementById('app');
-    let content = '';
-    switch(state.activeTab) {
-        case 'home': content = renderHome(); break;
-        case 'education': content = renderEducation(); break;
-        case 'tasks': content = renderTasks(); break;
-        case 'shop': content = renderShop(); break;
-    }
-    
-    app.innerHTML = content + `
-        <div class="bottom-nav">
-            <button class="nav-item ${state.activeTab==='home'?'active':''}" onclick="state.activeTab='home';render()">🏠</button>
-            <button class="nav-item ${state.activeTab==='tasks'?'active':''}" onclick="state.activeTab='tasks';render()">✅</button>
-            <button class="nav-item ${state.activeTab==='education'?'active':''}" onclick="state.activeTab='education';render()">📚</button>
-            <button class="nav-item ${state.activeTab==='shop'?'active':''}" onclick="state.activeTab='shop';render()">💎</button>
+function renderProfile() {
+    return `
+    <div class="slide-up">
+        ${renderHeader()}
+        <div class="content" style="text-align:center">
+            <h2 style="margin-bottom:30px;font-weight:800">ПРОФИЛЬ</h2>
+            <div class="profile-btn" style="width:100px;height:100px;margin:0 auto 20px; border-width:3px">
+                <img src="${state.avatar || 'https://via.placeholder.com/100?text=👤'}" alt="Avatar">
+            </div>
+            <div style="font-size:28px;font-weight:800;margin-bottom:5px">${state.nick}</div>
+            <div style="font-size:14px;color:#888;margin-bottom:30px">Уровень: Новичок</div>
+            
+            <div class="section" style="margin-top:20px; text-align:left">
+                <div style="font-weight:bold;margin-bottom:10px; color:var(--accent)">Пригласить друга</div>
+                <div style="font-size:13px; color:#999; margin-bottom:15px">Получи 500 очков за каждого друга.</div>
+                <div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:12px;margin:10px 0;font-family:monospace;font-size:12px;color:#fff;word-break:break-all;border:1px dashed #444">https://t.me/livi_app_bot?start=ref${userId}</div>
+                <button class="btn btn-primary" onclick="actions.copyReferral()">Копировать ссылку</button>
+            </div>
+            <div style="margin-top:20px; font-size:12px; color:#444">ID: ${userId}</div>
         </div>
-    `;
+    </div>`;
+}
+
+function initCharts() {
+    const ctxActivity = document.getElementById('activityChartCanvas');
+    if (ctxActivity) {
+        if (activityChart) activityChart.destroy();
+        
+        const labels = state.statsHistory.map(h => {
+             const d = new Date(h.date);
+             return `${d.getDate()}.${d.getMonth()+1}`;
+        });
+        const dataPoints = state.statsHistory.map(h => h.points);
+
+        activityChart = new Chart(ctxActivity, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Очки',
+                    data: dataPoints,
+                    borderColor: '#A8C4C6',
+                    backgroundColor: 'rgba(168, 196, 198, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointBackgroundColor: '#fff',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false, color: '#333' }, ticks: { color: '#666', font:{size:10} } },
+                    y: { display: false, grid: { color: '#222' } }
+                },
+                animation: { duration: 1500, easing: 'easeOutQuart' }
+            }
+        });
+    }
+
+    const ctxTask = document.getElementById('taskDistributionChart');
+    if (ctxTask) {
+        if (taskChart) taskChart.destroy();
+        
+        const habitCount = state.tasks.filter(t => t.type === 'habit').length;
+        const taskCount = state.tasks.filter(t => t.type === 'task').length;
+
+        taskChart = new Chart(ctxTask, {
+            type: 'doughnut',
+            data: {
+                labels: ['Привычки', 'Задачи'],
+                datasets: [{
+                    data: [habitCount, taskCount],
+                    backgroundColor: ['#D4AF7A', '#8B9A9C'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                cutout: '70%',
+                animation: { animateScale: true }
+            }
+        });
+    }
+}
+
+function render() {
+    let html = '';
+    if (state.activeTab === 'home') html = renderHome();
+    else if (state.activeTab === 'tasks') html = renderTasks();
+    else if (state.activeTab === 'education') html = renderEducation();
+    else if (state.activeTab === 'shop') html = renderShop();
+    else if (state.activeTab === 'profile') html = renderProfile();
+
+    document.getElementById('app').innerHTML = html + `
+    <div class="bottom-nav">
+        <button class="nav-item ${state.activeTab==='home'?'active':''}" onclick="state.activeTab='home';saveAll();render()">${getIcon('home')}</button>
+        <button class="nav-item ${state.activeTab==='tasks'?'active':''}" onclick="state.activeTab='tasks';saveAll();render()">${getIcon('check')}</button>
+        <button class="nav-item ${state.activeTab==='education'?'active':''}" onclick="state.activeTab='education';saveAll();render()">${getIcon('book')}</button>
+        <button class="nav-item ${state.activeTab==='shop'?'active':''}" onclick="state.activeTab='shop';saveAll();render()">${getIcon('shop')}</button>
+    </div>`;
+
+    // Инициализация графиков, если мы на главной
+    if(state.activeTab === 'home') {
+        setTimeout(initCharts, 0);
+    }
 }
 
 // --- ROULETTE LOGIC ---
@@ -533,10 +987,11 @@ function startRoulette(type) {
     strip.innerHTML = ''; strip.style.transition = 'none'; strip.style.transform = 'translateX(0px)';
     
     let pool = type === 'common' ? ITEMS.filter(i => i.rarity !== 'legendary') : ITEMS;
-    const winner = pool[Math.floor(Math.random() * pool.length)];
+    let winner = pool[Math.floor(Math.random() * pool.length)];
+    if(type === 'rare' && Math.random() > 0.7) winner = ITEMS.find(i=>i.rarity === 'legendary') || winner;
 
-    for (let i = 0; i < 40; i++) {
-        const item = i === 35 ? winner : pool[Math.floor(Math.random() * pool.length)];
+    for (let i = 0; i < 60; i++) {
+        const item = i === 50 ? winner : pool[Math.floor(Math.random() * pool.length)];
         const el = document.createElement('div');
         el.className = `r-item ${item.rarity}`;
         el.innerHTML = `<div style="font-size:40px">${item.icon}</div>`;
@@ -544,31 +999,25 @@ function startRoulette(type) {
     }
 
     setTimeout(() => {
-        strip.style.transition = 'transform 5s cubic-bezier(0.1, 0.9, 0.2, 1)';
-        strip.style.transform = `translateX(-${(35 * 140) - 150}px)`;
+        const offset = (document.querySelector('.roulette-window').offsetWidth / 2) - 64;
+        strip.style.transition = 'transform 6s cubic-bezier(0.1, 0.9, 0.2, 1)';
+        strip.style.transform = `translateX(-${(50 * 128) - offset}px)`;
         setTimeout(() => {
+            if(tg) tg.HapticFeedback.notificationOccurred('success');
             document.getElementById('winItemName').innerText = winner.name;
             document.getElementById('winMessage').style.opacity = '1';
-            if(!state.inventory.includes(winner.id)) state.inventory.push(winner.id);
-            actions.save();
-        }, 5200);
+            if (!state.inventory.includes(winner.id)) { state.inventory.push(winner.id); saveAll(); }
+        }, 6200);
     }, 100);
 }
+function closeRoulette() { document.getElementById('rouletteModal').classList.add('hidden'); render(); }
 
-function closeRoulette() {
-    document.getElementById('rouletteModal').classList.add('hidden');
-    document.getElementById('winMessage').style.opacity = '0';
+document.addEventListener('DOMContentLoaded', async () => {
+    initStars();
+    await loadState();
     render();
-}
-
-// Init
-window.onload = () => {
-    actions.load();
-    setTimeout(() => {
-        document.getElementById('loadingScreen').classList.add('fade-out');
-        render();
-    }, 1500);
-};
+    document.getElementById('loadingScreen').classList.add('fade-out');
+});
 </script>
 </body>
 </html>
