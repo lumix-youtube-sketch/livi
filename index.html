@@ -37,6 +37,7 @@ body{
 /* Animations */
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes slideInLeft{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @keyframes pulse-glow{0%,100%{box-shadow:0 0 10px var(--epic)}50%{box-shadow:0 0 25px var(--epic)}}
 @keyframes blink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(0.1)}}
@@ -44,9 +45,12 @@ body{
 @keyframes wave {0%, 100% {height: 10px;} 50% {height: 30px;}}
 @keyframes twinkle {0%, 100% {opacity: 0.2; transform: scale(1);} 50% {opacity: 0.8; transform: scale(1.5);}}
 @keyframes shimmer {0% {background-position: -200% 0;} 100% {background-position: 200% 0;}}
+@keyframes scaleIn {from{transform:scale(0.9);opacity:0}to{transform:scale(1);opacity:1}}
 
 .fade-in{animation:fadeIn .4s ease-out}
 .slide-up{animation:slideUp .4s ease-out}
+.slide-in-left{animation:slideInLeft .5s ease-out}
+.scale-in{animation:scaleIn .3s ease-out}
 .hidden{display:none!important}
 
 /* UI Elements */
@@ -54,14 +58,16 @@ body{
 .loading-screen.fade-out{opacity:0;pointer-events:none}
 .loading-logo{font-size:64px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px}
 
-.header{padding:20px;display:flex;align-items:center;justify-content:space-between;background:rgba(15,15,15,0.6);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05);position:sticky;top:0;z-index:50}
+.header{padding:20px;display:flex;align-items:center;justify-content:space-between;background:rgba(15,15,15,0.8);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05);position:sticky;top:0;z-index:50}
 .header-title{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header-stats{display:flex;gap:10px;align-items:center}
-.stat-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-weight:700;font-size:14px;background:var(--glass);border:1px solid var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);}
-.profile-btn{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid var(--primary);cursor:pointer;box-shadow:0 0 15px rgba(139,154,156,0.3)}
+.stat-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-weight:700;font-size:14px;background:var(--glass);border:1px solid var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); transition:transform .2s}
+.stat-badge:active{transform:scale(0.95)}
+.profile-btn{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid var(--primary);cursor:pointer;box-shadow:0 0 15px rgba(139,154,156,0.3);transition:transform .2s}
+.profile-btn:active{transform:scale(0.95)}
 .profile-btn img{width:100%;height:100%;object-fit:cover}
 
-/* Livi Character */
+/* Livi Character - НЕ ТРОГАЕМ */
 .livi-container{display:flex;flex-direction:column;align-items:center;padding:30px 0;position:relative; z-index: 5;}
 .livi-bg-glow {position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 220px; height: 220px; background: radial-gradient(circle, rgba(139,154,156,0.15) 0%, rgba(0,0,0,0) 70%); z-index: 1; pointer-events: none;}
 .livi-body{
@@ -83,7 +89,7 @@ body{
 .eye-l{left:32px} .eye-r{right:32px}
 .mouth{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);width:20px;height:10px;border-bottom:2px solid white;border-radius:0 0 15px 15px}
 
-/* Items CSS */
+/* Items CSS - НЕ ТРОГАЕМ */
 .item-cap {position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:80px;height:30px;background:linear-gradient(to bottom, #D4AF7A, #C09555);border-radius:20px 20px 0 0;z-index:20;box-shadow:inset 0 2px 5px rgba(255,255,255,0.2)}
 .item-crown {position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:60px;height:45px;z-index:20;background: linear-gradient(to bottom, #FFD700, #DAA520);clip-path: polygon(0% 100%, 20% 40%, 40% 100%, 60% 20%, 80% 100%, 100% 40%, 100% 100%);filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));}
 .item-glasses {position:absolute;top:50px;left:50%;transform:translateX(-50%);width:70px;height:20px;z-index:30;display:flex;justify-content:space-between}
@@ -94,7 +100,7 @@ body{
 .item-bowtie {position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:36px;height:18px;z-index:25;background:#D45D79;clip-path:polygon(0 50%, 40% 0, 50% 50%, 40% 100%, 0 50%, 50% 50%, 60% 0, 100% 50%, 60% 100%, 50% 50%)}
 .item-insurance {position:absolute;top:-25px;left:50%;transform:translateX(-50%);width:50px;height:50px;z-index:20;background:radial-gradient(circle, #FFD700, #B8860B);border-radius:50%;border:2px solid #FFA500;box-shadow:0 0 20px rgba(255,215,0,0.6);display:flex;align-items:center;justify-content:center;font-size:24px;}
 
-/* Main Layout & Beautiful Boxes */
+/* Main Layout & Beautiful Boxes - УЛУЧШЕННЫЕ */
 .content{padding:20px}
 .section {
     background: linear-gradient(160deg, rgba(30,30,30,0.6) 0%, rgba(10,10,10,0.8) 100%);
@@ -117,23 +123,93 @@ body{
 }
 .section > * { position: relative; z-index: 1; }
 
+.section-header {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 
 .btn{width:100%;padding:16px;border-radius:16px;font-weight:700;font-size:16px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;position:relative;overflow:hidden}
 .btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:white; box-shadow: 0 4px 15px rgba(139,154,156,0.3)}
+.btn-primary:active{transform:scale(0.97)}
 .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888}
 .add-btn {position: fixed;bottom: 90px;right: 20px;width: 60px;height: 60px;border-radius: 30px;background: linear-gradient(135deg, var(--primary), var(--accent));color: white;font-size: 32px;border: none;box-shadow: 0 4px 20px rgba(139,154,156,0.5);z-index: 80;display: flex;align-items: center;justify-content: center;cursor: pointer;transition: transform 0.2s;}
 .add-btn:active {transform: scale(0.95);}
 
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:428px;margin:0 auto;background:rgba(10,10,10,0.95);backdrop-filter:blur(20px);border-top:1px solid #222;display:flex;justify-content:space-around;padding:12px 0 calc(12px + env(safe-area-inset-bottom));z-index:100}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:none;color:#555;transition:color .2s}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:none;color:#555;transition:all .2s;cursor:pointer}
 .nav-item.active{color:var(--primary)}
 .nav-item.active svg {filter: drop-shadow(0 0 8px var(--primary));}
+.nav-item:active{transform:scale(0.9)}
 
 .chart-wrapper {
     position: relative;
     height: 200px;
     width: 100%;
+}
+.chart-wrapper-small {
+    position: relative;
+    height: 120px;
+    width: 100%;
+}
+
+/* Stats Cards - НОВЫЕ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 15px;
+}
+.stat-card {
+    background: linear-gradient(135deg, rgba(139,154,156,0.1) 0%, rgba(0,0,0,0.3) 100%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.3s;
+}
+.stat-card:active {
+    transform: scale(0.97);
+}
+.stat-value {
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 5px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.stat-label {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+    position: relative;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(168,196,198,0.5);
 }
 
 /* Challenge Card Styles */
@@ -168,8 +244,8 @@ body{
 .bar:nth-child(3) {animation-delay: 0.2s; height: 25px}
 .bar:nth-child(4) {animation-delay: 0.3s; height: 15px}
 
-.note-card {background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: background .2s;}
-.note-card:active {background: rgba(255,255,255,0.05);}
+.note-card {background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: all .2s;}
+.note-card:active {background: rgba(255,255,255,0.05);transform:scale(0.98)}
 .note-date {font-size: 11px; color: #777; margin-bottom: 5px; display: flex; justify-content: space-between;}
 .note-title {font-weight: 700; margin-bottom: 5px; color: #eee; font-size: 16px;}
 .note-preview {font-size: 13px; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis}
@@ -179,7 +255,8 @@ body{
 .note-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;}
 .note-textarea {flex: 1; background: transparent; border: none; color: #eee; font-size: 16px; line-height: 1.6; resize: none; outline: none; font-family: inherit; padding-bottom: 100px;}
 .ai-actions {display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px;}
-.ai-chip {background: rgba(139,154,156,0.1); padding: 8px 16px; border-radius: 20px; font-size: 12px; color: var(--accent); white-space: nowrap; border: 1px solid rgba(139,154,156,0.2); cursor: pointer;}
+.ai-chip {background: rgba(139,154,156,0.1); padding: 8px 16px; border-radius: 20px; font-size: 12px; color: var(--accent); white-space: nowrap; border: 1px solid rgba(139,154,156,0.2); cursor: pointer;transition:all .2s}
+.ai-chip:active{transform:scale(0.95);background:rgba(139,154,156,0.2)}
 
 /* Task Details */
 .priority-dot {width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px;}
@@ -223,6 +300,33 @@ body{
     color: var(--accent);
     margin-bottom: 4px;
     font-size: 14px;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    padding: 4px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+}
+.tab {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.tab.active {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    box-shadow: 0 2px 10px rgba(139,154,156,0.3);
 }
 
 svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -317,10 +421,7 @@ function initStars() {
 const Storage = {
     save: async (key, data) => {
         try {
-            // Всегда сохраняем в localStorage как fallback
             localStorage.setItem(key, JSON.stringify(data));
-            
-            // Если есть Telegram Cloud Storage - сохраняем туда
             if (tg && tg.CloudStorage) {
                 await new Promise((resolve, reject) => {
                     tg.CloudStorage.setItem(key, JSON.stringify(data), (err, success) => {
@@ -341,7 +442,6 @@ const Storage = {
     
     load: async (key) => {
         try {
-            // Приоритет - Cloud Storage
             if (tg && tg.CloudStorage) {
                 const cloudData = await new Promise((resolve) => {
                     tg.CloudStorage.getItem(key, (err, val) => {
@@ -358,7 +458,6 @@ const Storage = {
                 if (cloudData) {
                     try {
                         const parsed = JSON.parse(cloudData);
-                        // Сохраняем в localStorage для кэша
                         localStorage.setItem(key, cloudData);
                         return parsed;
                     } catch (e) {
@@ -367,7 +466,6 @@ const Storage = {
                 }
             }
             
-            // Fallback на localStorage
             const local = localStorage.getItem(key);
             return local ? JSON.parse(local) : null;
         } catch (e) { 
@@ -403,6 +501,7 @@ const ITEMS = [
 
 const defaultState = {
     activeTab: 'home',
+    statsTab: 'overview',
     streak: 1,
     totalPoints: 200,
     lastVisitDate: new Date().toISOString().split('T')[0],
@@ -424,7 +523,15 @@ const defaultState = {
     referralCount: 0,
     totalFire: 0,
     nick: firstName,
-    avatar: photoUrl
+    avatar: photoUrl,
+    weeklyGoals: {
+        tasks: 20,
+        points: 500,
+        notes: 10
+    },
+    totalTasksCompleted: 0,
+    totalNotesCreated: 0,
+    totalTimeSpent: 0
 };
 
 let state = { ...defaultState };
@@ -434,6 +541,9 @@ let currentTranscript = "";
 let editingNoteId = null;
 let activityChart = null;
 let taskChart = null;
+let weeklyChart = null;
+let priorityChart = null;
+let categoryChart = null;
 let lastFinalTranscript = "";
 let lastUiUpdate = 0;
 
@@ -445,11 +555,15 @@ async function loadState() {
     if (notesData && Array.isArray(notesData)) state.notes = notesData;
 
     if(state.statsHistory.length === 0) {
-        for(let i=6; i>=0; i--) {
-            const d = new Date(); d.setDate(d.getDate() - i);
+        for(let i=13; i>=0; i--) {
+            const d = new Date(); 
+            d.setDate(d.getDate() - i);
             state.statsHistory.push({
                 date: d.toISOString().split('T')[0],
-                points: Math.floor(Math.random() * 50)
+                points: Math.floor(Math.random() * 80) + 20,
+                tasks_completed: Math.floor(Math.random() * 8),
+                notes_created: Math.floor(Math.random() * 3),
+                time_spent: Math.floor(Math.random() * 120) + 30
             });
         }
     }
@@ -466,7 +580,6 @@ function checkDailyReset() {
         }
         state.lastVisitDate = today;
         
-        // Новый челлендж
         const challenges = ['Выполнить 3 задачи','Набрать 100 очков','Прочитать лекцию','Сделать конспект','Пройти 5000 шагов'];
         state.dailyChallenge = {
             date: today,
@@ -475,17 +588,15 @@ function checkDailyReset() {
             reward: 50
         };
         
-        // Сброс привычек
         state.tasks.forEach(t => { if (t.type === 'habit') t.completed = false; });
         saveAll();
     }
 }
 
-// Проверка полуночи каждую минуту
 setInterval(() => {
     checkDailyReset();
     render();
-}, 60000); // Каждую минуту
+}, 60000);
 
 async function saveAll() {
     const statsToSave = { ...state };
@@ -500,15 +611,23 @@ function hadActivityYesterday() {
     return !!state.statsHistory.find(e => e.date === y);
 }
 
-function updateHistory(pointsDelta) {
+function updateHistory(pointsDelta, taskCompleted = false, noteCreated = false) {
     const today = new Date().toISOString().split('T')[0];
     let entry = state.statsHistory.find(e => e.date === today);
     if (!entry) {
-        entry = { date: today, points: 0 };
+        entry = { date: today, points: 0, tasks_completed: 0, notes_created: 0, time_spent: 0 };
         state.statsHistory.push(entry);
     }
     entry.points += pointsDelta;
-    if (state.statsHistory.length > 7) state.statsHistory.shift();
+    if (taskCompleted) {
+        entry.tasks_completed++;
+        state.totalTasksCompleted++;
+    }
+    if (noteCreated) {
+        entry.notes_created++;
+        state.totalNotesCreated++;
+    }
+    if (state.statsHistory.length > 14) state.statsHistory.shift();
     saveAll();
 }
 
@@ -516,72 +635,66 @@ function updateHistory(pointsDelta) {
 const AI = {
     stopWords: ['и', 'в', 'во', 'не', 'на', 'я', 'с', 'со', 'как', 'а', 'то', 'все', 'она', 'так', 'его', 'но', 'да', 'ты', 'к', 'у', 'же', 'вы', 'за', 'бы', 'по', 'только', 'ее', 'мне', 'было', 'вот', 'от', 'меня', 'еще', 'нет', 'о', 'из', 'ему', 'теперь', 'когда', 'даже', 'ну', 'вдруг', 'ли', 'если', 'уже', 'или', 'ни', 'быть', 'был', 'него', 'до', 'вас', 'нибудь', 'опять', 'уж', 'вам', 'ведь', 'там', 'потом', 'себя', 'ничего', 'ей', 'может', 'они', 'тут', 'где', 'есть', 'надо', 'ней', 'для', 'мы', 'тебя', 'их', 'чем', 'была', 'сам', 'чтоб', 'без', 'будто', 'чего', 'раз', 'тоже', 'себе', 'под', 'будет', 'ж', 'тогда', 'кто', 'этот', 'того', 'потому', 'этого', 'какой', 'совсем', 'ним', 'здесь', 'этом', 'один', 'почти', 'мой', 'тем', 'чтобы', 'нее', 'сейчас', 'были', 'куда', 'зачем', 'всех', 'никогда', 'можно', 'при', 'наконец', 'два', 'об', 'другой', 'хоть', 'после', 'над', 'больше', 'тот', 'через', 'эти', 'нас', 'про', 'всего', 'них', 'какая', 'много', 'разве', 'три', 'эту', 'моя', 'впрочем', 'хорошо', 'свою', 'этой', 'перед', 'иногда', 'лучше', 'чуть', 'том', 'нельзя', 'такой', 'им', 'более', 'всегда', 'конечно', 'всю', 'между'],
 
-    // Словарь типичных ошибок
     commonErrors: {
-        'асвечание': 'освещение',
-        'пратектировать': 'проектировать',
-        'каманда': 'команда',
-        'функциянал': 'функционал',
-        'обязательна': 'обязательно',
-        'вобще': 'вообще',
-        'чтоли': 'что ли',
-        'наверно': 'наверное',
-        'ваще': 'вообще',
-        'прийти': 'прийти',
-        'придти': 'прийти'
+        'асвечание': 'освещение', 'пратектировать': 'проектировать', 'каманда': 'команда',
+        'функциянал': 'функционал', 'обязательна': 'обязательно', 'вобще': 'вообще',
+        'чтоли': 'что ли', 'наверно': 'наверное', 'ваще': 'вообще', 'придти': 'прийти',
+        'здраствуйте': 'здравствуйте', 'прийдет': 'придет', 'зделать': 'сделать',
+        'компания': 'кампания', 'извени': 'извини', 'пожалуста': 'пожалуйста'
     },
 
     clean: (text) => text.replace(/\s+/g, ' ').trim(),
 
-    // Исправление грамматических ошибок
     fixGrammar: (text) => {
         let fixed = text;
         
-        // Исправляем известные ошибки
         Object.keys(AI.commonErrors).forEach(error => {
             const regex = new RegExp('\\b' + error + '\\b', 'gi');
-            fixed = fixed.replace(regex, AI.commonErrors[error]);
+            fixed = fixed.replace(regex, (match) => {
+                const correction = AI.commonErrors[error.toLowerCase()];
+                if (match[0] === match[0].toUpperCase()) {
+                    return correction.charAt(0).toUpperCase() + correction.slice(1);
+                }
+                return correction;
+            });
         });
         
-        // Двойные пробелы
         fixed = fixed.replace(/\s+/g, ' ');
-        
-        // Пробелы перед знаками препинания
         fixed = fixed.replace(/\s+([,.!?;:])/g, '$1');
-        
-        // Пробел после знаков препинания
         fixed = fixed.replace(/([,.!?;:])([а-яА-ЯёЁa-zA-Z])/g, '$1 $2');
-        
-        // Заглавная после точки
         fixed = fixed.replace(/\.\s+([а-яё])/g, (match, p1) => '. ' + p1.toUpperCase());
         
-        // Первая буква заглавная
-        fixed = fixed.charAt(0).toUpperCase() + fixed.slice(1);
+        if (fixed.length > 0) {
+            fixed = fixed.charAt(0).toUpperCase() + fixed.slice(1);
+        }
         
         return fixed;
     },
 
-    // Добавление контекстных заметок
     addContextNotes: (text) => {
         let enhanced = text;
-        const lines = text.split('\n');
         const additions = [];
         
-        // Ищем ключевые фразы и добавляем заметки
-        if (text.toLowerCase().includes('проект')) {
+        const lowerText = text.toLowerCase();
+        
+        if (lowerText.includes('проект') && !lowerText.includes('сроки')) {
             additions.push('\n\n💡 **Заметка AI:** Не забудьте определить сроки и ресурсы для проекта.');
         }
         
-        if (text.toLowerCase().includes('встреч') || text.toLowerCase().includes('собрание')) {
+        if ((lowerText.includes('встреч') || lowerText.includes('собрание')) && !lowerText.includes('повестка')) {
             additions.push('\n\n📅 **Напоминание:** Подготовьте повестку дня заранее.');
         }
         
-        if (text.toLowerCase().includes('задач') || text.toLowerCase().includes('дела')) {
-            additions.push('\n\n✅ **Совет:** Приоритизируйте задачи по важности и срочности.');
+        if ((lowerText.includes('задач') || lowerText.includes('дела')) && !lowerText.includes('приоритет')) {
+            additions.push('\n\n✅ **Совет:** Приоритизируйте задачи по важности и срочности (матрица Эйзенхауэра).');
         }
         
-        if (text.toLowerCase().includes('изучи') || text.toLowerCase().includes('учеб')) {
-            additions.push('\n\n📚 **Рекомендация:** Используйте метод Фейнмана для лучшего понимания.');
+        if ((lowerText.includes('изучи') || lowerText.includes('учеб') || lowerText.includes('курс')) && !lowerText.includes('практик')) {
+            additions.push('\n\n📚 **Рекомендация:** Используйте активное обучение - делайте заметки и практикуйте материал.');
+        }
+        
+        if (lowerText.includes('цел') && !lowerText.includes('smart')) {
+            additions.push('\n\n🎯 **Подсказка:** Сделайте цели SMART (конкретными, измеримыми, достижимыми, релевантными, ограниченными по времени).');
         }
         
         return enhanced + additions.join('');
@@ -610,7 +723,8 @@ const AI = {
                 const cleanW = w.replace(/[^а-яёa-z]/gi, '');
                 if (freqs[cleanW]) score += freqs[cleanW];
             });
-            if (s.match(/(важно|суть|вывод|итак|значит|поэтому|запомнить)/i)) score *= 1.5;
+            if (s.match(/(важно|суть|вывод|итак|значит|поэтому|запомнить|главное|основное|ключевое)/i)) score *= 1.8;
+            if (s.match(/(во-первых|во-вторых|в-третьих|первое|второе|третье)/i)) score *= 1.3;
             return { text: s.trim(), score: score / (words.length || 1) };
         });
     },
@@ -618,44 +732,44 @@ const AI = {
     structure: (text) => {
         let processed = AI.fixGrammar(text);
         
-        // Определения
         processed = processed.replace(/([а-яА-ЯёЁa-zA-Z]+)\s*[-–—]\s*([а-яА-ЯёЁa-zA-Z].+?)(?=[.!?]|$)/g, "**$1** — $2");
-        // Абзацы
         processed = processed.replace(/([.!?])\s*(?=[А-ЯЁ])/g, "$1\n\n");
-        // Списки
-        processed = processed.replace(/(\n|^)\s*-\s*/g, "\n• ");
-        processed = processed.replace(/(Во-первых|Во-вторых|В-третьих),?/gi, "\n🔹 $1:");
-
+        processed = processed.replace(/(\n|^)\s*[-•]\s*/g, "\n• ");
+        processed = processed.replace(/(Во-первых|Во-вторых|В-третьих|Первое|Второе|Третье),?/gi, "\n\n🔹 $1:");
+        processed = processed.replace(/(Важно|Внимание|Примечание|Замечание):/gi, "\n\n⚠️ **$1:**");
+        
         return processed;
     },
 
     extractSummary: (text) => {
         const scored = AI.scoreSentences(text);
-        const count = Math.max(1, Math.ceil(scored.length * 0.3));
+        const count = Math.max(1, Math.min(3, Math.ceil(scored.length * 0.3)));
         const topSentences = [...scored].sort((a,b) => b.score - a.score).slice(0, count);
 
         const result = topSentences.map(s => "🔸 " + s.text).join('\n');
 
-        return "📌 ГЛАВНАЯ МЫСЛЬ:\n" + result;
+        return "📌 **ГЛАВНАЯ МЫСЛЬ:**\n\n" + result;
     },
 
     findTasks: (text) => {
-        const verbs = ['сделать', 'купить', 'прочитать', 'написать', 'отправить', 'позвонить', 'найти', 'изучить', 'подготовить', 'встретиться', 'выполнить', 'создать', 'разработать', 'проверить', 'завершить'];
-        const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+        const verbs = ['сделать', 'купить', 'прочитать', 'написать', 'отправить', 'позвонить', 'найти', 'изучить', 'подготовить', 'встретиться', 'выполнить', 'создать', 'разработать', 'проверить', 'завершить', 'организовать', 'спланировать', 'обсудить'];
+        const sentences = text.match(/[^.!?]+[.!?]+/g) || text.split(/\n+/);
         let tasks = [];
 
         sentences.forEach(s => {
             const lower = s.toLowerCase();
             if (verbs.some(v => lower.includes(v))) {
                 let t = s.trim();
-                if(t.length < 100) tasks.push("◻️ " + t);
+                if(t.length < 100 && t.length > 10) {
+                    t = t.replace(/^[-•]\s*/, '');
+                    tasks.push("☐ " + t);
+                }
             }
         });
 
-        return tasks.length > 0 ? "\n\n✅ ОБНАРУЖЕННЫЕ ЗАДАЧИ:\n" + tasks.join('\n') : "\n\n✅ Задач не найдено";
+        return tasks.length > 0 ? "\n\n✅ **ОБНАРУЖЕННЫЕ ЗАДАЧИ:**\n\n" + tasks.join('\n') : "\n\n✅ Задач не найдено";
     },
 
-    // Детальный анализ для главной страницы
     getDetailedInsights: (lastNote) => {
         if (!lastNote || lastNote.length < 20) {
             return {
@@ -675,21 +789,19 @@ const AI = {
         const scored = AI.scoreSentences(lastNote);
         const topSentence = scored.sort((a,b) => b.score - a.score)[0];
 
-        // Определяем настроение
         let mood = '💭';
-        if (lastNote.match(/хорошо|отлично|супер|класс|круто/i)) mood = '😊';
-        else if (lastNote.match(/плохо|сложно|трудно|проблема/i)) mood = '😟';
-        else if (lastNote.match(/задач|дела|работа|проект/i)) mood = '💼';
-        else if (lastNote.match(/учеб|изучи|курс|лекция/i)) mood = '📚';
+        if (lastNote.match(/хорошо|отлично|супер|класс|круто|прекрасно|великолепно/i)) mood = '😊';
+        else if (lastNote.match(/плохо|сложно|трудно|проблема|тяжело|сложность/i)) mood = '😟';
+        else if (lastNote.match(/задач|дела|работа|проект|deadline/i)) mood = '💼';
+        else if (lastNote.match(/учеб|изучи|курс|лекция|экзамен/i)) mood = '📚';
+        else if (lastNote.match(/спорт|тренировка|здоровье|фитнес/i)) mood = '💪';
 
-        // Категоризация
         let category = 'Общее';
-        if (lastNote.match(/работа|проект|задач|дела/i)) category = 'Работа';
-        else if (lastNote.match(/учеб|изучи|курс|лекция|конспект/i)) category = 'Обучение';
-        else if (lastNote.match(/здоровье|спорт|тренировка/i)) category = 'Здоровье';
-        else if (lastNote.match(/идея|план|мысл/i)) category = 'Идеи';
+        if (lastNote.match(/работа|проект|задач|дела|meeting|презентация/i)) category = 'Работа';
+        else if (lastNote.match(/учеб|изучи|курс|лекция|конспект|экзамен/i)) category = 'Обучение';
+        else if (lastNote.match(/здоровье|спорт|тренировка|питание|сон/i)) category = 'Здоровье';
+        else if (lastNote.match(/идея|план|мысл|концепция|стратегия/i)) category = 'Идеи';
 
-        // Генерируем рекомендации
         const suggestions = [];
         if (topWords.includes('проект') || topWords.includes('задач')) {
             suggestions.push('Создай отдельные задачи из этой заметки');
@@ -697,13 +809,16 @@ const AI = {
         if (lastNote.length > 300) {
             suggestions.push('Используй AI для выделения главного');
         }
-        if (!lastNote.match(/[0-9]{1,2}\.[0-9]{1,2}|завтра|сегодня/)) {
+        if (!lastNote.match(/[0-9]{1,2}\.[0-9]{1,2}|завтра|сегодня|через|до/)) {
             suggestions.push('Добавь временные рамки для задач');
+        }
+        if (lastNote.length > 500) {
+            suggestions.push('Разбей заметку на несколько частей для лучшей структуры');
         }
 
         return {
             mood: mood,
-            summary: topSentence ? topSentence.text.slice(0, 100) + '...' : 'Анализ заметки',
+            summary: topSentence ? topSentence.text.slice(0, 120) + '...' : 'Анализ заметки',
             topics: topWords.slice(0, 3),
             category: category,
             suggestions: suggestions.length > 0 ? suggestions : ['Продолжай в том же духе!']
@@ -721,10 +836,11 @@ const actions = {
     toggleTask: (id) => {
         const task = state.tasks.find(t => t.id === id);
         if (task) {
+            const wasCompleted = task.completed;
             task.completed = !task.completed;
             const delta = task.completed ? task.points : -task.points;
             state.totalPoints += delta;
-            updateHistory(delta);
+            updateHistory(delta, task.completed, false);
             if(task.completed && tg) tg.HapticFeedback.notificationOccurred('success');
             saveAll();
             render();
@@ -735,7 +851,7 @@ const actions = {
             state.dailyChallenge.completed = true;
             state.totalPoints += state.dailyChallenge.reward;
             state.totalFire += 1;
-            updateHistory(state.dailyChallenge.reward);
+            updateHistory(state.dailyChallenge.reward, false, false);
             if(tg) tg.HapticFeedback.notificationOccurred('success');
             saveAll();
             render();
@@ -780,7 +896,7 @@ const actions = {
     openChest: (type, cost) => {
         if (state.totalPoints >= cost) {
             state.totalPoints -= cost;
-            updateHistory(-cost);
+            updateHistory(-cost, false, false);
             startRoulette(type);
         } else alert("Не хватает очков!");
     },
@@ -789,7 +905,7 @@ const actions = {
         lastFinalTranscript = "";
         lastUiUpdate = 0;
         if (!window.webkitSpeechRecognition && !window.SpeechRecognition) {
-            alert("Нужен Chrome или Android");
+            alert("Распознавание речи не поддерживается. Используйте Chrome или Android.");
             return;
         }
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -797,8 +913,14 @@ const actions = {
         recognition.lang = 'ru-RU';
         recognition.continuous = true;
         recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
 
-        recognition.onstart = () => { isRecording = true; render(); };
+        recognition.onstart = () => { 
+            isRecording = true; 
+            if(tg) tg.HapticFeedback.impactOccurred('light');
+            render(); 
+        };
+        
         recognition.onresult = (event) => {
             let interimText = "";
 
@@ -817,17 +939,35 @@ const actions = {
             if (now - lastUiUpdate > 100) {
                 const el = document.getElementById('liveTranscript');
                 if (el) {
-                    el.innerText = (currentTranscript + " " + interimText).trim();
+                    const fullText = (currentTranscript + " " + interimText).trim();
+                    el.innerText = fullText || "Слушаю...";
                 }
                 lastUiUpdate = now;
             }
         };
 
-        recognition.onend = () => {
-            if (isRecording) {
-                setTimeout(() => recognition.start(), 300);
+        recognition.onerror = (event) => {
+            console.error('Ошибка распознавания:', event.error);
+            if (event.error === 'no-speech') {
+                recognition.stop();
+                setTimeout(() => {
+                    if (isRecording) recognition.start();
+                }, 500);
             }
         };
+
+        recognition.onend = () => {
+            if (isRecording) {
+                setTimeout(() => {
+                    try {
+                        recognition.start();
+                    } catch(e) {
+                        console.error('Не удалось перезапустить:', e);
+                    }
+                }, 300);
+            }
+        };
+        
         recognition.start();
     },
     stopRecording: () => {
@@ -841,11 +981,13 @@ const actions = {
             const newNote = {
                 id: Date.now(),
                 date: new Date().toLocaleString('ru-RU'),
-                title: 'Заметка ' + new Date().toLocaleTimeString().slice(0,5),
+                title: 'Заметка ' + new Date().toLocaleTimeString('ru-RU').slice(0,5),
                 text: enhancedText
             };
             state.notes.unshift(newNote);
+            updateHistory(0, false, true);
             currentTranscript = "";
+            if(tg) tg.HapticFeedback.notificationOccurred('success');
             saveAll();
         }
         render();
@@ -861,33 +1003,52 @@ const actions = {
     saveAndCloseNote: () => {
         const text = document.getElementById('modalText').value;
         const note = state.notes.find(n => n.id === editingNoteId);
-        if (note) { note.text = text; saveAll(); }
-        actions.closeNote(); render();
+        if (note) { 
+            note.text = text; 
+            saveAll(); 
+        }
+        actions.closeNote(); 
+        render();
     },
-    closeNote: () => { document.getElementById('noteModal').classList.remove('open'); editingNoteId = null; },
+    closeNote: () => { 
+        document.getElementById('noteModal').classList.remove('open'); 
+        editingNoteId = null; 
+    },
     deleteNote: (id) => {
-        if(confirm("Удалить?")) {
+        if(confirm("Удалить заметку?")) {
             state.notes = state.notes.filter(n => n.id !== id);
-            saveAll(); render();
+            saveAll(); 
+            render();
         }
     },
     enhanceNote: () => {
         const f = document.getElementById('modalText');
         const original = f.value;
-        f.value = "⏳ Анализирую...";
+        f.value = "⏳ Анализирую и улучшаю структуру...";
         setTimeout(() => {
             f.value = AI.structure(AI.clean(original));
+            if(tg) tg.HapticFeedback.notificationOccurred('success');
         }, 500);
-        if(tg) tg.HapticFeedback.notificationOccurred('selection');
+        if(tg) tg.HapticFeedback.impactOccurred('light');
     },
     addSummary: () => {
         const f = document.getElementById('modalText');
-        const summary = AI.extractSummary(f.value);
-        f.value = summary + "\n\n---\n" + f.value;
+        const original = f.value;
+        f.value = "⏳ Извлекаю главную мысль...";
+        setTimeout(() => {
+            const summary = AI.extractSummary(original);
+            f.value = summary + "\n\n---\n\n" + original;
+            if(tg) tg.HapticFeedback.notificationOccurred('success');
+        }, 500);
     },
     extractTasks: () => {
         const f = document.getElementById('modalText');
-        f.value = f.value + AI.findTasks(f.value);
+        const original = f.value;
+        f.value = "⏳ Ищу задачи в тексте...";
+        setTimeout(() => {
+            f.value = original + AI.findTasks(original);
+            if(tg) tg.HapticFeedback.notificationOccurred('success');
+        }, 500);
     },
     fixGrammar: () => {
         const f = document.getElementById('modalText');
@@ -897,19 +1058,32 @@ const actions = {
             f.value = AI.fixGrammar(original);
             if(tg) tg.HapticFeedback.notificationOccurred('success');
         }, 500);
+        if(tg) tg.HapticFeedback.impactOccurred('light');
     },
     addNotes: () => {
         const f = document.getElementById('modalText');
         const original = f.value;
-        f.value = "⏳ Добавляю заметки...";
+        f.value = "⏳ Добавляю контекстные заметки...";
         setTimeout(() => {
             f.value = AI.addContextNotes(original);
             if(tg) tg.HapticFeedback.notificationOccurred('success');
         }, 500);
     },
-    openProfile: () => { state.activeTab = 'profile'; render(); },
+    openProfile: () => { 
+        state.activeTab = 'profile'; 
+        saveAll();
+        render(); 
+    },
     copyReferral: () => {
-        navigator.clipboard.writeText(`https://t.me/livi_app_bot?start=ref${userId}`).then(() => alert("Скопировано!"));
+        const refLink = `https://t.me/livi_app_bot?start=ref${userId}`;
+        navigator.clipboard.writeText(refLink).then(() => {
+            alert("Ссылка скопирована!");
+            if(tg) tg.HapticFeedback.notificationOccurred('success');
+        });
+    },
+    switchStatsTab: (tab) => {
+        state.statsTab = tab;
+        render();
     }
 };
 
@@ -934,9 +1108,17 @@ function renderHome() {
     const b = ITEMS.find(i => i.id === state.equipped.body);
     const s = ITEMS.find(i => i.id === state.equipped.special);
 
-    // Детальный AI анализ
     const lastNote = state.notes.length > 0 ? state.notes[0].text : "";
     const insights = AI.getDetailedInsights(lastNote);
+
+    const weekData = state.statsHistory.slice(-7);
+    const weekTasksCompleted = weekData.reduce((sum, d) => sum + (d.tasks_completed || 0), 0);
+    const weekPointsEarned = weekData.reduce((sum, d) => sum + (d.points || 0), 0);
+    const weekNotesCreated = weekData.reduce((sum, d) => sum + (d.notes_created || 0), 0);
+
+    const tasksProgress = Math.min(100, (weekTasksCompleted / state.weeklyGoals.tasks) * 100);
+    const pointsProgress = Math.min(100, (weekPointsEarned / state.weeklyGoals.points) * 100);
+    const notesProgress = Math.min(100, (weekNotesCreated / state.weeklyGoals.notes) * 100);
 
     return `
     <div class="slide-up">
@@ -960,28 +1142,70 @@ function renderHome() {
                 <div style="margin-top:20px;font-weight:700; font-size: 18px">Привет, ${state.nick}!</div>
             </div>
 
-            <div class="grid-2">
-                <div class="section" style="margin:0;text-align:center">
-                    <div style="font-size:24px;font-weight:800;color:var(--primary)">${done}/${state.tasks.length}</div>
-                    <div style="font-size:12px;color:#888">Задачи</div>
+            <div class="stats-grid scale-in">
+                <div class="stat-card">
+                    <div class="stat-value">${done}/${state.tasks.length}</div>
+                    <div class="stat-label">Задачи сегодня</div>
                 </div>
-                <div class="section" style="margin:0;text-align:center">
-                    <div style="font-size:24px;font-weight:800;color:var(--gold)">${state.streak}</div>
-                    <div style="font-size:12px;color:#888">Стрик дней</div>
+                <div class="stat-card">
+                    <div class="stat-value">${state.streak}</div>
+                    <div class="stat-label">Стрик дней</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${state.totalTasksCompleted}</div>
+                    <div class="stat-label">Всего задач</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${state.notes.length}</div>
+                    <div class="stat-label">Заметок</div>
                 </div>
             </div>
 
-            <div class="section" style="margin-top: 15px; padding-bottom: 10px;">
-                <div style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px; display:flex; justify-content:space-between">
+            <div class="section scale-in" style="animation-delay: 0.1s">
+                <div class="section-header">
+                    <span>📊 Недельные цели</span>
+                    <span style="color:var(--accent); font-weight:700">${Math.round((tasksProgress + pointsProgress + notesProgress) / 3)}%</span>
+                </div>
+                <div style="margin-bottom:12px">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px">
+                        <span>Задачи: ${weekTasksCompleted}/${state.weeklyGoals.tasks}</span>
+                        <span style="color:var(--accent)">${Math.round(tasksProgress)}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width:${tasksProgress}%"></div>
+                    </div>
+                </div>
+                <div style="margin-bottom:12px">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px">
+                        <span>Очки: ${weekPointsEarned}/${state.weeklyGoals.points}</span>
+                        <span style="color:var(--gold)">${Math.round(pointsProgress)}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width:${pointsProgress}%; background:linear-gradient(90deg, var(--gold), #E5C08A)"></div>
+                    </div>
+                </div>
+                <div>
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px">
+                        <span>Заметки: ${weekNotesCreated}/${state.weeklyGoals.notes}</span>
+                        <span style="color:var(--epic)">${Math.round(notesProgress)}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width:${notesProgress}%; background:linear-gradient(90deg, var(--epic), #E07A8F)"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section scale-in" style="padding-bottom: 10px; animation-delay: 0.2s">
+                <div class="section-header">
                     <span>Активность</span>
-                    <span style="color:var(--accent)">7 дней</span>
+                    <span style="color:var(--accent)">14 дней</span>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="activityChartCanvas"></canvas>
                 </div>
             </div>
 
-            <div class="ai-insights">
+            <div class="ai-insights scale-in" style="animation-delay: 0.3s">
                 <div style="font-size:14px; font-weight:800; color:var(--accent); margin-bottom:15px; display:flex; align-items:center; gap:8px">
                     <span>🤖</span>
                     <span>AI АНАЛИЗ</span>
@@ -1023,18 +1247,20 @@ function renderHome() {
             </div>
 
             <div class="grid-2" style="margin-top:15px">
-                 <div class="section" style="margin:0">
-                    <div style="font-size:12px;color:#888;margin-bottom:5px;">Типы задач</div>
-                    <div style="height:100px; position:relative">
+                 <div class="section scale-in" style="margin:0; animation-delay: 0.4s">
+                    <div class="section-header">
+                        <span style="font-size:11px">Типы задач</span>
+                    </div>
+                    <div class="chart-wrapper-small">
                         <canvas id="taskDistributionChart"></canvas>
                     </div>
                  </div>
-                 <div class="section" style="margin:0; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                    <div style="font-size:32px; margin-bottom:10px">📊</div>
-                    <div style="font-size:11px; line-height:1.4; color:#ccc; text-align:center; font-weight:600">
-                        ${state.notes.length} заметок<br>
-                        ${state.tasks.length} задач<br>
-                        ${state.inventory.length} предметов
+                 <div class="section scale-in" style="margin:0; animation-delay: 0.5s">
+                    <div class="section-header">
+                        <span style="font-size:11px">Приоритеты</span>
+                    </div>
+                    <div class="chart-wrapper-small">
+                        <canvas id="priorityChart"></canvas>
                     </div>
                  </div>
             </div>
@@ -1048,7 +1274,7 @@ function renderEducation() {
         <div class="note-card" onclick="actions.openNote(${n.id})">
             <div class="note-date">
                 <span>${n.date}</span>
-                <span onclick="event.stopPropagation(); actions.deleteNote(${n.id})" style="color:#666">✕</span>
+                <span onclick="event.stopPropagation(); actions.deleteNote(${n.id})" style="color:#666; padding:5px">✕</span>
             </div>
             <div class="note-title">${n.title}</div>
             <div class="note-preview">${n.text.slice(0, 60)}...</div>
@@ -1064,15 +1290,15 @@ function renderEducation() {
                 <div style="font-size:13px;color:#aaa;margin-bottom:15px; line-height: 1.4;">
                     Нажми на микрофон. Я структурирую мысли,<br>выделю главное и найду задачи.
                 </div>
-                <div style="background: #111; padding: 15px; border-radius: 12px; min-height: 80px; margin-bottom: 20px; text-align: left; font-size: 14px; color: #ccc; border: 1px solid #333;" id="liveTranscript">
+                <div style="background: #111; padding: 15px; border-radius: 12px; min-height: 80px; margin-bottom: 20px; text-align: left; font-size: 14px; color: #ccc; border: 1px solid #333; line-height:1.5" id="liveTranscript">
                     ${currentTranscript || (isRecording ? "Слушаю..." : "Текст появится здесь...")}
                 </div>
                 <button class="mic-btn ${isRecording ? 'recording' : ''}" onclick="${isRecording ? 'actions.stopRecording()' : 'actions.startRecording()'}">
-                    ${isRecording ? '<div class="voice-wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>' : getIcon('mic')}
+                    ${isRecording ? '<div class="voice-wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>' : getIcon('mic')}
                 </button>
             </div>
-            <h3 style="margin:25px 0 10px;font-weight:700; padding-left: 5px; color:#666; font-size:12px">СОХРАНЕННЫЕ ЗАПИСИ</h3>
-            ${notesList || '<div style="text-align:center;color:#555;padding:20px; font-style: italic;">Пусто</div>'}
+            <h3 style="margin:25px 0 10px;font-weight:700; padding-left: 5px; color:#666; font-size:12px; text-transform:uppercase; letter-spacing:0.5px">Сохраненные записи (${state.notes.length})</h3>
+            ${notesList || '<div style="text-align:center;color:#555;padding:30px; font-style: italic;">Пусто<br><span style="font-size:12px">Начни с записи голосовой заметки</span></div>'}
         </div>
     </div>`;
 }
@@ -1081,8 +1307,8 @@ function renderTasks() {
     const list = state.tasks.map(t => `
         <div class="section" style="padding:15px;margin-bottom:10px;opacity:${t.completed ? 0.6 : 1}; border-left: 4px solid ${t.priority === 'high' ? 'var(--danger)' : t.priority === 'med' ? 'var(--warning)' : 'var(--success)'}">
             <div style="display:flex;align-items:center;">
-                <div style="width:24px;height:24px;border:2px solid var(--primary);border-radius:8px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:${t.completed ? 'var(--primary)' : 'transparent'}; transition:background 0.2s; flex-shrink:0" onclick="actions.toggleTask(${t.id})">
-                    ${t.completed ? '<svg width="14" height="14" stroke="white"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+                <div style="width:24px;height:24px;border:2px solid var(--primary);border-radius:8px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:${t.completed ? 'var(--primary)' : 'transparent'}; transition:background 0.2s; flex-shrink:0; cursor:pointer" onclick="actions.toggleTask(${t.id})">
+                    ${t.completed ? '<svg width="14" height="14" stroke="white" fill="none"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
                 </div>
                 <div style="flex:1">
                     <div style="font-weight:600; font-size:15px; text-decoration:${t.completed ? 'line-through' : 'none'}; color:${t.completed?'#777':'#eee'}">${t.title}</div>
@@ -1094,7 +1320,7 @@ function renderTasks() {
                         </span>
                     </div>
                 </div>
-                <div onclick="actions.deleteTask(${t.id})" style="color:#444; padding:5px; margin-left:10px">${getIcon('trash')}</div>
+                <div onclick="actions.deleteTask(${t.id})" style="color:#444; padding:8px; margin-left:10px; cursor:pointer">${getIcon('trash')}</div>
             </div>
         </div>
     `).join('');
@@ -1106,23 +1332,24 @@ function renderTasks() {
         <div class="content">
             <h2 style="margin-bottom:15px;font-weight:800">ЗАДАЧИ</h2>
 
-            <div class="section challenge-card" onclick="actions.completeChallenge()">
+            <div class="section challenge-card" onclick="actions.completeChallenge()" style="cursor:pointer">
                 <div class="challenge-header">
                     <div style="color:var(--gold); font-weight:800; font-size:12px; letter-spacing:1px">ЧЕЛЛЕНДЖ ДНЯ</div>
                     <div style="color:var(--gold); font-weight:bold">+${challenge.reward} pts</div>
                 </div>
                 <div style="display:flex; align-items:center; gap:15px">
-                    <div style="font-size:28px; filter: grayscale(${challenge.completed?1:0})">🔥</div>
+                    <div style="font-size:28px; filter: grayscale(${challenge.completed?1:0}); transition:filter .3s">🔥</div>
                     <div style="flex:1">
                         <div style="font-size:18px; font-weight:700; text-decoration: ${challenge.completed?'line-through':''}">${challenge.title}</div>
-                        <div style="font-size:12px; color:#aaa; margin-top:4px">${challenge.completed ? 'Выполнено!' : 'Нажми, чтобы завершить'}</div>
+                        <div style="font-size:12px; color:#aaa; margin-top:4px">${challenge.completed ? 'Выполнено! Возвращайся завтра' : 'Нажми, чтобы завершить'}</div>
                     </div>
-                    ${challenge.completed ? '<div style="background:var(--success); color:black; padding:4px 8px; border-radius:10px; font-weight:bold; font-size:12px">DONE</div>' : ''}
+                    ${challenge.completed ? '<div style="background:var(--success); color:black; padding:6px 10px; border-radius:10px; font-weight:bold; font-size:12px">✓ DONE</div>' : ''}
                 </div>
             </div>
 
-            <div style="margin-top:20px">
-                ${list}
+            <h3 style="margin:25px 0 10px;font-weight:700; padding-left: 5px; color:#666; font-size:12px; text-transform:uppercase; letter-spacing:0.5px">Мои задачи (${state.tasks.length})</h3>
+            <div style="margin-top:15px">
+                ${list || '<div style="text-align:center;color:#555;padding:40px; font-style: italic;">Нет задач<br><span style="font-size:12px">Нажми + чтобы добавить</span></div>'}
             </div>
         </div>
         <button class="add-btn" onclick="actions.addTask()">+</button>
@@ -1134,10 +1361,10 @@ function renderShop() {
         const i = ITEMS.find(x => x.id === id);
         const eq = Object.values(state.equipped).includes(id);
         const color = i.special ? '#FFA500' : (i.rarity === 'legendary' ? 'var(--epic)' : i.rarity === 'rare' ? 'var(--gold)' : 'var(--primary)');
-        return `<div class="section" style="padding:15px 10px;margin:0;display:flex;flex-direction:column;align-items:center; border-color:${eq ? color : 'var(--glass-border)'}; box-shadow:${eq?'0 0 15px '+color+'40':'none'}" onclick="actions.equip('${id}')">
+        return `<div class="section" style="padding:15px 10px;margin:0;display:flex;flex-direction:column;align-items:center; border-color:${eq ? color : 'var(--glass-border)'}; box-shadow:${eq?'0 0 15px '+color+'40':'none'}; transition:all .3s; cursor:pointer" onclick="actions.equip('${id}')">
             <div style="font-size:42px;margin-bottom:10px; filter:drop-shadow(0 5px 5px rgba(0,0,0,0.5))">${i.icon}</div>
             <div style="font-size:11px;color:#aaa;text-align:center;font-weight:600">${i.name}</div>
-            ${eq ? `<div style="width:6px;height:6px;background:${color};border-radius:50%;margin-top:8px"></div>` : ''}
+            ${eq ? `<div style="width:6px;height:6px;background:${color};border-radius:50%;margin-top:8px;box-shadow:0 0 8px ${color}"></div>` : ''}
         </div>`;
     }).join('');
     return `
@@ -1145,27 +1372,33 @@ function renderShop() {
         ${renderHeader()}
         <div class="content">
             <div style="text-align:center;margin-bottom:25px">
-                <div style="font-size:12px;color:#888; letter-spacing:1px; margin-bottom:5px">БАЛАНС</div>
-                <div style="font-size:42px;font-weight:900;color:var(--gold); text-shadow: 0 0 20px rgba(212,175,122,0.2)">${state.totalPoints}</div>
+                <div style="font-size:12px;color:#888; letter-spacing:1px; margin-bottom:5px; text-transform:uppercase">Баланс</div>
+                <div style="font-size:42px;font-weight:900;color:var(--gold); text-shadow: 0 0 20px rgba(212,175,122,0.3)">${state.totalPoints}</div>
+                <div style="font-size:11px;color:#666; margin-top:5px">очков доступно</div>
             </div>
             <div class="chest-wrapper">
                 <div class="chest-card chest-common" onclick="actions.openChest('common', 150)">
                     <div style="display:flex;justify-content:space-between;align-items:center">
-                        <div style="font-weight:800;font-size:18px;">Базовый ящик</div>
-                        <div style="font-size:14px;color:#bbb">150 pts</div>
+                        <div>
+                            <div style="font-weight:800;font-size:18px;">Базовый ящик</div>
+                            <div style="font-size:12px;opacity:0.6;margin-top:5px">Обычные предметы и аксессуары</div>
+                        </div>
+                        <div style="font-size:16px;color:#bbb;font-weight:700">150 pts</div>
                     </div>
-                    <div style="font-size:12px;opacity:0.6;margin-top:5px">Обычные предметы и аксессуары</div>
                 </div>
                 <div class="chest-card chest-rare" onclick="actions.openChest('rare', 300)">
                     <div style="display:flex;justify-content:space-between;align-items:center">
-                        <div style="font-weight:800;font-size:18px;color:var(--gold)">Редкий ящик</div>
-                        <div style="font-size:14px;color:var(--gold)">300 pts</div>
+                        <div>
+                            <div style="font-weight:800;font-size:18px;color:var(--gold)">Редкий ящик ⭐</div>
+                            <div style="font-size:12px;opacity:0.7;margin-top:5px; color:var(--gold)">Повышенный шанс легендарки</div>
+                        </div>
+                        <div style="font-size:16px;color:var(--gold);font-weight:700">300 pts</div>
                     </div>
-                    <div style="font-size:12px;opacity:0.6;margin-top:5px; color:var(--gold)">Повышенный шанс легендарки</div>
                 </div>
             </div>
+            <h3 style="margin:25px 0 15px;font-weight:700; padding-left: 5px; color:#666; font-size:12px; text-transform:uppercase; letter-spacing:0.5px">Инвентарь (${state.inventory.length})</h3>
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px">
-                ${inv || '<div style="grid-column:1/-1;text-align:center;color:#444;padding:20px">Инвентарь пуст</div>'}
+                ${inv || '<div style="grid-column:1/-1;text-align:center;color:#444;padding:40px; font-style:italic">Инвентарь пуст<br><span style="font-size:12px">Открой ящик, чтобы получить предметы</span></div>'}
             </div>
         </div>
     </div>`;
@@ -1181,15 +1414,34 @@ function renderProfile() {
                 <img src="${state.avatar || 'https://via.placeholder.com/100?text=👤'}" alt="Avatar">
             </div>
             <div style="font-size:28px;font-weight:800;margin-bottom:5px">${state.nick}</div>
-            <div style="font-size:14px;color:#888;margin-bottom:30px">Уровень: Новичок</div>
+            <div style="font-size:14px;color:#888;margin-bottom:30px">Уровень: ${Math.floor(state.totalPoints / 100)} • Новичок</div>
+
+            <div class="stats-grid" style="margin-bottom:20px">
+                <div class="stat-card">
+                    <div class="stat-value" style="font-size:24px">${state.totalTasksCompleted}</div>
+                    <div class="stat-label">Всего задач</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="font-size:24px">${state.totalNotesCreated}</div>
+                    <div class="stat-label">Заметок создано</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="font-size:24px">${state.inventory.length}</div>
+                    <div class="stat-label">Предметов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="font-size:24px">${state.totalFire}</div>
+                    <div class="stat-label">Огонь 🔥</div>
+                </div>
+            </div>
 
             <div class="section" style="margin-top:20px; text-align:left">
-                <div style="font-weight:bold;margin-bottom:10px; color:var(--accent)">Пригласить друга</div>
-                <div style="font-size:13px; color:#999; margin-bottom:15px">Получи 500 очков за каждого друга.</div>
-                <div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:12px;margin:10px 0;font-family:monospace;font-size:12px;color:#fff;word-break:break-all;border:1px dashed #444">https://t.me/livi_app_bot?start=ref${userId}</div>
+                <div style="font-weight:bold;margin-bottom:10px; color:var(--accent); font-size:16px">Пригласить друга</div>
+                <div style="font-size:13px; color:#999; margin-bottom:15px; line-height:1.5">Получи <b style="color:var(--gold)">500 очков</b> за каждого друга, который присоединится.</div>
+                <div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:12px;margin:10px 0;font-family:monospace;font-size:11px;color:#fff;word-break:break-all;border:1px dashed #444">https://t.me/livi_app_bot?start=ref${userId}</div>
                 <button class="btn btn-primary" onclick="actions.copyReferral()">Копировать ссылку</button>
             </div>
-            <div style="margin-top:20px; font-size:12px; color:#444">ID: ${userId}</div>
+            <div style="margin-top:20px; font-size:12px; color:#444">User ID: ${userId}</div>
         </div>
     </div>`;
 }
@@ -1203,7 +1455,7 @@ function initCharts() {
              const d = new Date(h.date);
              return `${d.getDate()}.${d.getMonth()+1}`;
         });
-        const dataPoints = state.statsHistory.map(h => h.points);
+        const dataPoints = state.statsHistory.map(h => h.points || 0);
 
         activityChart = new Chart(ctxActivity, {
             type: 'line',
@@ -1216,14 +1468,14 @@ function initCharts() {
                     backgroundColor: (context) => {
                         const ctx = context.chart.ctx;
                         const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-                        gradient.addColorStop(0, 'rgba(168, 196, 198, 0.25)');
+                        gradient.addColorStop(0, 'rgba(168, 196, 198, 0.3)');
                         gradient.addColorStop(1, 'rgba(168, 196, 198, 0)');
                         return gradient;
                     },
                     borderWidth: 3,
                     tension: 0.4,
                     pointRadius: 5,
-                    pointHoverRadius: 7,
+                    pointHoverRadius: 8,
                     pointBackgroundColor: '#fff',
                     pointBorderColor: '#A8C4C6',
                     pointBorderWidth: 2,
@@ -1233,25 +1485,40 @@ function initCharts() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
                 plugins: { 
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        backgroundColor: 'rgba(0,0,0,0.9)',
                         padding: 12,
                         titleColor: '#A8C4C6',
                         bodyColor: '#fff',
                         borderColor: '#A8C4C6',
-                        borderWidth: 1
+                        borderWidth: 1,
+                        displayColors: false,
+                        callbacks: {
+                            title: (items) => {
+                                const idx = items[0].dataIndex;
+                                const date = state.statsHistory[idx].date;
+                                return new Date(date).toLocaleDateString('ru-RU');
+                            },
+                            label: (item) => {
+                                return `Очки: ${item.parsed.y}`;
+                            }
+                        }
                     }
                 },
                 scales: {
                     x: { 
-                        grid: { display: false }, 
+                        grid: { display: false, drawBorder: false }, 
                         ticks: { color: '#666', font:{size:11, weight: 'bold'} } 
                     },
                     y: { 
                         display: true,
-                        grid: { color: '#222', drawBorder: false },
+                        grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false },
                         ticks: { color: '#666', font:{size:10} }
                     }
                 },
@@ -1290,11 +1557,64 @@ function initCharts() {
                         labels: {
                             color: '#999',
                             font: { size: 10 },
-                            padding: 10
+                            padding: 8,
+                            usePointStyle: true
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        backgroundColor: 'rgba(0,0,0,0.9)',
+                        padding: 10,
+                        titleColor: '#fff',
+                        bodyColor: '#fff'
+                    }
+                },
+                cutout: '65%',
+                animation: { 
+                    animateScale: true,
+                    animateRotate: true,
+                    duration: 1000
+                }
+            }
+        });
+    }
+
+    const ctxPriority = document.getElementById('priorityChart');
+    if (ctxPriority) {
+        if (priorityChart) priorityChart.destroy();
+
+        const highCount = state.tasks.filter(t => t.priority === 'high').length;
+        const medCount = state.tasks.filter(t => t.priority === 'med').length;
+        const lowCount = state.tasks.filter(t => t.priority === 'low').length;
+
+        priorityChart = new Chart(ctxPriority, {
+            type: 'doughnut',
+            data: {
+                labels: ['Высокий', 'Средний', 'Низкий'],
+                datasets: [{
+                    data: [highCount, medCount, lowCount],
+                    backgroundColor: ['#ff4757', '#ffa502', '#2ed573'],
+                    borderWidth: 0,
+                    hoverOffset: 8,
+                    hoverBorderColor: '#fff',
+                    hoverBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            color: '#999',
+                            font: { size: 10 },
+                            padding: 8,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.9)',
                         padding: 10,
                         titleColor: '#fff',
                         bodyColor: '#fff'
@@ -1321,14 +1641,14 @@ function render() {
 
     document.getElementById('app').innerHTML = html + `
     <div class="bottom-nav">
-        <button class="nav-item ${state.activeTab==='home'?'active':''}" onclick="state.activeTab='home';saveAll();render()">${getIcon('home')}</button>
-        <button class="nav-item ${state.activeTab==='tasks'?'active':''}" onclick="state.activeTab='tasks';saveAll();render()">${getIcon('check')}</button>
-        <button class="nav-item ${state.activeTab==='education'?'active':''}" onclick="state.activeTab='education';saveAll();render()">${getIcon('book')}</button>
-        <button class="nav-item ${state.activeTab==='shop'?'active':''}" onclick="state.activeTab='shop';saveAll();render()">${getIcon('shop')}</button>
+        <button class="nav-item ${state.activeTab==='home'?'active':''}" onclick="state.activeTab='home';saveAll();render()">${getIcon('home')}<span style="font-size:10px;margin-top:2px">Главная</span></button>
+        <button class="nav-item ${state.activeTab==='tasks'?'active':''}" onclick="state.activeTab='tasks';saveAll();render()">${getIcon('check')}<span style="font-size:10px;margin-top:2px">Задачи</span></button>
+        <button class="nav-item ${state.activeTab==='education'?'active':''}" onclick="state.activeTab='education';saveAll();render()">${getIcon('book')}<span style="font-size:10px;margin-top:2px">Конспект</span></button>
+        <button class="nav-item ${state.activeTab==='shop'?'active':''}" onclick="state.activeTab='shop';saveAll();render()">${getIcon('shop')}<span style="font-size:10px;margin-top:2px">Магазин</span></button>
     </div>`;
 
     if(state.activeTab === 'home') {
-        setTimeout(initCharts, 0);
+        setTimeout(initCharts, 100);
     }
 }
 
@@ -1337,17 +1657,22 @@ function startRoulette(type) {
     const modal = document.getElementById('rouletteModal');
     modal.classList.remove('hidden');
     const strip = document.getElementById('rouletteStrip');
-    strip.innerHTML = ''; strip.style.transition = 'none'; strip.style.transform = 'translateX(0px)';
+    strip.innerHTML = ''; 
+    strip.style.transition = 'none'; 
+    strip.style.transform = 'translateX(0px)';
 
     let pool = type === 'common' ? ITEMS.filter(i => i.rarity !== 'legendary') : ITEMS;
     let winner = pool[Math.floor(Math.random() * pool.length)];
-    if(type === 'rare' && Math.random() > 0.7) winner = ITEMS.find(i=>i.rarity === 'legendary') || winner;
+    if(type === 'rare' && Math.random() > 0.7) {
+        const legendaries = ITEMS.filter(i => i.rarity === 'legendary');
+        if (legendaries.length > 0) winner = legendaries[Math.floor(Math.random() * legendaries.length)];
+    }
 
     for (let i = 0; i < 60; i++) {
         const item = i === 50 ? winner : pool[Math.floor(Math.random() * pool.length)];
         const el = document.createElement('div');
         el.className = `r-item ${item.rarity}`;
-        el.innerHTML = `<div style="font-size:40px">${item.icon}</div>`;
+        el.innerHTML = `<div style="font-size:40px">${item.icon}</div><div style="font-size:10px;color:#888;margin-top:5px">${item.name}</div>`;
         strip.appendChild(el);
     }
 
@@ -1359,17 +1684,27 @@ function startRoulette(type) {
             if(tg) tg.HapticFeedback.notificationOccurred('success');
             document.getElementById('winItemName').innerText = winner.name;
             document.getElementById('winMessage').style.opacity = '1';
-            if (!state.inventory.includes(winner.id)) { state.inventory.push(winner.id); saveAll(); }
+            if (!state.inventory.includes(winner.id)) { 
+                state.inventory.push(winner.id); 
+                saveAll(); 
+            }
         }, 6200);
     }, 100);
 }
-function closeRoulette() { document.getElementById('rouletteModal').classList.add('hidden'); render(); }
+
+function closeRoulette() { 
+    document.getElementById('rouletteModal').classList.add('hidden'); 
+    document.getElementById('winMessage').style.opacity = '0';
+    render(); 
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     initStars();
     await loadState();
     render();
-    document.getElementById('loadingScreen').classList.add('fade-out');
+    setTimeout(() => {
+        document.getElementById('loadingScreen').classList.add('fade-out');
+    }, 800);
 });
 </script>
 </body>
