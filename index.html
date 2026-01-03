@@ -302,33 +302,6 @@ body{
     font-size: 14px;
 }
 
-/* Tabs */
-.tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
-    padding: 4px;
-    background: rgba(0,0,0,0.3);
-    border-radius: 12px;
-}
-.tab {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    background: transparent;
-    color: #666;
-    font-weight: 600;
-    font-size: 13px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.tab.active {
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    color: white;
-    box-shadow: 0 2px 10px rgba(139,154,156,0.3);
-}
-
 svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
@@ -364,6 +337,8 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
         <div class="ai-chip" onclick="actions.extractTasks()">✅ Найти задачи</div>
         <div class="ai-chip" onclick="actions.fixGrammar()">📝 Исправить ошибки</div>
         <div class="ai-chip" onclick="actions.addNotes()">💡 Доп. заметки</div>
+        <div class="ai-chip" onclick="actions.simplifyText()">🎯 Упростить</div>
+        <div class="ai-chip" onclick="actions.expandText()">📈 Расширить</div>
     </div>
     <textarea id="modalText" class="note-textarea" placeholder="Текст заметки..."></textarea>
     <button class="btn btn-primary" onclick="actions.saveAndCloseNote()" style="margin-top: auto;">СОХРАНИТЬ</button>
@@ -386,6 +361,7 @@ if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
 const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'local_user';
 const firstName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || 'User') : 'Друг';
 const photoUrl = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.photo_url || '') : '';
+const startParam = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param ? tg.initDataUnsafe.start_param : null;
 
 function appendWithoutDup(base, addition) {
     if (!addition) return base;
@@ -531,7 +507,8 @@ const defaultState = {
     },
     totalTasksCompleted: 0,
     totalNotesCreated: 0,
-    totalTimeSpent: 0
+    totalTimeSpent: 0,
+    isRegistered: false
 };
 
 let state = { ...defaultState };
@@ -546,6 +523,30 @@ let priorityChart = null;
 let categoryChart = null;
 let lastFinalTranscript = "";
 let lastUiUpdate = 0;
+
+// РЕФЕРАЛЬНАЯ СИСТЕМА
+async function processReferral() {
+    if (!startParam || !startParam.startsWith('ref')) return;
+    if (state.isRegistered) return; // Уже зарегистрирован
+    
+    const referrerId = startParam.replace('ref', '');
+    if (referrerId === userId) return;
+    
+    const referrerStats = await Storage.load(`livi_stats_${referrerId}`);
+    if (referrerStats) {
+        referrerStats.totalPoints = (referrerStats.totalPoints || 0) + 500;
+        referrerStats.referralCount = (referrerStats.referralCount || 0) + 1;
+        await Storage.save(`livi_stats_${referrerId}`, referrerStats);
+        
+        state.isRegistered = true;
+        await saveAll();
+        
+        if (tg) {
+            tg.showAlert('🎉 Добро пожаловать! Ваш друг получил 500 очков в подарок!');
+            tg.HapticFeedback.notificationOccurred('success');
+        }
+    }
+}
 
 async function loadState() {
     const statsData = await Storage.load(`livi_stats_${userId}`);
@@ -568,6 +569,7 @@ async function loadState() {
         }
     }
 
+    await processReferral();
     checkDailyReset();
 }
 
@@ -575,9 +577,34 @@ function checkDailyReset() {
     const today = new Date().toISOString().split('T')[0];
     
     if (state.lastVisitDate !== today) {
-        if (!state.statsHistory.find(e => e.date === today)) {
-             state.streak = hadActivityYesterday() ? state.streak + 1 : 1;
+        const hadActivity = hadActivityYesterday();
+        
+        if (!hadActivity && !state.hasStreakInsurance) {
+            // Сбрасываем стрик если нет активности и нет щита
+            state.streak = 1;
+        } else if (!hadActivity && state.hasStreakInsurance) {
+            // Используем щит - стрик сохраняется, щит пропадает
+            state.hasStreakInsurance = false;
+            state.equipped.special = null;
+            if (tg) {
+                tg.showAlert('🛡️ Щит стрика защитил твою серию! Стрик сохранён, но щит исчез.');
+                tg.HapticFeedback.notificationOccurred('warning');
+            }
+        } else {
+            // Была активность - увеличиваем стрик
+            state.streak++;
         }
+        
+        if (!state.statsHistory.find(e => e.date === today)) {
+            state.statsHistory.push({
+                date: today,
+                points: 0,
+                tasks_completed: 0,
+                notes_created: 0,
+                time_spent: 0
+            });
+        }
+        
         state.lastVisitDate = today;
         
         const challenges = ['Выполнить 3 задачи','Набрать 100 очков','Прочитать лекцию','Сделать конспект','Пройти 5000 шагов'];
@@ -608,7 +635,8 @@ async function saveAll() {
 function hadActivityYesterday() {
     const d = new Date(); d.setDate(d.getDate() - 1);
     const y = d.toISOString().split('T')[0];
-    return !!state.statsHistory.find(e => e.date === y);
+    const entry = state.statsHistory.find(e => e.date === y);
+    return entry && (entry.points > 0 || entry.tasks_completed > 0 || entry.notes_created > 0);
 }
 
 function updateHistory(pointsDelta, taskCompleted = false, noteCreated = false) {
@@ -640,18 +668,27 @@ const AI = {
         'функциянал': 'функционал', 'обязательна': 'обязательно', 'вобще': 'вообще',
         'чтоли': 'что ли', 'наверно': 'наверное', 'ваще': 'вообще', 'придти': 'прийти',
         'здраствуйте': 'здравствуйте', 'прийдет': 'придет', 'зделать': 'сделать',
-        'компания': 'кампания', 'извени': 'извини', 'пожалуста': 'пожалуйста'
+        'компания': 'кампания', 'извени': 'извини', 'пожалуста': 'пожалуйста',
+        'што': 'что', 'када': 'когда', 'тока': 'только', 'щас': 'сейчас',
+        'спасибо': 'спасибо', 'пасибо': 'спасибо', 'канешно': 'конечно',
+        'симпотично': 'симпатично', 'в общем': 'в общем', 'вообщем': 'в общем'
     },
 
     clean: (text) => text.replace(/\s+/g, ' ').trim(),
 
     fixGrammar: (text) => {
+        if (!text || text.length < 3) return text;
+        
         let fixed = text;
         
+        // Исправляем известные ошибки с учетом регистра
         Object.keys(AI.commonErrors).forEach(error => {
             const regex = new RegExp('\\b' + error + '\\b', 'gi');
             fixed = fixed.replace(regex, (match) => {
                 const correction = AI.commonErrors[error.toLowerCase()];
+                if (!correction) return match;
+                
+                // Сохраняем регистр первой буквы
                 if (match[0] === match[0].toUpperCase()) {
                     return correction.charAt(0).toUpperCase() + correction.slice(1);
                 }
@@ -659,49 +696,83 @@ const AI = {
             });
         });
         
-        fixed = fixed.replace(/\s+/g, ' ');
-        fixed = fixed.replace(/\s+([,.!?;:])/g, '$1');
-        fixed = fixed.replace(/([,.!?;:])([а-яА-ЯёЁa-zA-Z])/g, '$1 $2');
-        fixed = fixed.replace(/\.\s+([а-яё])/g, (match, p1) => '. ' + p1.toUpperCase());
+        // Убираем двойные пробелы
+        fixed = fixed.replace(/\s{2,}/g, ' ');
         
+        // Исправляем пробелы перед знаками препинания
+        fixed = fixed.replace(/\s+([,.!?;:])/g, '$1');
+        
+        // Добавляем пробел после знаков препинания, если его нет
+        fixed = fixed.replace(/([,.!?;:])([а-яА-ЯёЁa-zA-Z])/g, '$1 $2');
+        
+        // Заглавная буква после точки
+        fixed = fixed.replace(/\.(\s+)([а-яё])/g, (match, space, letter) => {
+            return '.' + space + letter.toUpperCase();
+        });
+        
+        // Заглавная буква в начале текста
         if (fixed.length > 0) {
             fixed = fixed.charAt(0).toUpperCase() + fixed.slice(1);
         }
+        
+        // Заглавная буква после переноса строки
+        fixed = fixed.replace(/\n([а-яё])/g, (match, letter) => {
+            return '\n' + letter.toUpperCase();
+        });
         
         return fixed;
     },
 
     addContextNotes: (text) => {
+        if (!text || text.length < 20) return text;
+        
         let enhanced = text;
         const additions = [];
-        
         const lowerText = text.toLowerCase();
         
-        if (lowerText.includes('проект') && !lowerText.includes('сроки')) {
-            additions.push('\n\n💡 **Заметка AI:** Не забудьте определить сроки и ресурсы для проекта.');
+        // Интеллектуальный анализ контекста
+        const hasProject = lowerText.match(/проект|задач|планир|цел/i);
+        const hasMeeting = lowerText.match(/встреч|собрание|созвон|митинг/i);
+        const hasStudy = lowerText.match(/изуч|учеб|курс|лекци|экзамен/i);
+        const hasDeadline = lowerText.match(/срок|deadline|дедлайн|до\s+\d|к\s+\d/i);
+        const hasTime = lowerText.match(/\d{1,2}:\d{2}|\d{1,2}\s+(час|минут)/i);
+        
+        // Умные контекстные подсказки
+        if (hasProject && !lowerText.includes('этап') && !lowerText.includes('milestone')) {
+            additions.push('\n\n💡 **AI рекомендует:** Разбейте проект на этапы с промежуточными результатами (milestones).');
         }
         
-        if ((lowerText.includes('встреч') || lowerText.includes('собрание')) && !lowerText.includes('повестка')) {
-            additions.push('\n\n📅 **Напоминание:** Подготовьте повестку дня заранее.');
+        if (hasMeeting && !hasTime) {
+            additions.push('\n\n⏰ **Подсказка:** Укажите время встречи для лучшего планирования.');
         }
         
-        if ((lowerText.includes('задач') || lowerText.includes('дела')) && !lowerText.includes('приоритет')) {
-            additions.push('\n\n✅ **Совет:** Приоритизируйте задачи по важности и срочности (матрица Эйзенхауэра).');
+        if (hasStudy && !lowerText.includes('практик')) {
+            additions.push('\n\n📚 **Метод:** Практикуйте материал в течение 24 часов после изучения для лучшего запоминания.');
         }
         
-        if ((lowerText.includes('изучи') || lowerText.includes('учеб') || lowerText.includes('курс')) && !lowerText.includes('практик')) {
-            additions.push('\n\n📚 **Рекомендация:** Используйте активное обучение - делайте заметки и практикуйте материал.');
+        if (hasDeadline && !lowerText.includes('буфер')) {
+            additions.push('\n\n⚡ **Совет:** Добавьте временной буфер (20-30%) на непредвиденные задержки.');
         }
         
-        if (lowerText.includes('цел') && !lowerText.includes('smart')) {
-            additions.push('\n\n🎯 **Подсказка:** Сделайте цели SMART (конкретными, измеримыми, достижимыми, релевантными, ограниченными по времени).');
+        // Анализ длины предложений
+        const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+        const avgLength = sentences.reduce((sum, s) => sum + s.split(' ').length, 0) / sentences.length;
+        
+        if (avgLength > 25) {
+            additions.push('\n\n✍️ **Стиль:** Рассмотрите разбивку длинных предложений для лучшей читаемости.');
         }
         
         return enhanced + additions.join('');
     },
 
     getWordFrequencies: (text) => {
-        const words = text.toLowerCase().replace(/[.,!?;:()]/g, '').split(/\s+/);
+        if (!text) return {};
+        
+        const words = text.toLowerCase()
+            .replace(/[.,!?;:()«»—–]/g, '')
+            .split(/\s+/)
+            .filter(w => w.length > 0);
+            
         const freqs = {};
         words.forEach(w => {
             if (w.length > 3 && !AI.stopWords.includes(w)) {
@@ -712,6 +783,9 @@ const AI = {
     },
 
     scoreSentences: (text) => {
+        if (!text) return [];
+        
+        // Улучшенное разбиение на предложения
         const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
         const freqs = AI.getWordFrequencies(text);
         const maxFreq = Math.max(...Object.values(freqs), 1);
@@ -719,55 +793,233 @@ const AI = {
         return sentences.map(s => {
             let score = 0;
             const words = s.toLowerCase().split(/\s+/);
+            
+            // Подсчёт по частоте слов
             words.forEach(w => {
                 const cleanW = w.replace(/[^а-яёa-z]/gi, '');
-                if (freqs[cleanW]) score += freqs[cleanW];
+                if (freqs[cleanW]) {
+                    score += (freqs[cleanW] / maxFreq) * 2;
+                }
             });
-            if (s.match(/(важно|суть|вывод|итак|значит|поэтому|запомнить|главное|основное|ключевое)/i)) score *= 1.8;
-            if (s.match(/(во-первых|во-вторых|в-третьих|первое|второе|третье)/i)) score *= 1.3;
-            return { text: s.trim(), score: score / (words.length || 1) };
+            
+            // Бонус за ключевые слова (более широкий список)
+            const keywordPatterns = [
+                /(важно|суть|вывод|итак|значит|поэтому|запомнить|главное|основное|ключевое|центральн)/i,
+                /(во-первых|во-вторых|в-третьих|первое|второе|третье|далее|затем)/i,
+                /(необходимо|нужно|следует|должн|обязательно)/i,
+                /(проблема|решение|задач|цель|результат)/i
+            ];
+            
+            keywordPatterns.forEach(pattern => {
+                if (s.match(pattern)) score *= 1.5;
+            });
+            
+            // Позиция в тексте (первые и последние предложения важнее)
+            const index = sentences.indexOf(s);
+            if (index === 0 || index === sentences.length - 1) {
+                score *= 1.3;
+            }
+            
+            // Нормализация по длине
+            const normalizedScore = score / Math.max(words.length, 1);
+            
+            return { 
+                text: s.trim(), 
+                score: normalizedScore,
+                length: words.length 
+            };
         });
     },
 
     structure: (text) => {
+        if (!text || text.length < 10) return text;
+        
         let processed = AI.fixGrammar(text);
         
-        processed = processed.replace(/([а-яА-ЯёЁa-zA-Z]+)\s*[-–—]\s*([а-яА-ЯёЁa-zA-Z].+?)(?=[.!?]|$)/g, "**$1** — $2");
-        processed = processed.replace(/([.!?])\s*(?=[А-ЯЁ])/g, "$1\n\n");
-        processed = processed.replace(/(\n|^)\s*[-•]\s*/g, "\n• ");
-        processed = processed.replace(/(Во-первых|Во-вторых|В-третьих|Первое|Второе|Третье),?/gi, "\n\n🔹 $1:");
-        processed = processed.replace(/(Важно|Внимание|Примечание|Замечание):/gi, "\n\n⚠️ **$1:**");
+        // Определения и термины
+        processed = processed.replace(
+            /([А-ЯЁа-яё][а-яё]+)\s*[-–—]\s*([а-яёА-ЯЁ].+?)(?=\.|$)/gm,
+            "**$1** — $2"
+        );
         
-        return processed;
+        // Разбивка на абзацы по смыслу
+        processed = processed.replace(/([.!?])\s+(?=[А-ЯЁ])/g, "$1\n\n");
+        
+        // Списки и перечисления
+        processed = processed.replace(/(\n|^)\s*[-•]\s*/g, "\n• ");
+        processed = processed.replace(/(\n|^)\s*(\d+)[.)]\s*/g, "\n$2. ");
+        
+        // Маркеры структуры
+        processed = processed.replace(
+            /(Во-первых|Во-вторых|В-третьих|Первое|Второе|Третье|Далее|Затем|Наконец),?\s*/gi,
+            "\n\n🔹 **$1:** "
+        );
+        
+        // Важные блоки
+        processed = processed.replace(
+            /(Важно|Внимание|Примечание|Замечание|Итого|Вывод|Результат):\s*/gi,
+            "\n\n⚠️ **$1:**\n"
+        );
+        
+        // Удаление лишних переносов
+        processed = processed.replace(/\n{3,}/g, "\n\n");
+        
+        return processed.trim();
     },
 
     extractSummary: (text) => {
+        if (!text || text.length < 20) return "Текст слишком короткий для анализа.";
+        
         const scored = AI.scoreSentences(text);
-        const count = Math.max(1, Math.min(3, Math.ceil(scored.length * 0.3)));
-        const topSentences = [...scored].sort((a,b) => b.score - a.score).slice(0, count);
-
-        const result = topSentences.map(s => "🔸 " + s.text).join('\n');
-
-        return "📌 **ГЛАВНАЯ МЫСЛЬ:**\n\n" + result;
+        
+        // Определяем количество предложений для резюме (20-30% текста, мин 1, макс 3)
+        const count = Math.max(1, Math.min(3, Math.ceil(scored.length * 0.25)));
+        
+        // Сортируем по важности и берём топ
+        const topSentences = [...scored]
+            .sort((a, b) => b.score - a.score)
+            .slice(0, count);
+        
+        // Восстанавливаем оригинальный порядок
+        const orderedSentences = topSentences.sort((a, b) => {
+            return text.indexOf(a.text) - text.indexOf(b.text);
+        });
+        
+        let result = orderedSentences.map(s => "▪️ " + s.text).join('\n\n');
+        
+        // Добавляем статистику
+        const wordCount = text.split(/\s+/).length;
+        const readTime = Math.ceil(wordCount / 200); // ~200 слов в минуту
+        
+        return `📌 **ГЛАВНАЯ МЫСЛЬ:**\n\n${result}\n\n---\n📊 Слов: ${wordCount} | ⏱️ Чтение: ~${readTime} мин`;
     },
 
     findTasks: (text) => {
-        const verbs = ['сделать', 'купить', 'прочитать', 'написать', 'отправить', 'позвонить', 'найти', 'изучить', 'подготовить', 'встретиться', 'выполнить', 'создать', 'разработать', 'проверить', 'завершить', 'организовать', 'спланировать', 'обсудить'];
+        if (!text || text.length < 10) return "\n\n✅ Задач не обнаружено";
+        
+        // Расширенный список глаголов действия
+        const actionVerbs = [
+            'сделать', 'купить', 'прочитать', 'написать', 'отправить', 
+            'позвонить', 'найти', 'изучить', 'подготовить', 'встретиться',
+            'выполнить', 'создать', 'разработать', 'проверить', 'завершить',
+            'организовать', 'спланировать', 'обсудить', 'согласовать', 'утвердить',
+            'доделать', 'исправить', 'обновить', 'добавить', 'удалить',
+            'связаться', 'уточнить', 'подтвердить', 'зарегистрировать', 'оплатить'
+        ];
+        
         const sentences = text.match(/[^.!?]+[.!?]+/g) || text.split(/\n+/);
-        let tasks = [];
-
+        const tasks = [];
+        
         sentences.forEach(s => {
             const lower = s.toLowerCase();
-            if (verbs.some(v => lower.includes(v))) {
-                let t = s.trim();
-                if(t.length < 100 && t.length > 10) {
-                    t = t.replace(/^[-•]\s*/, '');
-                    tasks.push("☐ " + t);
+            
+            // Проверяем наличие глаголов действия
+            const hasActionVerb = actionVerbs.some(v => lower.includes(v));
+            
+            // Дополнительные паттерны задач
+            const taskPatterns = [
+                /надо\s+/i,
+                /нужно\s+/i,
+                /необходимо\s+/i,
+                /следует\s+/i,
+                /^[-•]\s*/,
+                /^\d+[.)]\s*/,
+                /todo:/i,
+                /задача:/i
+            ];
+            
+            const hasTaskPattern = taskPatterns.some(p => lower.match(p));
+            
+            if (hasActionVerb || hasTaskPattern) {
+                let task = s.trim();
+                
+                // Очищаем от маркеров
+                task = task.replace(/^[-•]\s*/, '').replace(/^\d+[.)]\s*/, '');
+                
+                // Проверяем длину
+                if (task.length > 10 && task.length < 120) {
+                    
+                    // Определяем приоритет
+                    let priority = '';
+                    if (lower.match(/срочно|важно|асап|asap|!!/)) {
+                        priority = ' 🔴 Высокий';
+                    } else if (lower.match(/желательно|по возможности/)) {
+                        priority = ' 🟡 Низкий';
+                    }
+                    
+                    tasks.push(`☐ ${task}${priority}`);
                 }
             }
         });
+        
+        if (tasks.length === 0) {
+            return "\n\n✅ Задач не обнаружено. Попробуйте использовать глаголы действия (сделать, купить, написать и т.д.)";
+        }
+        
+        return `\n\n✅ **ОБНАРУЖЕННЫЕ ЗАДАЧИ (${tasks.length}):**\n\n` + tasks.join('\n');
+    },
 
-        return tasks.length > 0 ? "\n\n✅ **ОБНАРУЖЕННЫЕ ЗАДАЧИ:**\n\n" + tasks.join('\n') : "\n\n✅ Задач не найдено";
+    simplifyText: (text) => {
+        if (!text || text.length < 20) return text;
+        
+        let simplified = text;
+        
+        // Словарь упрощений
+        const replacements = {
+            'в настоящее время': 'сейчас',
+            'в ближайшее время': 'скоро',
+            'в случае если': 'если',
+            'по причине того что': 'потому что',
+            'в связи с тем что': 'так как',
+            'для того чтобы': 'чтобы',
+            'в течение': 'за',
+            'посредством': 'через',
+            'осуществить': 'сделать',
+            'реализовать': 'выполнить',
+            'продемонстрировать': 'показать',
+            'идентифицировать': 'определить',
+            'оптимизировать': 'улучшить',
+            'модифицировать': 'изменить'
+        };
+        
+        Object.keys(replacements).forEach(complex => {
+            const regex = new RegExp('\\b' + complex + '\\b', 'gi');
+            simplified = simplified.replace(regex, replacements[complex]);
+        });
+        
+        // Разбиваем длинные предложения
+        simplified = simplified.replace(/([^.!?]{100,}?)([,;])\s+/g, '$1.$2 ');
+        
+        return AI.fixGrammar(simplified);
+    },
+
+    expandText: (text) => {
+        if (!text || text.length < 10) return text;
+        
+        let expanded = text;
+        const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+        
+        // Анализируем контекст
+        const lowerText = text.toLowerCase();
+        const expansions = [];
+        
+        if (lowerText.includes('проект') && sentences.length < 3) {
+            expansions.push('Определите ключевые этапы реализации проекта. Установите промежуточные контрольные точки для отслеживания прогресса.');
+        }
+        
+        if (lowerText.includes('задач') && !lowerText.includes('приоритет')) {
+            expansions.push('Рассмотрите приоритизацию задач по матрице важности и срочности.');
+        }
+        
+        if (lowerText.match(/учеб|изуч/) && !lowerText.includes('метод')) {
+            expansions.push('Используйте активные методы обучения: конспектирование, практические упражнения, обсуждение материала.');
+        }
+        
+        if (expansions.length > 0) {
+            expanded = text + '\n\n**Дополнительные детали:**\n' + expansions.map(e => '• ' + e).join('\n');
+        }
+        
+        return expanded;
     },
 
     getDetailedInsights: (lastNote) => {
@@ -813,7 +1065,7 @@ const AI = {
             suggestions.push('Добавь временные рамки для задач');
         }
         if (lastNote.length > 500) {
-            suggestions.push('Разбей заметку на несколько частей для лучшей структуры');
+            suggestions.push('Разбей заметку на несколько частей');
         }
 
         return {
@@ -1024,50 +1276,131 @@ const actions = {
     enhanceNote: () => {
         const f = document.getElementById('modalText');
         const original = f.value;
+        if (!original || original.length < 5) {
+            alert('Текст слишком короткий для обработки');
+            return;
+        }
         f.value = "⏳ Анализирую и улучшаю структуру...";
         setTimeout(() => {
-            f.value = AI.structure(AI.clean(original));
-            if(tg) tg.HapticFeedback.notificationOccurred('success');
-        }, 500);
+            try {
+                f.value = AI.structure(AI.clean(original));
+                if(tg) tg.HapticFeedback.notificationOccurred('success');
+            } catch(e) {
+                f.value = original;
+                alert('Ошибка обработки текста');
+            }
+        }, 600);
         if(tg) tg.HapticFeedback.impactOccurred('light');
     },
     addSummary: () => {
         const f = document.getElementById('modalText');
         const original = f.value;
+        if (!original || original.length < 30) {
+            alert('Текст слишком короткий для выделения главной мысли (минимум 30 символов)');
+            return;
+        }
         f.value = "⏳ Извлекаю главную мысль...";
         setTimeout(() => {
-            const summary = AI.extractSummary(original);
-            f.value = summary + "\n\n---\n\n" + original;
-            if(tg) tg.HapticFeedback.notificationOccurred('success');
-        }, 500);
+            try {
+                const summary = AI.extractSummary(original);
+                f.value = summary + "\n\n" + "═".repeat(40) + "\n\n**ПОЛНЫЙ ТЕКСТ:**\n\n" + original;
+                if(tg) tg.HapticFeedback.notificationOccurred('success');
+            } catch(e) {
+                f.value = original;
+                alert('Ошибка анализа текста');
+            }
+        }, 700);
     },
     extractTasks: () => {
         const f = document.getElementById('modalText');
         const original = f.value;
+        if (!original || original.length < 15) {
+            alert('Текст слишком короткий для поиска задач');
+            return;
+        }
         f.value = "⏳ Ищу задачи в тексте...";
         setTimeout(() => {
-            f.value = original + AI.findTasks(original);
-            if(tg) tg.HapticFeedback.notificationOccurred('success');
-        }, 500);
+            try {
+                f.value = original + AI.findTasks(original);
+                if(tg) tg.HapticFeedback.notificationOccurred('success');
+            } catch(e) {
+                f.value = original;
+                alert('Ошибка поиска задач');
+            }
+        }, 600);
     },
     fixGrammar: () => {
         const f = document.getElementById('modalText');
         const original = f.value;
+        if (!original || original.length < 5) {
+            alert('Текст слишком короткий');
+            return;
+        }
         f.value = "⏳ Исправляю ошибки...";
         setTimeout(() => {
-            f.value = AI.fixGrammar(original);
-            if(tg) tg.HapticFeedback.notificationOccurred('success');
+            try {
+                f.value = AI.fixGrammar(original);
+                if(tg) tg.HapticFeedback.notificationOccurred('success');
+            } catch(e) {
+                f.value = original;
+                alert('Ошибка исправления');
+            }
         }, 500);
         if(tg) tg.HapticFeedback.impactOccurred('light');
     },
     addNotes: () => {
         const f = document.getElementById('modalText');
         const original = f.value;
+        if (!original || original.length < 20) {
+            alert('Текст слишком короткий для добавления заметок');
+            return;
+        }
         f.value = "⏳ Добавляю контекстные заметки...";
         setTimeout(() => {
-            f.value = AI.addContextNotes(original);
-            if(tg) tg.HapticFeedback.notificationOccurred('success');
-        }, 500);
+            try {
+                f.value = AI.addContextNotes(original);
+                if(tg) tg.HapticFeedback.notificationOccurred('success');
+            } catch(e) {
+                f.value = original;
+                alert('Ошибка добавления заметок');
+            }
+        }, 600);
+    },
+    simplifyText: () => {
+        const f = document.getElementById('modalText');
+        const original = f.value;
+        if (!original || original.length < 20) {
+            alert('Текст слишком короткий для упрощения');
+            return;
+        }
+        f.value = "⏳ Упрощаю текст...";
+        setTimeout(() => {
+            try {
+                f.value = AI.simplifyText(original);
+                if(tg) tg.HapticFeedback.notificationOccurred('success');
+            } catch(e) {
+                f.value = original;
+                alert('Ошибка упрощения');
+            }
+        }, 600);
+    },
+    expandText: () => {
+        const f = document.getElementById('modalText');
+        const original = f.value;
+        if (!original || original.length < 15) {
+            alert('Текст слишком короткий для расширения');
+            return;
+        }
+        f.value = "⏳ Расширяю текст...";
+        setTimeout(() => {
+            try {
+                f.value = AI.expandText(original);
+                if(tg) tg.HapticFeedback.notificationOccurred('success');
+            } catch(e) {
+                f.value = original;
+                alert('Ошибка расширения');
+            }
+        }, 600);
     },
     openProfile: () => { 
         state.activeTab = 'profile'; 
@@ -1140,6 +1473,7 @@ function renderHome() {
                 </div>
                 ${b ? `<div style="position:relative;width:0;height:0;top:-10px"><div class="${b.css}"></div></div>` : ''}
                 <div style="margin-top:20px;font-weight:700; font-size: 18px">Привет, ${state.nick}!</div>
+                ${state.hasStreakInsurance ? '<div style="font-size:12px;color:var(--gold);margin-top:5px">🛡️ Стрик защищён</div>' : ''}
             </div>
 
             <div class="stats-grid scale-in">
@@ -1430,16 +1764,16 @@ function renderProfile() {
                     <div class="stat-label">Предметов</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" style="font-size:24px">${state.totalFire}</div>
-                    <div class="stat-label">Огонь 🔥</div>
+                    <div class="stat-value" style="font-size:24px">${state.referralCount}</div>
+                    <div class="stat-label">Рефералов</div>
                 </div>
             </div>
 
             <div class="section" style="margin-top:20px; text-align:left">
-                <div style="font-weight:bold;margin-bottom:10px; color:var(--accent); font-size:16px">Пригласить друга</div>
-                <div style="font-size:13px; color:#999; margin-bottom:15px; line-height:1.5">Получи <b style="color:var(--gold)">500 очков</b> за каждого друга, который присоединится.</div>
+                <div style="font-weight:bold;margin-bottom:10px; color:var(--accent); font-size:16px">🎁 Пригласить друга</div>
+                <div style="font-size:13px; color:#999; margin-bottom:15px; line-height:1.5">Получи <b style="color:var(--gold)">500 очков</b> за каждого друга, который присоединится по твоей ссылке.</div>
                 <div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:12px;margin:10px 0;font-family:monospace;font-size:11px;color:#fff;word-break:break-all;border:1px dashed #444">https://t.me/livi_app_bot?start=ref${userId}</div>
-                <button class="btn btn-primary" onclick="actions.copyReferral()">Копировать ссылку</button>
+                <button class="btn btn-primary" onclick="actions.copyReferral()">📋 Копировать ссылку</button>
             </div>
             <div style="margin-top:20px; font-size:12px; color:#444">User ID: ${userId}</div>
         </div>
@@ -1708,4 +2042,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 </script>
 </body>
-</html>
+</html
