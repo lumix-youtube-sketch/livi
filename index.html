@@ -304,9 +304,9 @@ body{
     font-size: 14px;
 }
 
-.task-modal {position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; display: flex; flex-direction: column; padding: 20px; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); transform: translateY(100%);}
+.task-modal {position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; display: flex; flex-direction: column; padding: 20px; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); transform: translateY(100%); overflow-y: auto;}
 .task-modal.open {transform: translateY(0);}
-.task-input {background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; color: #fff; font-size: 16px; width: 100%; margin-bottom: 15px; outline: none;}
+.task-input {background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; color: #fff; font-size: 16px; width: 100%; margin-bottom: 15px; outline: none; font-family: inherit;}
 .task-input:focus {border-color: var(--primary);}
 .task-input::placeholder {color: #666;}
 
@@ -385,6 +385,7 @@ body{
     outline: none;
     appearance: none;
     cursor: pointer;
+    font-family: inherit;
 }
 .select-wrapper::after {
     content: '▼';
@@ -489,10 +490,12 @@ if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
     tg.enableClosingConfirmation();
 }
 
-const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'local_user';
+const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'local_user_' + Math.random().toString(36).substr(2, 9);
 const firstName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || 'User') : 'Друг';
 const photoUrl = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.photo_url || '') : '';
 const startParam = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param ? tg.initDataUnsafe.start_param : null;
+
+console.log('App started. UserId:', userId, 'StartParam:', startParam);
 
 function appendWithoutDup(base, addition) {
     if (!addition) return base;
@@ -527,6 +530,7 @@ const Storage = {
     save: async (key, data) => {
         try {
             localStorage.setItem(key, JSON.stringify(data));
+            console.log('Saved to localStorage:', key);
             if (tg && tg.CloudStorage) {
                 await new Promise((resolve, reject) => {
                     tg.CloudStorage.setItem(key, JSON.stringify(data), (err, success) => {
@@ -646,7 +650,8 @@ const defaultState = {
         patience: 1
     },
     liviChatHistory: [],
-    consecutiveSuccesses: 0
+    consecutiveSuccesses: 0,
+    referredBy: null
 };
 
 let state = { ...defaultState };
@@ -838,31 +843,61 @@ function getLiviMoodClass() {
 }
 
 async function processReferral() {
-    if (!startParam || !startParam.startsWith('ref')) return;
-    if (state.isRegistered) return;
+    console.log('Processing referral. StartParam:', startParam, 'IsRegistered:', state.isRegistered);
+    
+    if (!startParam || !startParam.startsWith('ref')) {
+        console.log('No referral parameter');
+        return;
+    }
+    
+    if (state.isRegistered) {
+        console.log('Already registered, skipping referral');
+        return;
+    }
     
     const referrerId = startParam.replace('ref', '');
-    if (referrerId === userId) return;
+    console.log('Referrer ID:', referrerId, 'Current User ID:', userId);
     
-    const referrerStats = await Storage.load(`livi_stats_${referrerId}`);
+    if (referrerId === userId.toString()) {
+        console.log('Cannot refer yourself');
+        return;
+    }
+    
+    const referrerKey = `livi_stats_${referrerId}`;
+    console.log('Loading referrer stats from:', referrerKey);
+    
+    const referrerStats = await Storage.load(referrerKey);
+    console.log('Referrer stats loaded:', referrerStats);
+    
     if (referrerStats) {
         referrerStats.totalPoints = (referrerStats.totalPoints || 0) + 500;
         referrerStats.referralCount = (referrerStats.referralCount || 0) + 1;
-        await Storage.save(`livi_stats_${referrerId}`, referrerStats);
+        
+        console.log('Updated referrer stats:', referrerStats);
+        await Storage.save(referrerKey, referrerStats);
         
         state.isRegistered = true;
+        state.referredBy = referrerId;
+        
         await saveAll();
+        console.log('✅ Referral processed successfully!');
         
         if (tg) {
             tg.showAlert('🎉 Добро пожаловать! Ваш друг получил 500 очков в подарок!');
             tg.HapticFeedback.notificationOccurred('success');
         }
+    } else {
+        console.log('Referrer stats not found');
     }
 }
 
 async function loadState() {
     const statsData = await Storage.load(`livi_stats_${userId}`);
-    if (statsData) state = { ...defaultState, ...statsData };
+    console.log('Loaded stats:', statsData);
+    
+    if (statsData) {
+        state = { ...defaultState, ...statsData };
+    }
 
     const notesData = await Storage.load(`livi_notes_${userId}`);
     if (notesData && Array.isArray(notesData)) state.notes = notesData;
@@ -875,6 +910,9 @@ async function loadState() {
     }
     if (state.consecutiveSuccesses === undefined) {
         state.consecutiveSuccesses = 0;
+    }
+    if (state.referralCount === undefined) {
+        state.referralCount = 0;
     }
 
     state.tasks = state.tasks.map(t => ({
@@ -953,7 +991,6 @@ function checkDailyReset() {
 setInterval(() => {
     checkDailyReset();
     checkDeadlines();
-    render();
 }, 60000);
 
 async function saveAll() {
@@ -961,6 +998,7 @@ async function saveAll() {
     delete statsToSave.notes;
     await Storage.save(`livi_stats_${userId}`, statsToSave);
     await Storage.save(`livi_notes_${userId}`, state.notes);
+    console.log('All data saved');
 }
 
 function hadActivityYesterday() {
@@ -1406,6 +1444,7 @@ const actions = {
         }
     },
     openTaskModal: () => {
+        console.log('Opening task modal');
         document.getElementById('taskTitleInput').value = '';
         document.getElementById('taskDeadlineInput').value = '';
         document.getElementById('taskPrioritySelect').value = 'med';
@@ -1415,6 +1454,7 @@ const actions = {
         document.getElementById('taskModal').classList.add('open');
     },
     closeTaskModal: () => {
+        console.log('Closing task modal');
         document.getElementById('taskModal').classList.remove('open');
     },
     saveTask: () => {
@@ -1427,6 +1467,8 @@ const actions = {
         const priority = document.getElementById('taskPrioritySelect').value;
         const deadline = document.getElementById('taskDeadlineInput').value || null;
         const promiseLevel = document.getElementById('taskPromiseLevelSelect').value || null;
+        
+        console.log('Creating task:', { title, priority, deadline, promiseLevel });
         
         state.tasks.push({
             id: Date.now(),
@@ -1448,6 +1490,7 @@ const actions = {
         render();
     },
     addTask: () => {
+        console.log('Add task button clicked');
         actions.openTaskModal();
     },
     deleteTask: (id) => {
@@ -1749,7 +1792,7 @@ const actions = {
     }
 };
 
-setTimeout(() => {
+function setupEventListeners() {
     const promiseLevelSelect = document.getElementById('taskPromiseLevelSelect');
     if (promiseLevelSelect) {
         promiseLevelSelect.addEventListener('change', function() {
@@ -1761,7 +1804,7 @@ setTimeout(() => {
             }
         });
     }
-}, 1000);
+}
 
 function renderHeader() {
     const moodClass = getLiviMoodClass();
@@ -2399,19 +2442,7 @@ function render() {
         setTimeout(initCharts, 100);
     }
     
-    setTimeout(() => {
-        const promiseLevelSelect = document.getElementById('taskPromiseLevelSelect');
-        if (promiseLevelSelect) {
-            promiseLevelSelect.addEventListener('change', function() {
-                const warning = document.getElementById('promiseWarning');
-                if (this.value) {
-                    warning.style.display = 'block';
-                } else {
-                    warning.style.display = 'none';
-                }
-            });
-        }
-    }, 100);
+    setTimeout(setupEventListeners, 100);
 }
 
 function startRoulette(type) {
@@ -2460,6 +2491,7 @@ function closeRoulette() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM loaded, initializing app');
     initStars();
     await loadState();
     render();
@@ -2470,3 +2502,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </script>
 </body>
 </html>
+
